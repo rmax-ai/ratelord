@@ -103,6 +103,13 @@ When dispatching sub-agents or using tools, prefer small, resumable units of wor
 - File discovery: prefer globbing patterns over ad-hoc scanning.
 - Edits: make minimal, reviewable patches; preserve existing style and headings.
 
+## Code Quality Guidelines
+
+- **Self-explanatory code**: Write code that is clear and understandable without relying on comments. Use descriptive variable, function, and class names that convey their purpose and intent.
+- **Avoid unnecessary comments**: Comments should explain the "why" behind complex logic or business rules, not the "what" of obvious code. Remove comments that merely restate what the code does.
+- **Modular design**: Break code into small, focused functions and modules with single responsibilities. Each component should have a clear, cohesive purpose.
+- **Readability**: Maintain consistent formatting, use meaningful whitespace, and organize code in a logical flow. Prioritize clarity over cleverness.
+
 ## Self-Reflection and Learning Tracking
 
 - Agents must periodically self-reflect on completed tasks to identify efficiencies, inefficiencies, and lessons learned that could improve future work.
