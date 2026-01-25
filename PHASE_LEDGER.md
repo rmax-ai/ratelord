@@ -24,3 +24,4 @@
 - [x] **Epic 7: Forecasting** - Implemented forecast model interface, linear burn model, and forecast loop integration. Added `pkg/engine/forecast/` package with types, linear model, projection for history, and service for event emission. Wired into poller and main daemon.
 - [x] **M8.1 & M8.2: TUI Foundation & Dashboard** (Epic 8) - Initialized `ratelord-tui` with Bubbletea, implemented polling loop, connected to daemon, and built dashboard view with identity list and live event stream.
 - [x] **M10.1: End-to-End Simulation Script** (Epic 10) - Implemented `ratelord-sim` tool to generate realistic traffic patterns and verify system stability.
+- [x] **M10.4: Final Acceptance Run** (Epic 10) - Executed full acceptance suite. Identified critical issues in Policy Engine and Drift Persistence (see `ACCEPTANCE_REPORT.md`). Defined Phase 5 Remediation plan.

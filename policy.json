@@ -1,0 +1,19 @@
+{
+  "policies": [
+    {
+      "id": "hard_limit",
+      "scope": "global",
+      "type": "hard",
+      "rules": [
+        {
+          "name": "deny_low_remaining",
+          "condition": "remaining < 4950",
+          "action": "deny",
+          "params": {
+            "reason": "insufficient quota remaining"
+          }
+        }
+      ]
+    }
+  ]
+}

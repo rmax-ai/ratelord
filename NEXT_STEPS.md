@@ -1,16 +1,19 @@
-# NEXT STEPS: Phase 4 - Implementation & Verification
+# NEXT STEPS: Phase 5 - Remediation
 
-The TUI Dashboard (Epic 8) and Policy Engine are now stabilized, providing visibility into the system state and enforcing rules. The core implementation phase is largely complete. The next steps involve verifying the full system behavior.
+The Final Acceptance Run (M10.4) revealed critical gaps in the Policy Engine and Persistence layer. While the core daemon works, it fails to enforce rules or persist provider drift. The next session must focus on debugging and fixing these specific issues before the system can be considered "production ready".
 
-## Current Objective: Full System Verification
-
-The system components are stabilized. Now we need to verify full system behavior.
+## Current Objective: Fix Policy Engine & Persistence
 
 ### Tasks for Next Session:
 
-1.  **M10.4: Final Acceptance Run**
-    - Execute full suite of Acceptance Tests.
+1.  **M11.1: Debug Policy Loading**
+    - Investigate `pkg/engine/loader.go` and `pkg/engine/policy.go`.
+    - Ensure rules from `policy.yaml` are actually loaded into memory and matched against intents.
+2.  **M11.2: Implement Wait/Modify Actions**
+    - The `Evaluate` function needs to return correct `Wait` or `Modify` instructions, not just Approve/Deny.
+3.  **M12.1: Persist Provider State**
+    - Ensure that when the daemon restarts, it remembers the last known external usage to prevent drift resets.
 
 ## Reference
+- **Report**: `ACCEPTANCE_REPORT.md`
 - **Plan**: `TASKS.md`
-- **Design**: `TUI_SPEC.md`

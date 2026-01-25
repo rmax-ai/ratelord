@@ -161,5 +161,26 @@ Focus: Proving the system works as a cohesive whole using the strategies in `TES
     - Drive usage to limit.
     - Verify Intents are denied.
     - *Acceptance*: `Pol-01` (Hard Limit), `Pol-02` (Load Shedding).
-- [ ] **M10.4: Final Acceptance Run**
+- [x] **M10.4: Final Acceptance Run**
     - Execute full suite of Acceptance Tests.
+    - *Result*: Partial Pass (See `ACCEPTANCE_REPORT.md`).
+
+# Phase 5: Remediation & 1.0 Release
+
+## Epic 11: Policy Engine Fixes
+Focus: Ensure policies are loaded, hot-reloaded, and correctly evaluated to enable denial/throttling.
+- [ ] **M11.1: Debug Policy Loading**
+    - Investigate why `policy.yaml` rules are not applying.
+    - Fix `LoadPolicyConfig` and `Evaluate`.
+- [ ] **M11.2: Implement Wait/Modify Actions**
+    - Ensure `approve_with_modifications` works.
+- [ ] **M11.3: Verify Hot Reload**
+    - Ensure SIGHUP updates rules without restart.
+
+## Epic 12: Persistence & Robustness
+Focus: Ensure drift detection and provider state survive restarts.
+- [ ] **M12.1: Persist Provider State**
+    - Ensure provider offsets/drift are saved to SQLite.
+- [ ] **M12.2: TUI Verification**
+    - Manually verify TUI dashboard connects and displays data.
+
