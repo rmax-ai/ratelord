@@ -19,6 +19,7 @@ const (
 	EventTypeIntentDecided        EventType = "intent_decided"
 	EventTypePolicyTriggered      EventType = "policy_triggered"
 	EventTypeThrottleAdvised      EventType = "throttle_advised"
+	EventTypeIdentityRegistered   EventType = "identity_registered"
 )
 
 // EventID is a unique identifier for an event.

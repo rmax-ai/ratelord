@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/rmax/ratelord/pkg/api"
+	"github.com/rmax/ratelord/pkg/engine"
 	"github.com/rmax/ratelord/pkg/store"
 )
 
@@ -32,8 +33,24 @@ func main() {
 	}
 	fmt.Printf(`{"level":"info","msg":"store_initialized","path":"%s"}`+"\n", dbPath)
 
+	// M4.2: Initialize Identity Projection
+	identityProj := engine.NewIdentityProjection()
+
+	// Replay events to build projection
+	// NOTE: This blocks startup, but safe for small event logs
+	events, err := st.ReadEvents(context.Background(), time.Time{}, 10000) // arbitrary large limit, from beginning
+	if err == nil {
+		if err := identityProj.Replay(events); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_replay_events","error":"%v"}`+"\n", err)
+		} else {
+			fmt.Printf(`{"level":"info","msg":"projection_replayed","events_count":%d}`+"\n", len(events))
+		}
+	} else {
+		fmt.Printf(`{"level":"error","msg":"failed_to_read_events","error":"%v"}`+"\n", err)
+	}
+
 	// M3.1: Start HTTP Server (in background)
-	srv := api.NewServer(st)
+	srv := api.NewServer(st, identityProj)
 	go func() {
 		if err := srv.Start(); err != nil {
 			fmt.Printf(`{"level":"error","msg":"server_error","error":"%v"}`+"\n", err)

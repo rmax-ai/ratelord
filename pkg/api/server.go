@@ -8,43 +8,21 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/rmax/ratelord/pkg/engine"
 	"github.com/rmax/ratelord/pkg/store"
 )
 
 // API Request/Response Structs
 
-// IntentRequest matches the POST /v1/intent body schema
-type IntentRequest struct {
-	AgentID     string `json:"agent_id"`
-	ScopeID     string `json:"scope_id"`
-	WorkloadID  string `json:"workload_id"`
-	Priority    string `json:"priority,omitempty"` // low, normal, critical
-	Description string `json:"description,omitempty"`
-}
-
-// DecisionResponse matches the response for POST /v1/intent
-type DecisionResponse struct {
-	IntentID   string `json:"intent_id"`
-	Decision   string `json:"decision"` // approve, deny, modify
-	Reason     string `json:"reason,omitempty"`
-	ModifiedBy string `json:"modified_by,omitempty"` // if decision=modify
-	ValidUntil string `json:"valid_until,omitempty"` // ISO8601
-}
-
-// EventResponse is a simplified view of store.Event for JSON output
-// We can reuse store.Event or define a specific API shape.
-// For now, let's reuse store.Event as it's already JSON-tagged well enough,
-// or wraps it if we need extra metadata.
-// Using store.Event directly for simplicity in this stub.
-
 // Server encapsulates the HTTP API server
 type Server struct {
-	store  *store.Store
-	server *http.Server
+	store      *store.Store
+	server     *http.Server
+	identities *engine.IdentityProjection
 }
 
 // NewServer creates a new API server instance
-func NewServer(st *store.Store) *Server {
+func NewServer(st *store.Store, identities *engine.IdentityProjection) *Server {
 	mux := http.NewServeMux()
 
 	// Register routes
@@ -59,17 +37,19 @@ func NewServer(st *store.Store) *Server {
 
 	// Refactoring NewServer to instantiate Server first, then register routes.
 	s := &Server{
-		store: st,
+		store:      st,
+		identities: identities,
 	}
 
 	mux.HandleFunc("/v1/intent", s.handleIntent)
+	mux.HandleFunc("/v1/identities", s.handleIdentities)
 	mux.HandleFunc("/v1/events", s.handleEvents)
 
 	// Middleware: Logging & Panic Recovery
 	handler := withLogging(withRecovery(mux))
 
 	s.server = &http.Server{
-		Addr:         "127.0.0.1:8090",
+		Addr:         ":8090",
 		Handler:      handler,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -121,6 +101,90 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		Decision:   "approve",
 		Reason:     "policy_engine_stub_auto_approval",
 		ValidUntil: time.Now().Add(5 * time.Minute).Format(time.RFC3339),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_encode_response","error":"%v"}`+"\n", err)
+	}
+}
+
+// handleIdentities registers a new identity.
+func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		identities := s.identities.GetAll()
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(identities); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_encode_identities","error":"%v"}`+"\n", err)
+		}
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, `{"error":"method_not_allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req IdentityRegistration
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, `{"error":"invalid_json_body"}`, http.StatusBadRequest)
+		return
+	}
+
+	if req.IdentityID == "" || req.Kind == "" {
+		http.Error(w, `{"error":"missing_required_fields"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Construct the event
+	now := time.Now()
+	payload, _ := json.Marshal(map[string]interface{}{
+		"kind":     req.Kind,
+		"metadata": req.Metadata,
+	})
+
+	evt := store.Event{
+		EventID:       store.EventID(fmt.Sprintf("evt_id_%d", now.UnixNano())),
+		EventType:     store.EventTypeIdentityRegistered,
+		SchemaVersion: 1,
+		TsEvent:       now,
+		TsIngest:      now,
+		Source: store.EventSource{
+			OriginKind: "client",
+			OriginID:   "api", // In a real system, we might get this from context
+			WriterID:   "ratelord-d",
+		},
+		Dimensions: store.EventDimensions{
+			AgentID:    store.SentinelSystem,
+			IdentityID: req.IdentityID,
+			WorkloadID: store.SentinelSystem,
+			ScopeID:    store.SentinelGlobal,
+		},
+		Correlation: store.EventCorrelation{
+			CorrelationID: fmt.Sprintf("corr_%d", now.UnixNano()),
+			CausationID:   store.SentinelUnknown,
+		},
+		Payload: payload,
+	}
+
+	if err := s.store.AppendEvent(r.Context(), &evt); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_append_identity_event","error":"%v"}`+"\n", err)
+		http.Error(w, `{"error":"internal_server_error"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Update projection
+	if err := s.identities.Apply(evt); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_update_projection","error":"%v"}`+"\n", err)
+		// We don't fail the request, but we log the inconsistency
+	}
+
+	// Response
+	resp := map[string]string{
+		"identity_id": req.IdentityID,
+		"status":      "registered",
+		"event_id":    string(evt.EventID),
 	}
 
 	w.Header().Set("Content-Type", "application/json")

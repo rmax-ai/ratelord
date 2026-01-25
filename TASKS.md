@@ -72,11 +72,11 @@ Focus: The HTTP/Socket interface for agents to negotiate intents.
 
 ## Epic 4: Identity & CLI Basics
 Focus: Allow registration of the first identity to prove the write-path works.
-- [ ] **M4.1: Identity Registration Command**
+- [x] **M4.1: Identity Registration Command**
     - Implement CLI `ratelord identity add`.
     - Emit `identity_registered` event to storage.
     - *Acceptance*: `D-06` (Identity Registration).
-- [ ] **M4.2: Basic State Projection**
+- [x] **M4.2: Basic State Projection**
     - Implement in-memory `IdentityProjection` built during replay.
     - Serve `GET /v1/identities` to list registered actors.
     - *Acceptance*: `T-03` (Identity List).

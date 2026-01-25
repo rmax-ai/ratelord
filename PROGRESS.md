@@ -24,4 +24,6 @@
 | pkg/store/sqlite.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/store/store_test.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/api/server.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/engine/projection.go | COMMITTED | Agent | 2026-01-25 |
+| cmd/ratelord/main.go | COMMITTED | Agent | 2026-01-25 |
 | TASKS.md | UPDATED | Orchestrator | 2026-01-25 |

@@ -80,36 +80,33 @@ Returns the operational status of the daemon.
 }
 ```
 
-**`GET /v1/forecast`**
-Returns current predictions for a specific scope/pool. Useful for debugging or TUI "what-if" analysis.
+### 2.3 Identity Management
 
-#### Query Params
-*   `scope_id`: (Required) e.g., `repo:owner/name`
-*   `identity_id`: (Optional) Filter by identity
-*   `pool_id`: (Optional) Filter by resource pool (e.g., `core`, `search`)
+**`POST /v1/identities`**
+Registers a new identity (actor) in the system. This emits an `identity_registered` event.
 
-#### Response (`Forecast`)
+#### Request (`IdentityRegistration`)
 ```json
 {
-  "scope_id": "string",
-  "pool_id": "string",
-  "as_of_ts": "string",
-  "burn_rate": {
-    "1m": number,
-    "1h": number
-  },
-  "time_to_exhaustion": {
-    "p50_seconds": number,
-    "p99_seconds": number
-  },
-  "risk_score": number,      // 0.0 - 1.0
-  "is_gated": boolean        // If true, new intents are likely to be denied
+  "identity_id": "string",    // Unique ID (e.g., "pat:rmax")
+  "kind": "string",           // "user" | "service" | "bot"
+  "metadata": object          // Optional: Display names, email, etc.
+}
+```
+
+#### Response
+```json
+{
+  "identity_id": "string",
+  "status": "registered",
+  "event_id": "string"        // The event ID created
 }
 ```
 
 ---
 
-### 2.3 Event Streaming (TUI)
+### 2.4 Event Streaming (TUI)
+
 
 **`GET /v1/events`**
 Stream recent events for real-time visualization (TUI live tail).
