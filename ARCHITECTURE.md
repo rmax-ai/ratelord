@@ -8,7 +8,7 @@ This document describes the ratelord system architecture at a conceptual level. 
 - Single write authority: all write decisions and state transitions happen in `ratelord-d` (the daemon). All clients are read-only views.
 - Event-sourced + replayable: the append-only event log is the source of truth; all derived state is a projection that can be rebuilt.
 - Predictive, not reactive: the primary outputs are forecasts (P50/P90/P99 time-to-exhaustion and risk) in time-domain terms.
-- Intent negotiation: actions are expressed as intents; the daemon arbitrates intents (approve/deny/modify) under policy.
+- Intent negotiation: actions are expressed as intents; the daemon arbitrates intents (`approve`, `approve_with_modifications`, `deny_with_reason`) under policy.
 - Explicit shared vs isolated: no implicit isolation; all constraints explicitly declare sharing semantics via identities, scopes, and pools.
 - Time-domain reasoning: budgets/limits are interpreted as rates over windows; risk is expressed as time-to-exhaustion under uncertainty.
 
@@ -67,7 +67,7 @@ Constraints:
 Responsibilities:
 
 - Render projections and forecasts.
-- Display intent status (pending/approved/denied/modified) and rationale.
+- Display intent status (pending / `approve` / `approve_with_modifications` / `deny_with_reason`) and rationale.
 - Provide a safe interface for proposing intents (submission is a request; daemon decides).
 - Visualize shared vs isolated semantics (pools, scopes, identities).
 
@@ -281,7 +281,7 @@ Key Invariants:
 - **Mandatory Scoping**: No event is unscoped. Every event MUST carry identifiers for Agent, Identity, Workload, and Scope. Sentinel IDs (e.g., `sentinel:global`, `sentinel:system`) are used where specific entities are not applicable or unknown. Nulls are not permitted for these core dimensions.
 
 Illustrative fields (non-normative):
-- `event_id`: unique, monotonic.
+- `event_id`: unique.
 - `ts_event`: logical time.
 - `ts_ingest`: daemon physical time.
 - `type`: event category.

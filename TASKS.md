@@ -5,8 +5,8 @@
     - [x] 2. CONSTITUTION.md (Orchestrator Initial Draft)
     - [x] 3. ARCHITECTURE.md
     - [x] 4. CONSTRAINTS.md
-    - [ ] 5. IDENTITIES.md
-    - [ ] 6. DATA_MODEL.md
+    - [x] 5. IDENTITIES.md
+    - [x] 6. DATA_MODEL.md
 - [ ] Phase 2: Behavioral & Engine Specs
     - [ ] 7. PREDICTION.md
     - [ ] 8. POLICY_ENGINE.md

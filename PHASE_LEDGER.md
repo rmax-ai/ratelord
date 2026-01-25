@@ -10,3 +10,4 @@
 - **Action**: Updated TASKS.md and PROGRESS.md to reflect current draft status.
 - **Action**: Conceptualized ARCHITECTURE.md storage (removed physical schema), aligned intent terminology (`approve`, `approve_with_modifications`, `deny_with_reason`), and hardened scoping rigor (mandatory dimensions + sentinel IDs).
 - **Action**: Updated CONSTITUTION.md and CONSTRAINTS.md to match new terminology and scoping rules.
+- **Action**: Drafted IDENTITIES.md and DATA_MODEL.md (sub-agent drafts, orchestrator integration).

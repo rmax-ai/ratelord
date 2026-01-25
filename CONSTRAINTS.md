@@ -14,7 +14,7 @@ This document defines how `ratelord` represents, observes, predicts, and governs
 - Every datum is scoped (Agent, Identity, Workload, Scope); “global” is simply the root scope. Sentinel IDs are used for unknown/not-applicable dimensions.
 - Defensive governance is triggered by forecasts (risk) rather than threshold breaches (reactive).
 - Shared vs isolated semantics must be explicit; never assume “one agent = one limit.”
-- The system prefers “Approve with Modifications” over “Deny” when safety can be preserved.
+- The system prefers `approve_with_modifications` over `deny_with_reason` when safety can be preserved.
 - Local-first, zero-ops, privacy-preserving by default.
 
 ---

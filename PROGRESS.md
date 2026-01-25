@@ -7,8 +7,8 @@
 | CONSTITUTION.md | DRAFT | Orchestrator | 2026-01-25 |
 | ARCHITECTURE.md | DRAFT | Orchestrator | 2026-01-25 |
 | CONSTRAINTS.md | DRAFT | Orchestrator | 2026-01-25 |
-| IDENTITIES.md | PENDING | Sub-Agent | - |
-| DATA_MODEL.md | PENDING | Sub-Agent | - |
+| IDENTITIES.md | DRAFT | Orchestrator | 2026-01-25 |
+| DATA_MODEL.md | DRAFT | Orchestrator | 2026-01-25 |
 | PREDICTION.md | PENDING | Sub-Agent | - |
 | POLICY_ENGINE.md | PENDING | Sub-Agent | - |
 | AGENT_CONTRACT.md | PENDING | Sub-Agent | - |
