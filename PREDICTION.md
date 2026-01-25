@@ -1,151 +1,196 @@
 # PREDICTION: ratelord
 
-This document defines how `ratelord` transforms raw observations into actionable forecasts. It shifts governance from "reactive counting" to "predictive risk management."
+This document defines how `ratelord` forecasts the future state of constraint pools.
 
-## Core Principles
-
-1.  **Forecasts are Probabilistic**: We never know the exact future burn rate or reset time. We model distributions (P50, P90, P99) to quantify risk.
-2.  **Time-Domain Reasoning**: The primary unit of risk is *time*, not *count*. "100 requests remaining" is meaningless without a burn rate. "10 minutes to exhaustion" is actionable.
-3.  **Scoped & Hierarchical**: Forecasts are computed for every node in the Constraint Graph (Identity, Pool, Scope). A single intent may check multiple forecasts (e.g., Local Identity forecast AND Shared Pool forecast).
-4.  **Reset-Aware**: The finish line is the *reset window*. Survival means reaching the reset timestamp with > 0 capacity.
+The system’s core value proposition is **predictive governance**: instead of blocking actions only when a limit is hit (reactive), `ratelord` blocks or shapes actions when the *risk of future exhaustion* becomes unacceptable.
 
 ---
 
-## Burn Rate Modeling
+## 1. Core Philosophy
 
-Burn rate ($B$) is the speed of consumption (units/second). It is not a constant; it is a stochastic process.
+### 1.1 Prediction > Observation
+Raw counters ("4500/5000 remaining") are insufficient for decision-making. A counter without a rate is meaningless. `ratelord` treats observations as inputs to a probabilistic model that outputs **Time-to-Exhaustion (TTE)** and **Risk**.
 
-### Exponential Moving Average (EMA)
-For each Pool-at-Scope, `ratelord-d` maintains an EMA of consumption to establish a baseline trend.
+### 1.2 Time-Domain Reasoning
+All governance decisions are made in the time domain.
+- **Wrong**: "Deny because remaining < 500."
+- **Right**: "Deny because P90 TTE is 5 minutes, but reset is in 60 minutes."
 
--   **Short-term EMA**: Reacts quickly to bursts (for tactical throttling).
--   **Long-term EMA**: Captures sustained load (for strategic admission).
+### 1.3 Probabilistic Nature
+The future is uncertain. Agents burst, providers suffer latency, and clocks drift. Therefore, `ratelord` never predicts a single number. It predicts a distribution:
+- **P50 (Expected)**: The median outcome. "We probably have 30 minutes left."
+- **P90 (Conservative)**: The safe bet. "We are 90% sure we have at least 15 minutes left."
+- **P99 (Worst Case)**: The defensive bound. "In the worst 1% of scenarios, we survive 5 minutes."
 
-### Variance Tracking
-The system tracks the *variance* ($\sigma^2$) of the burn rate. High variance implies high uncertainty, widening the gap between P50 and P99 forecasts.
-
--   **Stable Agent**: Low variance $\rightarrow$ P99 $\approx$ P50.
--   **Bursty Agent**: High variance $\rightarrow$ P99 $\ll$ P50 (P99 TTE is much shorter).
-
-*Note: In Shared Pools, variance includes the aggregate noise of all actors.*
-
----
-
-## Reset Uncertainty
-
-Provider reset timestamps are not absolute truth. They suffer from:
-1.  **Clock Skew**: Difference between provider server time and local daemon time.
-2.  **Jitter**: Reset logic on the provider side may delay by seconds.
-3.  **Propagation Delay**: API headers may reflect a state from milliseconds ago.
-
-`ratelord` models the **Effective Reset Time** ($T_{reset}$) as a distribution, not a scalar.
-
--   **Optimistic Reset**: Earliest possible reset (provider claim).
--   **P99 Reset**: The latest likely reset (provider claim + max observed jitter + skew buffer).
-
-Risk calculations use the *P99 Reset* timestamp to be conservative.
+Governance policies typically gate on **P90** or **P99** to ensure reliability.
 
 ---
 
-## Forecasting Logic
+## 2. Burn Rate Modeling
 
-### Time-to-Exhaustion (TTE)
+Burn rate ($B$) is the velocity of consumption (units per second). It is the fundamental derivative used to calculate TTE.
 
-Given:
--   Current Capacity ($C_{now}$)
--   Modeled Burn Rate distribution ($B \sim N(\mu, \sigma^2)$)
+### 2.1 Exponential Moving Average (EMA)
+To balance responsiveness with stability, `ratelord` tracks burn rate using Exponential Moving Averages over multiple windows:
+- **Instantaneous ($B_{inst}$)**: Very short window (e.g., last 1 minute or last $N$ events). Detects spikes immediately.
+- **Trend ($B_{trend}$)**: Medium/Long window (e.g., 15 minutes, 1 hour). Captures baseline load.
 
-We compute the time until $C=0$.
+### 2.2 Handling Variance
+We do not just track the mean burn rate $\mu$; we track the variance $\sigma^2$.
+High variance implies a volatile workload, which widens the confidence intervals for TTE.
 
-$$TTE = \frac{C_{now}}{B}$$
+- **Stable Agent**: Low variance $\rightarrow$ P50 and P99 are close.
+- **Bursty Agent**: High variance $\rightarrow$ P99 is much lower (shorter TTE) than P50.
 
-Since $B$ is a distribution, TTE is also a distribution.
-
--   **P50 TTE** (Expected): How long we last under normal conditions.
--   **P90 TTE** (Conservative): How long we last if load increases moderately.
--   **P99 TTE** (Worst Case): The "guaranteed" survival time for high-reliability planning.
-
-### Probability of Exhaustion Before Reset ($P_{exhaust}$)
-
-This is the **primary risk metric** for governance. It answers: "What are the odds we run dry before the refill?"
-
-It is the probability that $TTE < TimeToReset$.
-
-$$P(TTE < (T_{reset} - T_{now}))$$
-
--   If $P_{exhaust} > 0.1\%$ (P99 breach): **High Risk**.
--   If $P_{exhaust} > 50\%$ (P50 breach): **Critical Failure Imminent**.
+### 2.3 Decay and Silence
+If no usage events occur, the burn rate must decay toward zero (or a known floor).
+- **Decay Function**: `ratelord` applies a decay factor based on time-since-last-event.
+- **Silence != Safety**: A silent provider might mean a network partition, not zero usage. See "Uncertainty" below.
 
 ---
 
-## Risk Metrics (Signals to Policy)
+## 3. Time-to-Exhaustion (TTE)
 
-The Prediction Engine emits `forecast_computed` events containing these signals for the Policy Engine:
+TTE is the estimated duration until a pool's capacity reaches zero, assuming no reset occurs.
 
-### 1. Reserve Margin
-$$Margin = TTE_{P99} - (T_{reset} - T_{now})$$
--   Positive: We are safe; we expect to reach reset with capacity to spare.
--   Negative: We are in the "Danger Zone"; we rely on luck (variance) to survive.
+### 3.1 The Formula
+Fundamentally:
+$$ TTE = \frac{\text{Remaining Capacity}}{\text{Burn Rate}} $$
 
-### 2. Burst Headroom
-How much *additional* immediate consumption ($\Delta C$) can be accepted without spiking $P_{exhaust}$ above a safety threshold (e.g., 1%)?
-This allows "burst budgeting" for urgent intents.
+### 3.2 Probabilistic TTE
+Because Burn Rate is a distribution $N(\mu, \sigma)$, TTE is also a distribution.
+Instead of complex closed-form integration, `ratelord` approximates quantiles:
 
-### 3. Shared Pool Saturation
-For shared pools, we metricize the "Background Noise" (consumption by others).
--   High noise reduces the confidence of local forecasts.
--   Policy may force **isolation** (switch Identity) if saturation crosses a threshold.
+- **P50 TTE**: Derived from Mean Burn Rate.
+  $$ TTE_{P50} \approx \frac{C_{rem}}{B_{mean}} $$
 
----
+- **P99 TTE (Worst Case)**: Derived from a high-percentile Burn Rate (e.g., Mean + 2$\sigma$ or Peak observed).
+  $$ TTE_{P99} \approx \frac{C_{rem}}{B_{P99}} $$
 
-## Data Flow
-
-### Inputs (Observations)
-The model ingests a stream of events:
--   `usage_observed`: "Used 50 tokens", "Remaining: 4950".
--   `reset_observed`: "Reset at 12:00:00 UTC".
--   `intent_submitted` (Hypothetical): "I plan to use ~100 tokens".
-
-### Model State (Per Node)
-For every active Pool/Scope/Identity node in the Constraint Graph, the daemon maintains:
--   Current $C_{now}$
--   Current $T_{reset}$ (with uncertainty bounds)
--   Burn Rate state ($\mu, \sigma^2$)
-
-### Outputs (`forecast_computed`)
-On every significant state change (or periodic tick), the model emits:
--   **Target**: `provider_id`, `pool_id`, `scope_id`
--   **TTE Vectors**: `{ p50: "15m", p90: "12m", p99: "8m" }`
--   **Risk**: `{ prob_exhaustion: 0.05, safe_margin: "-2m" }`
-
-These events trigger the **Policy Engine**, which updates the rules (e.g., "Stop approving non-urgent intents").
-
-### "What-If" Analysis (Intent Arbitration)
-When an `intent_submitted` arrives:
-1.  Daemon creates a temporary "Hypothetical State" ($C_{hyp} = C_{now} - Intent_{cost}$).
-2.  Re-runs risk model on $C_{hyp}$.
-3.  If $P_{exhaust}$ jumps significantly (Marginal Risk), the intent is **Flagged**.
+*Note: As $C_{rem}$ approaches zero, TTE approaches zero regardless of burn rate.*
 
 ---
 
-## Shared vs. Isolated Semantics
+## 4. Reset-Aware Risk
 
-### Isolated Pools
--   **Input**: Only the specific Agent's past usage.
--   **Forecast**: High confidence, specific to that Agent's behavior.
+The absolute TTE is less important than the relationship between **TTE** and **Time-to-Reset (TTR)**.
 
-### Shared Pools
--   **Input**: Aggregate usage of ALL Agents on that Identity/Scope.
--   **Forecast**:
-    -   **Global Forecast**: "Will the pool survive total load?" (Used to protect the pool).
-    -   **Attributed Contribution**: "How much of the variance is Agent X?" (Used to blame/throttle the noisy neighbor).
+### 4.1 The Critical Question
+"Will we exhaust *before* the reset?"
 
-*Note: An Agent usually checks BOTH. It must pass the Global Shared Forecast (Pool health) AND its Local Allocation limits.*
+We are safe if:
+$$ TTE_{min} > TTR_{max} $$
+
+### 4.2 Risk Probability
+Risk is the probability that exhaustion occurs before reset:
+$$ P(\text{Exhaustion}) = P(TTE < TTR) $$
+
+- If $P(\text{Exhaustion}) > \text{Threshold}$ (e.g., 10%), the system enters a **Yellow/Warning** state.
+- If $P(\text{Exhaustion})$ is near 100%, the system enters a **Red/Critical** state (throttling active).
+
+### 4.3 Safety Margin
+The **Safety Margin** is the buffer between the worst-case survival time and the reset time.
+$$ \text{Margin} = TTE_{P99} - TTR $$
+
+- Positive Margin: "Even at worst-case burn, we survive past the reset."
+- Negative Margin: "At worst-case burn, we die before reset."
+
+### 4.4 Reset Uncertainty
+$TTR$ is also a distribution, not a scalar.
+- **Fixed Windows**: TTR is precise (modulo clock skew).
+- **Rolling Windows**: TTR is complex (capacity trickles back in).
+- **Unknown/Jitter**: TTR has uncertainty bounds.
+
+`ratelord` conservatively assumes the *latest* probable reset time ($TTR_{max}$) when calculating risk.
 
 ---
 
-## Open Questions
+## 5. Hierarchy of Prediction
 
--   **Cold Starts**: How to forecast burn rate for a brand new Agent/Identity? (Default priors? Probationary period?).
--   **Seasonality**: Do we model daily/weekly cycles? (Likely Phase 2).
--   **Feedback Loops**: How does the model react when Policy *throttles* usage? (Burn rate drops $\rightarrow$ Forecast improves $\rightarrow$ Policy relaxes $\rightarrow$ Burn rate spikes). We need to model "Unconstrained Demand" vs "Observed Usage".
+Predictions are not flat; they exist at every node in the constraint graph where a limit or burn rate can be observed.
+
+### 5.1 Pool-Level Prediction (Physical Reality)
+*Scope: The Provider's limit (e.g., GitHub REST Core for an Org).*
+- The most authoritative prediction.
+- Aggregates usage from *all* identities and scopes sharing this pool.
+- If this TTE is critical, *everyone* sharing the pool gets throttled.
+
+### 5.2 Identity-Level Prediction (Attribution)
+*Scope: Specific Token / Identity.*
+- Tracks the burn rate attributable to a single identity.
+- Useful for detecting "noisy neighbors" or rogue agents.
+- Used to target `approve_with_modifications` (throttle specific offender) rather than global panic.
+
+### 5.3 Scope-Level Prediction (Logical)
+*Scope: Repo, Project, or Environment.*
+- "How fast is the `frontend-repo` CI pipeline burning budget?"
+- Used for high-level resource planning and "virtual" limits.
+
+---
+
+## 6. Uncertainty & Degraded States
+
+Forecasts must be honest about what they don't know.
+
+### 6.1 Staleness
+As data ages (time since last `provider_poll_observed`), uncertainty grows.
+- **Mechanism**: Inflate the variance $\sigma$ of the burn rate model as a function of staleness.
+- **Result**: P99 TTE drops rapidly (becomes more conservative) as data gets old. "If we haven't seen data in 5 minutes, assume the worst."
+
+### 6.2 Unknown Reset Times
+If a provider does not report a reset time (or we haven't seen one yet):
+- Assume $TTR = \infty$ (worst case) or a provider-specific heuristic default.
+- Risk becomes effectively 100% if any burn exists, forcing conservative throttling until a reset is observed.
+
+### 6.3 Missing Data (Degraded Provider)
+If `provider_error` events occur:
+- Freeze $C_{rem}$ at last known value (or decay it pessimistically).
+- Widen confidence intervals.
+- Governance policies typically switch to "Safe Mode" (deny non-critical intents).
+
+---
+
+## 7. Inputs & Outputs
+
+### 7.1 Inputs (from Event Log)
+- `usage_observed`: Used to update $C_{rem}$ and calculate instantaneous burn $B_{inst}$.
+- `reset_observed`: Used to anchor the $TTR$ calculation.
+- `constraint_observed`: Updates the capacity ceiling $C_{total}$.
+- `provider_poll_observed`: Timestamp provides the "freshness" anchor.
+
+### 7.2 Outputs (Events)
+The Forecaster emits `forecast_computed` events. These are the **only** signals Policy uses to make decisions.
+
+**Event Payload (`forecast_computed`)**:
+```json
+{
+  "provider_id": "github",
+  "pool_id": "rest_core",
+  "scope_id": "org:acme",
+  "as_of_ts": 1700000000,
+  "tte": {
+    "p50_seconds": 3600,
+    "p90_seconds": 1800,
+    "p99_seconds": 300
+  },
+  "risk": {
+    "probability_exhaustion_before_reset": 0.05,
+    "safety_margin_seconds": 240,
+    "ttr_seconds": 60
+  },
+  "burn_rate": {
+    "mean": 1.5,
+    "variance": 0.2,
+    "unit": "req/sec"
+  }
+}
+```
+
+---
+
+## 8. Open Questions
+
+1.  **Cold Start**: How do we predict burn rate for a brand new identity with zero history? (Likely need a "pessimistic default" or "learning phase" state).
+2.  **Rolling Windows**: Mathematically modeling TTE for rolling windows (where capacity returns continuously) is complex. Do we simulate it, or approximate with "worst case fixed window"?
+3.  **Seasonality**: Should the burn rate model eventually account for time-of-day (e.g., "CI bursts at 9am")? (Out of scope for Phase 1, but architectural hooks should exist).
+4.  **Feedback Loops**: If `ratelord` throttles an agent, observed burn rate drops. This increases TTE, which might relax throttling, causing burn to spike again. We need to distinguish "natural burn" from "throttled burn".

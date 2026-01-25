@@ -11,3 +11,6 @@
 - **Action**: Conceptualized ARCHITECTURE.md storage (removed physical schema), aligned intent terminology (`approve`, `approve_with_modifications`, `deny_with_reason`), and hardened scoping rigor (mandatory dimensions + sentinel IDs).
 - **Action**: Updated CONSTITUTION.md and CONSTRAINTS.md to match new terminology and scoping rules.
 - **Action**: Drafted IDENTITIES.md and DATA_MODEL.md (sub-agent drafts, orchestrator integration).
+- **Action**: Drafted PREDICTION.md, POLICY_ENGINE.md, AGENT_CONTRACT.md, and API_SPEC.md.
+- **Action**: Drafted TUI_SPEC.md, WEB_UI_SPEC.md, WORKFLOWS.md, and ACCEPTANCE.md.
+- **Action**: Completed Phase 3 (Interface & Workflow Specs) and finalized the Required Document Set.

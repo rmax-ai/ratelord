@@ -11,9 +11,9 @@
 | DATA_MODEL.md | DRAFT | Orchestrator | 2026-01-25 |
 | PREDICTION.md | DRAFT | Sub-Agent | 2026-01-25 |
 | POLICY_ENGINE.md | DRAFT | Sub-Agent | 2026-01-25 |
-| AGENT_CONTRACT.md | PENDING | Sub-Agent | - |
-| API_SPEC.md | PENDING | Sub-Agent | - |
-| TUI_SPEC.md | PENDING | Sub-Agent | - |
-| WEB_UI_SPEC.md | PENDING | Sub-Agent | - |
-| WORKFLOWS.md | PENDING | Sub-Agent | - |
-| ACCEPTANCE.md | PENDING | Sub-Agent | - |
+| AGENT_CONTRACT.md | DRAFT | Sub-Agent | 2026-01-25 |
+| API_SPEC.md | DRAFT | Sub-Agent | 2026-01-25 |
+| TUI_SPEC.md | DRAFT | Sub-Agent | 2026-01-25 |
+| WEB_UI_SPEC.md | DRAFT | Sub-Agent | 2026-01-25 |
+| WORKFLOWS.md | DRAFT | Sub-Agent | 2026-01-25 |
+| ACCEPTANCE.md | DRAFT | Sub-Agent | 2026-01-25 |

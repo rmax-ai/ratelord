@@ -7,16 +7,16 @@
     - [x] 4. CONSTRAINTS.md
     - [x] 5. IDENTITIES.md
     - [x] 6. DATA_MODEL.md
-- [ ] Phase 2: Behavioral & Engine Specs
+- [x] Phase 2: Behavioral & Engine Specs
     - [x] 7. PREDICTION.md
     - [x] 8. POLICY_ENGINE.md
-    - [ ] 9. AGENT_CONTRACT.md
-    - [ ] 10. API_SPEC.md
-- [ ] Phase 3: Interface & Workflow Specs
-    - [ ] 11. TUI_SPEC.md
-    - [ ] 12. WEB_UI_SPEC.md
-    - [ ] 13. WORKFLOWS.md
-    - [ ] 14. ACCEPTANCE.md
-- [ ] Phase 4: Project Management
+    - [x] 9. AGENT_CONTRACT.md
+    - [x] 10. API_SPEC.md
+- [x] Phase 3: Interface & Workflow Specs
+    - [x] 11. TUI_SPEC.md
+    - [x] 12. WEB_UI_SPEC.md
+    - [x] 13. WORKFLOWS.md
+    - [x] 14. ACCEPTANCE.md
+- [x] Phase 4: Project Management
     - [x] Initialize PROGRESS.md
     - [x] Initialize PHASE_LEDGER.md
