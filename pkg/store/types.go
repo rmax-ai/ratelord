@@ -1,0 +1,67 @@
+package store
+
+import (
+	"encoding/json"
+	"time"
+)
+
+// EventType represents the kind of event.
+type EventType string
+
+const (
+	EventTypeProviderPollObserved EventType = "provider_poll_observed"
+	EventTypeProviderError        EventType = "provider_error"
+	EventTypeConstraintObserved   EventType = "constraint_observed"
+	EventTypeResetObserved        EventType = "reset_observed"
+	EventTypeUsageObserved        EventType = "usage_observed"
+	EventTypeForecastComputed     EventType = "forecast_computed"
+	EventTypeIntentSubmitted      EventType = "intent_submitted"
+	EventTypeIntentDecided        EventType = "intent_decided"
+	EventTypePolicyTriggered      EventType = "policy_triggered"
+	EventTypeThrottleAdvised      EventType = "throttle_advised"
+)
+
+// EventID is a unique identifier for an event.
+type EventID string
+
+// Event represents the canonical envelope for all system events.
+// See DATA_MODEL.md for field definitions.
+type Event struct {
+	EventID       EventID          `json:"event_id"`
+	EventType     EventType        `json:"event_type"`
+	SchemaVersion int              `json:"schema_version"`
+	TsEvent       time.Time        `json:"ts_event"`
+	TsIngest      time.Time        `json:"ts_ingest"`
+	Source        EventSource      `json:"source"`
+	Dimensions    EventDimensions  `json:"dimensions"`
+	Correlation   EventCorrelation `json:"correlation"`
+	Payload       json.RawMessage  `json:"payload"`
+}
+
+// EventSource describes the origin of the event.
+type EventSource struct {
+	OriginKind string `json:"origin_kind"` // daemon, provider, client, operator
+	OriginID   string `json:"origin_id"`
+	WriterID   string `json:"writer_id"` // Always "ratelord-d"
+}
+
+// EventDimensions are the mandatory scopes for every event.
+type EventDimensions struct {
+	AgentID    string `json:"agent_id"`
+	IdentityID string `json:"identity_id"`
+	WorkloadID string `json:"workload_id"`
+	ScopeID    string `json:"scope_id"`
+}
+
+// EventCorrelation groups events logically.
+type EventCorrelation struct {
+	CorrelationID string `json:"correlation_id"`
+	CausationID   string `json:"causation_id"`
+}
+
+// Sentinel constants for unknown/global dimensions.
+const (
+	SentinelSystem  = "sentinel:system"
+	SentinelGlobal  = "sentinel:global"
+	SentinelUnknown = "sentinel:unknown"
+)
