@@ -17,5 +17,7 @@
 | WEB_UI_SPEC.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | WORKFLOWS.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | ACCEPTANCE.md | COMPLETED | Sub-Agent | 2026-01-25 |
+| TEST_STRATEGY.md | COMPLETED | Orchestrator | 2026-01-25 |
 | loop.sh | IMPROVED | Agent | 2026-01-25 |
 | LOOP_PROMPT.md | IMPROVED | Agent | 2026-01-25 |
+| TASKS.md | UPDATED | Orchestrator | 2026-01-25 |

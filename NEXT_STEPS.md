@@ -1,23 +1,18 @@
 # NEXT STEPS: Phase 4 - Implementation & Verification
 
-The Documentation Phase (Phases 1-3) is **COMPLETE**. All required specifications, workflows, and acceptance criteria have been generated and reviewed.
+The planning and specification phase is complete. The project is now in active implementation mode.
 
-## Transition to Implementation
-The project is now ready for code implementation. The repository is bootstrapped with a comprehensive "Constitution" and "Blueprint".
+## Current Objective: Epic 1 - Foundation & Daemon Lifecycle
 
-## Immediate Objectives
-1.  **Initialize Repository Structure**: Create the directory layout defined in `ARCHITECTURE.md` (e.g., `cmd/ratelord-d`, `pkg/engine`, `pkg/store`).
-2.  **Bootstrap Daemon**: Implement the `ratelord-d` entry point and basic signal handling (as defined in `ACCEPTANCE.md` D-01/D-03).
-3.  **Implement Event Store**: Create the SQLite schema and the append-only event log mechanism (`DATA_MODEL.md`).
-4.  **Implement API Surface**: Bind the Unix Socket listener and implement the `POST /intent` stub (`API_SPEC.md`).
+We are starting with the absolute basics: getting the Go module initialized, the directory structure created, and a process that can start and stop cleanly.
 
-## Reference Docs (for Implementation Agents)
-- **Source of Truth**: `PROJECT_SEED.md` & `CONSTITUTION.md`
-- **Blueprint**: `ARCHITECTURE.md` & `DATA_MODEL.md`
-- **Behavior**: `PREDICTION.md` & `POLICY_ENGINE.md`
-- **Interface**: `API_SPEC.md` & `AGENT_CONTRACT.md`
-- **Validation**: `ACCEPTANCE.md`
+### Tasks for Next Session:
+1.  **Initialize Go Module**: Run `go mod init` (or similar) to set up the project.
+2.  **Create Directory Skeleton**: Create `cmd/ratelord-d`, `pkg/engine`, `pkg/store`, `pkg/api` as defined in M1.1.
+3.  **Implement Entrypoint**: Write `cmd/ratelord-d/main.go` to print a startup message and handle `SIGINT`/`SIGTERM` (M1.2).
+4.  **Verify**: Build and run the daemon; confirm it logs startup and exits cleanly on Ctrl+C.
 
-## Status
-- **Docs**: DONE
-- **Code**: PENDING
+## Reference
+- **Plan**: `TASKS.md` (Epic 1)
+- **Validation**: `TEST_STRATEGY.md` (Lifecycle E2E)
+- **Architecture**: `ARCHITECTURE.md`

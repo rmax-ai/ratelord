@@ -57,7 +57,7 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
   echo -e "\n${YELLOW}--- Iteration $i / $MAX_ITERATIONS ---${NC}" | tee -a "$LOG_FILE"
 
   # Run opencode with the orchestrator agent.
-  if $OPENCODE_BIN $OPENCODE_COMMAND >> "$LOG_FILE" 2>&1; then
+  if $OPENCODE_BIN $OPENCODE_COMMAND 2>&1 | tee -a "$LOG_FILE" 2>&1; then
     # Check if the agent signalled completion
     if grep -q "<promise>DONE</promise>" "$LOG_FILE"; then
       echo -e "${GREEN}✅ Success: ALL TASKS DONE signal received.${NC}" | tee -a "$LOG_FILE"
