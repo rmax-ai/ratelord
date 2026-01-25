@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/rmax/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // ForecastProjection maintains sliding window history of usage observations per pool

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/rmax/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // Identity represents the read-model for an identity

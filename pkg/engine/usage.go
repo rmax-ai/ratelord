@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rmax/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // PoolState represents the current usage state of a constraint pool

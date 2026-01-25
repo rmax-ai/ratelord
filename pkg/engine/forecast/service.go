@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/rmax/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // Forecaster ties together the projection, model, and event emission

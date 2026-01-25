@@ -1,4 +1,4 @@
-module github.com/rmax/ratelord
+module github.com/rmax-ai/ratelord
 
 go 1.24.0
 

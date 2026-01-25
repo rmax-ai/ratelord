@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/rmax/ratelord/pkg/api"
+	"github.com/rmax-ai/ratelord/pkg/api"
 )
 
 func main() {

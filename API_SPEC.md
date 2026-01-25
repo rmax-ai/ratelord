@@ -134,7 +134,7 @@ All endpoints enforce strict JSON Schema validation.
 ### 3.1 Common Types
 
 *   **Timestamps**: ISO 8601 strings (`2024-01-01T12:00:00Z`).
-*   **IDs**: String, case-sensitive. Recommended format: `type:value` (e.g., `scope:repo:rmax/ratelord`).
+*   **IDs**: String, case-sensitive. Recommended format: `type:value` (e.g., `scope:repo:rmax-ai/ratelord`).
 *   **Enums**:
     *   `urgency`: `["high", "normal", "background"]`
     *   `decision`: `["approve", "approve_with_modifications", "deny_with_reason"]`

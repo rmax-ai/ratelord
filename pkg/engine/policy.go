@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/rmax/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // Decision defines the outcome of an intent evaluation

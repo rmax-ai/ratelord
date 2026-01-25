@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rmax/ratelord/pkg/engine/forecast"
-	"github.com/rmax/ratelord/pkg/provider"
-	"github.com/rmax/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
+	"github.com/rmax-ai/ratelord/pkg/provider"
+	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // Poller manages the polling loop for registered providers

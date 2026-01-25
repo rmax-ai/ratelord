@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/rmax/ratelord/pkg/engine"
-	"github.com/rmax/ratelord/pkg/provider"
-	"github.com/rmax/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/engine"
+	"github.com/rmax-ai/ratelord/pkg/provider"
+	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // API Request/Response Structs
