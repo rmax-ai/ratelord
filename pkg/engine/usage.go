@@ -130,3 +130,16 @@ func (p *UsageProjection) GetPoolState(providerID, poolID string) (PoolState, bo
 	state, ok := p.pools[makePoolKey(providerID, poolID)]
 	return state, ok
 }
+
+// CalculateWaitTime returns the seconds until reset for a pool
+func (p *UsageProjection) CalculateWaitTime(providerID, poolID string) float64 {
+	state, exists := p.GetPoolState(providerID, poolID)
+	if !exists || state.ResetAt.IsZero() {
+		return 0
+	}
+	timeLeft := time.Until(state.ResetAt)
+	if timeLeft > 0 {
+		return timeLeft.Seconds()
+	}
+	return 0
+}

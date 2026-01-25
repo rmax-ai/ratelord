@@ -173,8 +173,9 @@ Focus: Ensure policies are loaded, hot-reloaded, and correctly evaluated to enab
     - Investigate why `policy.yaml` rules are not applying.
     - Fix `LoadPolicyConfig` and `Evaluate`.
 - [x] **M11.2: Implement Wait/Modify Actions**
-    - Ensure `approve_with_modifications` works.
-- [ ] **M11.3: Verify Hot Reload**
+    - [x] Ensure `approve_with_modifications` works.
+    - [x] Implement shape/defer logic.
+- [x] **M11.3: Verify Hot Reload**
     - Ensure SIGHUP updates rules without restart.
 
 ## Epic 12: Persistence & Robustness
@@ -183,4 +184,3 @@ Focus: Ensure drift detection and provider state survive restarts.
     - Ensure provider offsets/drift are saved to SQLite.
 - [ ] **M12.2: TUI Verification**
     - Manually verify TUI dashboard connects and displays data.
-

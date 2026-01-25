@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
-	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
@@ -128,15 +127,8 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, 
 	return false
 }
 
-func (pe *PolicyEngine) calculateWaitTime(poolState PoolState) float64 {
-	if poolState.ResetAt.IsZero() {
-		return 0
-	}
-	timeLeft := time.Until(poolState.ResetAt)
-	if timeLeft > 0 {
-		return timeLeft.Seconds()
-	}
-	return 0
+func (pe *PolicyEngine) calculateWaitTime(providerID, poolID string) float64 {
+	return pe.usage.CalculateWaitTime(providerID, poolID)
 }
 
 func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}, poolState PoolState) PolicyEvaluationResult {
@@ -172,7 +164,7 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 
 	case "defer":
 		// Wait until reset + jitter
-		wait := pe.calculateWaitTime(poolState)
+		wait := pe.calculateWaitTime(poolState.ProviderID, poolState.PoolID)
 
 		// Add jitter to avoid thundering herd (default 100ms - 1s)
 		jitterMax := 1.0

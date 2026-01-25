@@ -1,19 +1,22 @@
-# NEXT STEPS: Phase 5 - Remediation
+# NEXT_STEPS: Phase 5 - Remediation
 
-The Policy Engine loading and evaluation logic (M11.1) and the client-side modification handling (M11.2) have been implemented and verified with basic manual tests. The simulator now correctly sleeps if a `wait_seconds` modification is received.
+## Current Context
+- **Policy Engine**: Full loop is working. Loading (M11.1), enforcement (M5.2), shaping/deferring (M11.2), and hot reloading (M11.3) are verified.
+- **Provider State**: Currently, the poller replays events but might not be fully persisting granular provider state (cursors/offsets) explicitly in a way that survives restarts without full replay. Actually, the event sourcing model *is* the persistence. `ratelord-d` startup replays events to rebuild state. The question for M12.1 is: does `Poller` properly initialize its *internal cursor* from those replayed events?
+- **TUI**: Needs manual verification (M12.2).
 
-## Current Objective: Finalize Robustness
+## Immediate Actions
 
-### Tasks for Next Session:
+1. **Persist Provider State (M12.1)**:
+   - Audit `pkg/engine/poller.go` and `pkg/provider/mock.go`.
+   - Verify: When `ratelord-d` restarts and replays events, does the `Poller` (or `Provider`) know where it left off? Or does it start from scratch/zero?
+   - If it starts from scratch, we might get duplicate events or miss data.
+   - Task: Ensure `Poller` or `Provider` exposes a way to "restore" state from the replayed event stream (e.g., last seen cursor/timestamp).
 
-1.  **M11.3: Verify Hot Reload**
-    - Create a test case that modifies `policy.json` and sends `SIGHUP`.
-    - Verify that new rules (e.g., stricter limits) take effect immediately without restart.
-2.  **M12.1: Persist Provider State**
-    - Ensure that when the daemon restarts, it remembers the last known external usage to prevent drift resets.
-    - Check `engine/poller.go` replay logic.
-3.  **M12.2: TUI Verification**
-    - Manually verify TUI dashboard connects and displays data.
+2. **TUI Verification (M12.2)**:
+   - Run the daemon (`go run cmd/ratelord-d/main.go`).
+   - Run the TUI (`go run cmd/ratelord-tui/main.go`).
+   - Verify it looks correct. (Manual step for user, or automated if possible).
 
 ## Reference
 - **Report**: `ACCEPTANCE_REPORT.md`

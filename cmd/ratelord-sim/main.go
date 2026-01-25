@@ -139,6 +139,7 @@ func main() {
 
 								// Actually wait to simulate compliance
 								if seconds > 0 {
+									log.Printf("[%s] Waiting %.1f seconds due to policy...", aID, seconds)
 									time.Sleep(time.Duration(seconds * float64(time.Second)))
 								}
 							}
