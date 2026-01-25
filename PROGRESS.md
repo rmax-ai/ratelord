@@ -20,4 +20,7 @@
 | TEST_STRATEGY.md | COMPLETED | Orchestrator | 2026-01-25 |
 | loop.sh | IMPROVED | Agent | 2026-01-25 |
 | LOOP_PROMPT.md | IMPROVED | Agent | 2026-01-25 |
+| pkg/store/types.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/store/sqlite.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/store/store_test.go | COMMITTED | Agent | 2026-01-25 |
 | TASKS.md | UPDATED | Orchestrator | 2026-01-25 |

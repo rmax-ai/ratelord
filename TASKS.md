@@ -43,7 +43,7 @@ Focus: Getting the process to run, manage its lifecycle, and handle signals corr
 
 ## Epic 2: Storage Layer (Event Sourcing)
 Focus: The immutable SQLite ledger that serves as the source of truth.
-- [ ] **M2.1: SQLite Initialization**
+- [x] **M2.1: SQLite Initialization**
     - Implement DB connection with WAL mode enabled.
     - Create `events` table schema (id, type, payload, dimensions, ts).
     - *Acceptance*: `D-01` (Clean Start).

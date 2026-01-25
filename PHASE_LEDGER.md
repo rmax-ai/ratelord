@@ -17,4 +17,5 @@
 - **Action**: Hardened orchestration tooling; upgraded `loop.sh` with bash strict mode, ANSI colors, pre-flight checks, and timing; rewritten `LOOP_PROMPT.md` to enforce `AGENTS.md` rules and prescriptive tracking.
 - **Action**: Optimized loop for single-task leverage, frequent commits, and resettable progress tracking; added `NEXT_TASK` signal handling.
 - **Action**: Defined Phase 4 Implementation Plan (Epics, Milestones, and Test Strategy) in `TASKS.md` and `TEST_STRATEGY.md`.
-- **Action**: Initialized Phase 4 (Epic 1: Foundation) - Created Go module, directory skeleton, and basic daemon entrypoint with signal handling.
+- [x] **M2.1: SQLite Initialization** (Epic 2) - Implemented `pkg/store/types.go` (Event structs) and `pkg/store/sqlite.go` (connection, WAL, schema migration). Verified with `pkg/store/store_test.go`.
+- **Action**: Committed M2.1 code changes to git repository.

@@ -1,16 +1,17 @@
 # NEXT STEPS: Phase 4 - Implementation & Verification
 
-The project foundation is set. We have a running daemon skeleton that handles signals and logs structured events.
+The storage layer foundation (SQLite connection, schema, types) is in place (M2.1).
 
 ## Current Objective: Epic 2 - Storage Layer (Event Sourcing)
 
-We need to implement the persistent storage engine. This is the heart of the system.
+We need to implement the write path for the event log.
 
 ### Tasks for Next Session:
-1.  **Define Event Structs**: Create `pkg/store/types.go` to define the `Event` struct and basic interfaces.
-2.  **Initialize SQLite**: Implement `pkg/store/sqlite.go` to open a DB connection and enable WAL mode (M2.1).
-3.  **Schema Migration**: Write the SQL to create the `events` table on startup (M2.1).
-4.  **Verify**: Write a small test or main-loop integration to open the DB and check if the file is created.
+1.  **Implement Event Writer**: Add `AppendEvent` method to `Store` in `pkg/store/sqlite.go` (M2.2).
+    - Must serialize the payload and other fields to JSON.
+    - Must be atomic.
+2.  **Verify Writer**: Add a test case to `pkg/store/store_test.go` to write an event and verify no errors occur.
+    - (Note: We can't read it back yet until M2.3, but we can check the DB row count or lack of error).
 
 ## Reference
 - **Plan**: `TASKS.md` (Epic 2)
