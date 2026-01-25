@@ -4,14 +4,15 @@ The storage layer foundation (SQLite connection, schema, types) is in place (M2.
 
 ## Current Objective: Epic 2 - Storage Layer (Event Sourcing)
 
-We need to implement the write path for the event log.
+We have the write path (M2.2). Now we need to implement the read path for replay and hydration.
 
 ### Tasks for Next Session:
-1.  **Implement Event Writer**: Add `AppendEvent` method to `Store` in `pkg/store/sqlite.go` (M2.2).
-    - Must serialize the payload and other fields to JSON.
-    - Must be atomic.
-2.  **Verify Writer**: Add a test case to `pkg/store/store_test.go` to write an event and verify no errors occur.
-    - (Note: We can't read it back yet until M2.3, but we can check the DB row count or lack of error).
+1.  **Implement Event Reader**: Add `ReadEvents` method to `Store` in `pkg/store/sqlite.go` (M2.3).
+    - Should accept an offset (sequence/limit) and return a channel or slice.
+    - Must deserialize the JSON payload correctly.
+2.  **Verify Reader**: Update `pkg/store/store_test.go`.
+    - Add a test that writes multiple events, then reads them back in order.
+    - Verify data integrity (payloads match).
 
 ## Reference
 - **Plan**: `TASKS.md` (Epic 2)

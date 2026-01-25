@@ -47,7 +47,7 @@ Focus: The immutable SQLite ledger that serves as the source of truth.
     - Implement DB connection with WAL mode enabled.
     - Create `events` table schema (id, type, payload, dimensions, ts).
     - *Acceptance*: `D-01` (Clean Start).
-- [ ] **M2.2: Event Writer (Append-Only)**
+- [x] **M2.2: Event Writer (Append-Only)**
     - Implement `AppendEvent` function.
     - Ensure atomic writes.
     - *Acceptance*: `D-04` (Event Immutability).

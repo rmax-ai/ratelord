@@ -1,9 +1,12 @@
 package store
 
 import (
+	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestNewStore(t *testing.T) {
@@ -76,5 +79,82 @@ func TestNewStore(t *testing.T) {
 	}
 	if !foundCorrelationIndex {
 		t.Errorf("idx_events_correlation not found")
+	}
+}
+
+func TestAppendEvent(t *testing.T) {
+	// Setup
+	tmpDir, err := os.MkdirTemp("", "ratelord-store-test-append")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	dbPath := filepath.Join(tmpDir, "ratelord.db")
+	store, err := NewStore(dbPath)
+	if err != nil {
+		t.Fatalf("NewStore failed: %v", err)
+	}
+	defer store.Close()
+
+	// Create a sample event
+	evt := &Event{
+		EventID:       "evt_123",
+		EventType:     EventTypeUsageObserved,
+		SchemaVersion: 1,
+		TsEvent:       time.Now().UTC(),
+		TsIngest:      time.Now().UTC(),
+		Source: EventSource{
+			OriginKind: "client",
+			OriginID:   "cli_001",
+			WriterID:   "ratelord-d",
+		},
+		Dimensions: EventDimensions{
+			AgentID:    "agent_a",
+			IdentityID: "user_1",
+			WorkloadID: "wl_main",
+			ScopeID:    "scope_global",
+		},
+		Correlation: EventCorrelation{
+			CorrelationID: "corr_abc",
+			CausationID:   "cause_xyz",
+		},
+		Payload: json.RawMessage(`{"tokens": 50}`),
+	}
+
+	// Execute AppendEvent
+	if err := store.AppendEvent(context.Background(), evt); err != nil {
+		t.Fatalf("AppendEvent failed: %v", err)
+	}
+
+	// Verify persistence by querying directly
+	var count int
+	err = store.db.QueryRow("SELECT count(*) FROM events").Scan(&count)
+	if err != nil {
+		t.Fatalf("failed to count events: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("expected 1 event, got %d", count)
+	}
+
+	// Verify specific fields
+	var (
+		id    string
+		etype string
+		pay   []byte
+	)
+	err = store.db.QueryRow("SELECT event_id, event_type, payload FROM events WHERE event_id = ?", "evt_123").Scan(&id, &etype, &pay)
+	if err != nil {
+		t.Fatalf("failed to query inserted event: %v", err)
+	}
+
+	if id != string(evt.EventID) {
+		t.Errorf("expected event_id %s, got %s", evt.EventID, id)
+	}
+	if etype != string(evt.EventType) {
+		t.Errorf("expected event_type %s, got %s", evt.EventType, etype)
+	}
+	if string(pay) != string(evt.Payload) {
+		t.Errorf("expected payload %s, got %s", evt.Payload, pay)
 	}
 }

@@ -1,8 +1,11 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"time"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -91,6 +94,70 @@ func (s *Store) migrate() error {
 
 	if _, err := s.db.Exec(query); err != nil {
 		return fmt.Errorf("failed to create events table: %w", err)
+	}
+
+	return nil
+}
+
+// AppendEvent writes a single event to the database.
+// It is an append-only operation.
+func (s *Store) AppendEvent(ctx context.Context, evt *Event) error {
+	query := `
+	INSERT INTO events (
+		event_id,
+		event_type,
+		schema_version,
+		ts_event,
+		ts_ingest,
+		origin_kind,
+		origin_id,
+		writer_id,
+		agent_id,
+		identity_id,
+		workload_id,
+		scope_id,
+		correlation_id,
+		causation_id,
+		payload
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+	`
+
+	// Ensure ts_ingest is set. If zero, default to current time.
+	// Although the DB has a default, setting it explicitly ensures
+	// the struct in memory matches what's persisted if we continue to use it.
+	tsIngest := evt.TsIngest
+	if tsIngest.IsZero() {
+		tsIngest = time.Now().UTC()
+	}
+
+	// Payload is already []byte (json.RawMessage), so we can store it directly.
+	// If it's nil, we should probably store empty JSON object "{}" or null depending on requirements.
+	// The schema says JSON NOT NULL, so let's default to "{}" if nil/empty.
+	payload := evt.Payload
+	if len(payload) == 0 {
+		payload = []byte("{}")
+	}
+
+	_, err := s.db.ExecContext(ctx, query,
+		evt.EventID,
+		evt.EventType,
+		evt.SchemaVersion,
+		evt.TsEvent,
+		tsIngest,
+		evt.Source.OriginKind,
+		evt.Source.OriginID,
+		evt.Source.WriterID,
+		evt.Dimensions.AgentID,
+		evt.Dimensions.IdentityID,
+		evt.Dimensions.WorkloadID,
+		evt.Dimensions.ScopeID,
+		evt.Correlation.CorrelationID,
+		evt.Correlation.CausationID,
+		payload,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to append event %s: %w", evt.EventID, err)
 	}
 
 	return nil
