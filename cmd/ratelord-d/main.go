@@ -11,6 +11,7 @@ import (
 
 	"github.com/rmax/ratelord/pkg/api"
 	"github.com/rmax/ratelord/pkg/engine"
+	"github.com/rmax/ratelord/pkg/provider"
 	"github.com/rmax/ratelord/pkg/store"
 )
 
@@ -61,6 +62,21 @@ func main() {
 
 	// M5.2: Initialize Policy Engine
 	policyEngine := engine.NewPolicyEngine(usageProj)
+
+	// M6.3: Initialize Polling Orchestrator
+	// Use the new Poller to drive the provider loop
+	poller := engine.NewPoller(st, 10*time.Second) // Poll every 10s for demo
+	// Register the mock provider (M6.2)
+	// IMPORTANT: For the demo, we assume the mock provider is available in the 'pkg/provider' package via a factory or similar,
+	// but currently it resides in 'pkg/provider/mock.go' which is in package 'provider'.
+	// So we can instantiate it directly.
+	mockProv := provider.NewMockProvider("mock-provider-1")
+	poller.Register(mockProv)
+
+	// Start Poller in background
+	pollerCtx, pollerCancel := context.WithCancel(context.Background())
+	defer pollerCancel()
+	go poller.Start(pollerCtx)
 
 	// M3.1: Start HTTP Server (in background)
 	srv := api.NewServer(st, identityProj, usageProj, policyEngine)
