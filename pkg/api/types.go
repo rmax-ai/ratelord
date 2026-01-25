@@ -13,12 +13,12 @@ type IntentRequest struct {
 
 // DecisionResponse matches the response for POST /v1/intent
 type DecisionResponse struct {
-	IntentID      string            `json:"intent_id"`
-	Decision      string            `json:"decision"` // approve, deny, modify
-	Reason        string            `json:"reason,omitempty"`
-	Modifications map[string]string `json:"modifications,omitempty"`
-	ModifiedBy    string            `json:"modified_by,omitempty"` // if decision=modify
-	ValidUntil    string            `json:"valid_until,omitempty"` // ISO8601
+	IntentID      string                 `json:"intent_id"`
+	Decision      string                 `json:"decision"` // approve, deny, modify
+	Reason        string                 `json:"reason,omitempty"`
+	Modifications map[string]interface{} `json:"modifications,omitempty"`
+	ModifiedBy    string                 `json:"modified_by,omitempty"` // if decision=modify
+	ValidUntil    string                 `json:"valid_until,omitempty"` // ISO8601
 }
 
 // IdentityRegistration matches the payload for POST /v1/identities

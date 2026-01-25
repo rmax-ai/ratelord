@@ -30,9 +30,9 @@ type Intent struct {
 
 // PolicyEvaluationResult captures the output of the policy engine
 type PolicyEvaluationResult struct {
-	Decision      Decision          `json:"decision"`
-	Reason        string            `json:"reason"`
-	Modifications map[string]string `json:"modifications,omitempty"`
+	Decision      Decision               `json:"decision"`
+	Reason        string                 `json:"reason"`
+	Modifications map[string]interface{} `json:"modifications,omitempty"`
 }
 
 // PolicyEngine is responsible for arbitrating intents
@@ -140,16 +140,16 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 		}
 
 	case "shape":
-		wait := "0s"
+		var wait float64
 		// If "wait_seconds" is explicitly provided
 		if w, ok := params["wait_seconds"].(float64); ok {
-			wait = fmt.Sprintf("%.2fs", w)
+			wait = w
 		}
 		// TODO: Implement algorithms like linear backoff if params["algorithm"] is set
 
 		return PolicyEvaluationResult{
 			Decision: DecisionApproveWithModifications,
-			Modifications: map[string]string{
+			Modifications: map[string]interface{}{
 				"wait_seconds": wait,
 			},
 			Reason: "policy:shaping_applied",
@@ -157,17 +157,17 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 
 	case "defer":
 		// Wait until reset
-		wait := "0s"
+		var wait float64
 		if !poolState.ResetAt.IsZero() {
 			timeLeft := time.Until(poolState.ResetAt)
 			if timeLeft > 0 {
-				wait = fmt.Sprintf("%.2fs", timeLeft.Seconds())
+				wait = timeLeft.Seconds()
 			}
 		}
 
 		return PolicyEvaluationResult{
 			Decision: DecisionApproveWithModifications,
-			Modifications: map[string]string{
+			Modifications: map[string]interface{}{
 				"wait_seconds": wait,
 			},
 			Reason: "policy:deferred_until_reset",
