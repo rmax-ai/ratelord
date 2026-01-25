@@ -17,7 +17,7 @@ LOG_DIR="logs"
 PROMPT_FILE="LOOP_PROMPT.md"
 OPENCODE_BIN=$(command -v opencode || echo "opencode")
 OPENCODE_AGENT="orchestrator"
-OPENCODE_GOAL="Follow execution protocol $PROMPT_FILE to achieve $CURENNT_GOAL."
+OPENCODE_GOAL="Follow execution protocol $PROMPT_FILE to achieve $CURENNT_GOAL. At the end of every iteration, you MUST use the terminal agent to commit all changes."
 OPENCODE_COMMAND="run --agent $OPENCODE_AGENT $OPENCODE_GOAL -f $PROMPT_FILE"
 
 # Colors for TUI-lite experience
