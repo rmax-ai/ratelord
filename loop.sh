@@ -57,7 +57,41 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
   echo -e "\n${YELLOW}--- Iteration $i / $MAX_ITERATIONS ---${NC}" | tee -a "$LOG_FILE"
 
   # Run opencode with the orchestrator agent.
-  if $OPENCODE_BIN $OPENCODE_COMMAND 2>&1 | tee -a "$LOG_FILE" 2>&1; then
+  # Run in background to monitor for inactivity (5 minute timeout).
+  ($OPENCODE_BIN $OPENCODE_COMMAND 2>&1 | tee -a "$LOG_FILE" 2>&1) &
+  PID=$!
+
+  TIMEOUT=300
+  KILLED=0
+
+  while kill -0 $PID 2>/dev/null; do
+    sleep 5
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      LAST_MOD=$(stat -f %m "$LOG_FILE")
+    else
+      LAST_MOD=$(stat -c %Y "$LOG_FILE")
+    fi
+    NOW=$(date +%s)
+
+    if (( NOW - LAST_MOD > TIMEOUT )); then
+      echo -e "\n${RED}❌ Timeout: No log output for ${TIMEOUT}s. Killing process...${NC}" | tee -a "$LOG_FILE"
+      kill -9 $PID 2>/dev/null || true
+      KILLED=1
+      break
+    fi
+  done
+
+  set +e
+  wait $PID
+  EXIT_CODE=$?
+  set -e
+
+  if [ $KILLED -eq 1 ]; then
+    echo -e "${RED}❌ Error: Iteration timed out.${NC}" | tee -a "$LOG_FILE"
+    exit 1
+  fi
+
+  if [ $EXIT_CODE -eq 0 ]; then
     # Check if the agent signalled completion
     if grep -q "<promise>DONE</promise>" "$LOG_FILE"; then
       echo -e "${GREEN}✅ Success: ALL TASKS DONE signal received.${NC}" | tee -a "$LOG_FILE"
@@ -68,7 +102,7 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
       echo -e "${YELLOW}⚠️ Iteration finished without explicit signal. Continuing...${NC}" | tee -a "$LOG_FILE"
     fi
   else
-    echo -e "${RED}❌ Error: opencode failed with exit code $?. Check $LOG_FILE${NC}" | tee -a "$LOG_FILE"
+    echo -e "${RED}❌ Error: opencode failed with exit code $EXIT_CODE. Check $LOG_FILE${NC}" | tee -a "$LOG_FILE"
     exit 1
   fi
 
