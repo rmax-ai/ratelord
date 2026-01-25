@@ -17,3 +17,13 @@
 
 ### Metric of Success
 The "Required Document Set" is complete with 0 implementation code written, preserving a pure design phase. This should reduce code churn significantly.
+
+## 2026-01-25: Loop & Tooling Refinement
+
+### What Worked Well
+1.  **Iterative Orchestration Loop**: Enhancing `loop.sh` with a maximum iteration limit (50) and per-iteration logging provides better observability and prevents infinite run costs or context contamination.
+2.  **Sentinel Sanity Checks**: Injecting constitutional rules (like mandatory sentinel identifiers) directly into the `LOOP_PROMPT.md` acts as a "guardrail", ensuring that even after many iterations, the agent remains compliant with the project's core invariants.
+3.  **Structured Logs**: Moving to a `logs/` directory with timestamped files allows for post-hoc analysis of "hallucination paths" or decision logic without cluttering the project root.
+
+### Challenges Encountered
+1.  **Context Continuity**: Deciding between `--continue` (stateful) and fresh runs (stateless). Fresh runs are safer for disk-sourced truth, but `--continue` can reduce repeated "orientation" overhead. We opted for NO `--continue` in the improved loop to allow the orchestrator to build on its internal reasoning.
