@@ -1,22 +1,30 @@
-# NEXT STEPS: Phase 5 - Testing & Validation
+# NEXT STEPS: Phase 4 - Implementation & Verification
 
-Epic 7 (Forecasting) is now complete. The forecast loop is integrated into the main engine, computing predictions after each `usage_observed` event.
+The forecasting engine is now integrated (Epic 7). The final epic before functional completion is the TUI dashboard to visualize the system state.
 
-## Next Objectives
+## Current Objective: Epic 8 - TUI & Visualization
 
-Move to Phase 5: Testing & Validation.
+We need to implement a terminal user interface to visualize the system state (Identities, Pools, Forecasts).
 
-- **Epic 8: Testing Infrastructure** - Implement comprehensive test suites for all components.
-- **Epic 9: Integration Testing** - End-to-end testing of the full daemon loop.
-- **Epic 10: Performance & Load Testing** - Validate prediction accuracy and system performance.
+### Tasks for Next Session:
+1. **Initialize TUI Foundation**:
+   - Create `cmd/ratelord-tui/main.go` (or similar).
+   - Initialize Bubbletea model.
+   - Connect to `GET /v1/events` and `GET /v1/identities`.
+   - M8.1: TUI Foundation.
 
-## Immediate Next Task
+2. **Implement Dashboard View**:
+   - Render Usage Bars per pool (Capacity vs Used).
+   - Render Time-to-Exhaustion (Forecast) if available.
+   - Render recent Event Log scrolling view.
+   - M8.2: Dashboard View.
 
-1. **Run Integration Test**: Start the daemon and verify forecast events are emitted.
-2. **Validate Predictions**: Check that forecasts are reasonable and events are stored correctly.
-3. **Update API**: If needed, add endpoints to query forecasts.
+3. **Verify End-to-End**:
+   - Run daemon.
+   - Register identity.
+   - Ingest mock usage.
+   - Verify TUI shows updates.
 
 ## Reference
-- **Completed**: `TASKS.md` (Epic 7)
-- **Architecture**: `ARCHITECTURE.md` (Prediction Engine)
-- **Test Strategy**: `TEST_STRATEGY.md`
+- **Plan**: `TASKS.md` (Epic 8)
+- **Design**: `TUI_SPEC.md`

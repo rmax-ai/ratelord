@@ -112,13 +112,13 @@ Focus: Connect to external sources (or mocks) to ingest real usage/limit data.
 
 ## Epic 7: Forecasting (Prediction Engine)
 Focus: Translate raw usage history into time-to-exhaustion predictions.
-- [ ] **M7.1: Forecast Model Interface**
+- [x] **M7.1: Forecast Model Interface**
     - Create `pkg/engine/forecast/types.go`.
     - Define `Model` interface (Inputs -> Distribution).
-- [ ] **M7.2: Linear Burn Model**
+- [x] **M7.2: Linear Burn Model**
     - Implement simple linear regression model.
     - Calculate P99 time-to-exhaustion based on recent history.
-- [ ] **M7.3: Forecast Loop**
+- [x] **M7.3: Forecast Loop**
     - Trigger forecasts after `usage_observed` events.
     - Emit `forecast_computed` events.
     - *Acceptance*: `D-09` (Forecast Emission).
