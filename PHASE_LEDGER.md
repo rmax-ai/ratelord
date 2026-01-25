@@ -14,3 +14,5 @@
 - **Action**: Drafted PREDICTION.md, POLICY_ENGINE.md, AGENT_CONTRACT.md, and API_SPEC.md.
 - **Action**: Drafted TUI_SPEC.md, WEB_UI_SPEC.md, WORKFLOWS.md, and ACCEPTANCE.md.
 - **Action**: Completed Phase 3 (Interface & Workflow Specs) and finalized the Required Document Set.
+- **Action**: Hardened orchestration tooling; upgraded `loop.sh` with bash strict mode, ANSI colors, pre-flight checks, and timing; rewritten `LOOP_PROMPT.md` to enforce `AGENTS.md` rules and prescriptive tracking.
+- **Action**: Optimized loop for single-task leverage, frequent commits, and resettable progress tracking; added `NEXT_TASK` signal handling.
