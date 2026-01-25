@@ -7,7 +7,7 @@ Maintain the bootstrapping and implementation process for **ratelord** following
 - **Frequent Progress Tracking**:
     - Update `PROGRESS.md`, `TASKS.md`, `PHASE_LEDGER.md`, and `NEXT_STEPS.md` immediately as sub-steps are completed.
     - **Commit often**: Use the terminal to commit small, coherent changes to track progress.
-- **Mandatory Final Action**: At the end of EVERY iteration, before signaling completion, you MUST use the terminal agent to commit all tracked and untracked changes (excluding ignored files) with a descriptive commit message following the conventions in `AGENTS.md`.
+- **Mandatory Final Action**: At the end of EVERY iteration, before signaling completion, you MUST use the terminal agent to commit all tracked and untracked changes (excluding ignored files) with a descriptive commit message following the conventions in `AGENTS.md`. Maintain `.gitignore` to ensure unwanted files (logs, binaries, local state) are never committed.
 - **Resilience & Resumability**:
     - Assume work may be halted at any point.
     - Every iteration should start by reading `NEXT_STEPS.md` to pick up exactly where the last one left off.
