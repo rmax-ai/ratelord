@@ -41,6 +41,7 @@ func main() {
 		totalRequests uint64
 		totalApproved uint64
 		totalDenied   uint64
+		totalModified uint64
 		totalErrors   uint64
 		totalInjected uint64
 	)
@@ -123,6 +124,17 @@ func main() {
 
 					if decision.Decision == "approve" {
 						atomic.AddUint64(&totalApproved, 1)
+					} else if decision.Decision == "approve_with_modifications" {
+						atomic.AddUint64(&totalModified, 1)
+						// If wait_seconds is in modification, sleep
+						if mods := decision.Modifications; mods != nil {
+							if val, ok := mods["wait_seconds"]; ok {
+								var seconds float64
+								fmt.Sscanf(val, "%fs", &seconds)
+								// Actually wait to simulate compliance
+								time.Sleep(time.Duration(seconds * float64(time.Second)))
+							}
+						}
 					} else {
 						atomic.AddUint64(&totalDenied, 1)
 						// log.Printf("[%s] Intent denied: %s", aID, decision.Reason)
@@ -137,6 +149,7 @@ func main() {
 	fmt.Println("\n--- Simulation Complete ---")
 	fmt.Printf("Total Requests: %d\n", totalRequests)
 	fmt.Printf("Approved:       %d\n", totalApproved)
+	fmt.Printf("Modified:       %d\n", totalModified)
 	fmt.Printf("Denied:         %d\n", totalDenied)
 	fmt.Printf("Errors:         %d\n", totalErrors)
 	if sabotage {

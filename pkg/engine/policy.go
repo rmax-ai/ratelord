@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
@@ -72,13 +73,21 @@ func (pe *PolicyEngine) Evaluate(intent Intent) PolicyEvaluationResult {
 func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) PolicyEvaluationResult {
 	// Simple linear scan of policies -> rules
 	// In a real implementation, we'd have a compiled rule tree.
+
+	// Fetch pool state once for the intent context
+	var poolState PoolState
+	var exists bool
+	if intent.ProviderID != "" && intent.PoolID != "" {
+		poolState, exists = pe.usage.GetPoolState(intent.ProviderID, intent.PoolID)
+	}
+
 	for _, policy := range config.Policies {
 		// TODO: Match Scope (e.g. wildcard or exact match)
 		// For now, assume "global" or match
 
 		for _, rule := range policy.Rules {
-			if pe.checkCondition(rule.Condition, intent, policy.Limit) {
-				return pe.applyAction(rule.Action, rule.Params)
+			if pe.checkCondition(rule.Condition, intent, policy.Limit, poolState, exists) {
+				return pe.applyAction(rule.Action, rule.Params, poolState)
 			}
 		}
 	}
@@ -90,7 +99,7 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) Pol
 	}
 }
 
-func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64) bool {
+func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, poolState PoolState, exists bool) bool {
 	// Very basic DSL parser for M9.3
 	// Supported: "remaining < X"
 
@@ -98,7 +107,6 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64) 
 		return false
 	}
 
-	poolState, exists := pe.usage.GetPoolState(intent.ProviderID, intent.PoolID)
 	if !exists {
 		return false
 	}
@@ -119,7 +127,7 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64) 
 	return false
 }
 
-func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}) PolicyEvaluationResult {
+func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}, poolState PoolState) PolicyEvaluationResult {
 	switch action {
 	case "deny":
 		reason := "policy:rule_matched"
@@ -130,7 +138,40 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 			Decision: DecisionDenyWithReason,
 			Reason:   reason,
 		}
-		// TODO: Handle shape/modify
+
+	case "shape":
+		wait := "0s"
+		// If "wait_seconds" is explicitly provided
+		if w, ok := params["wait_seconds"].(float64); ok {
+			wait = fmt.Sprintf("%.2fs", w)
+		}
+		// TODO: Implement algorithms like linear backoff if params["algorithm"] is set
+
+		return PolicyEvaluationResult{
+			Decision: DecisionApproveWithModifications,
+			Modifications: map[string]string{
+				"wait_seconds": wait,
+			},
+			Reason: "policy:shaping_applied",
+		}
+
+	case "defer":
+		// Wait until reset
+		wait := "0s"
+		if !poolState.ResetAt.IsZero() {
+			timeLeft := time.Until(poolState.ResetAt)
+			if timeLeft > 0 {
+				wait = fmt.Sprintf("%.2fs", timeLeft.Seconds())
+			}
+		}
+
+		return PolicyEvaluationResult{
+			Decision: DecisionApproveWithModifications,
+			Modifications: map[string]string{
+				"wait_seconds": wait,
+			},
+			Reason: "policy:deferred_until_reset",
+		}
 	}
 
 	return PolicyEvaluationResult{

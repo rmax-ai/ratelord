@@ -128,10 +128,11 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 	// For M5.2, we just return the result.
 
 	resp := DecisionResponse{
-		IntentID:   intent.IntentID,
-		Decision:   string(result.Decision),
-		Reason:     result.Reason,
-		ValidUntil: time.Now().Add(5 * time.Minute).Format(time.RFC3339),
+		IntentID:      intent.IntentID,
+		Decision:      string(result.Decision),
+		Reason:        result.Reason,
+		ValidUntil:    time.Now().Add(5 * time.Minute).Format(time.RFC3339),
+		Modifications: result.Modifications,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

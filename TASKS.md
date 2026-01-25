@@ -169,10 +169,10 @@ Focus: Proving the system works as a cohesive whole using the strategies in `TES
 
 ## Epic 11: Policy Engine Fixes
 Focus: Ensure policies are loaded, hot-reloaded, and correctly evaluated to enable denial/throttling.
-- [ ] **M11.1: Debug Policy Loading**
+- [x] **M11.1: Debug Policy Loading**
     - Investigate why `policy.yaml` rules are not applying.
     - Fix `LoadPolicyConfig` and `Evaluate`.
-- [ ] **M11.2: Implement Wait/Modify Actions**
+- [x] **M11.2: Implement Wait/Modify Actions**
     - Ensure `approve_with_modifications` works.
 - [ ] **M11.3: Verify Hot Reload**
     - Ensure SIGHUP updates rules without restart.

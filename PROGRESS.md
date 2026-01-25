@@ -27,7 +27,7 @@
 | pkg/api/server.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/projection.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/usage.go | COMMITTED | Agent | 2026-01-25 |
-| pkg/engine/policy.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/engine/policy.go | UPDATED | Agent | 2026-01-25 |
 | pkg/provider/types.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/provider/mock.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/forecast/types.go | COMMITTED | Agent | 2026-01-25 |
@@ -48,3 +48,5 @@
 | M10.2: Verify Drift Detection | COMPLETED | Orchestrator | 2026-01-25 |
 | M10.3: Verify Policy Enforcement | COMPLETED | Orchestrator | 2026-01-25 |
 | M10.4: Final Acceptance Run | COMPLETED | Orchestrator | 2026-01-25 |
+| M11.1: Debug and fix policy loading/evaluation | COMPLETED | Fix | 2026-01-25 |
+| M11.2: Implement client-side Wait/Modify logic | COMPLETED | Feature | 2026-01-25 |
