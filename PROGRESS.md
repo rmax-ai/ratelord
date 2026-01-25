@@ -9,7 +9,7 @@
 | CONSTRAINTS.md | DRAFT | Orchestrator | 2026-01-25 |
 | IDENTITIES.md | DRAFT | Orchestrator | 2026-01-25 |
 | DATA_MODEL.md | DRAFT | Orchestrator | 2026-01-25 |
-| PREDICTION.md | PENDING | Sub-Agent | - |
+| PREDICTION.md | IN_PROGRESS | Sub-Agent | 2026-01-25 |
 | POLICY_ENGINE.md | PENDING | Sub-Agent | - |
 | AGENT_CONTRACT.md | PENDING | Sub-Agent | - |
 | API_SPEC.md | PENDING | Sub-Agent | - |

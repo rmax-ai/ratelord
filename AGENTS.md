@@ -51,7 +51,7 @@ Required order (see `PROJECT_SEED.md`):
 
 Optional:
 
-- `PHASE_LEDGER.md`, `POSTMORTEM_TEMPLATE.md`, `EXTENSIONS.md`
+- `PHASE_LEDGER.md`, `POSTMORTEM_TEMPLATE.md`, `EXTENSIONS.md`, `LEARNING.md`
 
 ## Review checklist (before marking “done”)
 
@@ -66,6 +66,19 @@ Optional:
 - Orchestrator delegates drafting/refinement per document; sub-agents work strictly from `PROJECT_SEED.md` + current manifest.
 - Sub-agents should propose: outline, key definitions, invariants, and open questions; avoid speculative implementation.
 - Orchestrator performs final integration pass for consistency and updates tracking docs.
+
+## Reliability (Avoiding Interrupted/Stuck Tool Runs)
+
+When dispatching sub-agents or using tools, prefer small, resumable units of work to reduce the chance of interrupted runs and to preserve progress.
+
+- Prefer **sequential** sub-agent dispatch over parallel for long tasks (scan 2 draft 2 refine).
+- **Chunk large deliverables** into milestones (outline 2 section fills 2 final pass) with explicit stop points.
+- Use **tight prompts** with strict output contracts (Markdown-only; size/section limits; no extra commentary).
+- **Limit scope per task** (target specific terminology or sections) rather than asking for broad, open-ended reviews.
+- Keep an explicit **trail of progress** at all times (update `PROGRESS.md` / `TASKS.md` / `PHASE_LEDGER.md` / `NEXT_STEPS.md` as you go), since work may be interrupted at any point.
+- **Checkpoint immediately** after each successful result by writing it into the target `.md` file (or pasting into `NEXT_STEPS.md`) before starting the next task.
+- **Commit often** when commits are requested/allowed: prefer small, focused commits after each coherent docs delta to avoid losing work to interruptions.
+- Avoid very large reads/outputs in one go; prefer targeted searches/reads where possible.
 
 ## Commit conventions (when commits are requested)
 
@@ -88,3 +101,10 @@ Optional:
   - `rg "intent_approved|deny_with_reason" -n **/*.md`
 - File discovery: prefer globbing patterns over ad-hoc scanning.
 - Edits: make minimal, reviewable patches; preserve existing style and headings.
+
+## Self-Reflection and Learning Tracking
+
+- Agents must periodically self-reflect on completed tasks to identify efficiencies, inefficiencies, and lessons learned that could improve future work.
+- Maintain a dedicated document `LEARNING.md` to record insights, best practices, and optimizations discovered during development.
+- Update `LEARNING.md` after each major iteration or task completion, documenting what worked well, what challenges were encountered, and actionable improvements for velocity and precision.
+- Use this tracking to continuously enhance the document-first workflow and agent performance.
