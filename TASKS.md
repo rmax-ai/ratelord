@@ -93,3 +93,42 @@ Focus: Implement the core logic for tracking usage against limits and making pol
     - Implement `Evaluate(intent)` which checks usage against limits.
     - Update `POST /v1/intent` to use the real policy engine.
     - *Acceptance*: `A-03` (Policy Enforcement).
+
+## Epic 6: Provider Integration (Ingestion)
+Focus: Connect to external sources (or mocks) to ingest real usage/limit data.
+- [ ] **M6.1: Provider Interface & Registry**
+    - Create `pkg/provider/types.go` (Provider interface).
+    - Implement a `ProviderRegistry` in `pkg/engine`.
+    - *Dependency*: None.
+- [ ] **M6.2: Mock Provider**
+    - Create `pkg/provider/mock/mock.go`.
+    - Implement a provider that emits synthetic usage/limit events.
+    - *Acceptance*: `T-02` (Mock Data Ingestion).
+- [ ] **M6.3: Polling Orchestrator**
+    - Create `pkg/engine/poller.go`.
+    - Implement the loop that ticks and calls `Provider.Poll()`.
+    - Ingest results into Event Log (`provider_poll_observed`).
+    - *Acceptance*: `D-08` (Continuous Polling).
+
+## Epic 7: Forecasting (Prediction Engine)
+Focus: Translate raw usage history into time-to-exhaustion predictions.
+- [ ] **M7.1: Forecast Model Interface**
+    - Create `pkg/engine/forecast/types.go`.
+    - Define `Model` interface (Inputs -> Distribution).
+- [ ] **M7.2: Linear Burn Model**
+    - Implement simple linear regression model.
+    - Calculate P99 time-to-exhaustion based on recent history.
+- [ ] **M7.3: Forecast Loop**
+    - Trigger forecasts after `usage_observed` events.
+    - Emit `forecast_computed` events.
+    - *Acceptance*: `D-09` (Forecast Emission).
+
+## Epic 8: TUI & Visualization (Read-Only)
+Focus: Visualize the state of the system for the operator.
+- [ ] **M8.1: TUI Foundation**
+    - Initialize Bubbletea model.
+    - Connect to `GET /v1/events` and `GET /v1/identities`.
+- [ ] **M8.2: Dashboard View**
+    - Render Usage Bars per pool.
+    - Render recent Event Log.
+    - *Acceptance*: `T-04` (Dashboard).
