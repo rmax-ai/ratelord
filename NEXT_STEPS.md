@@ -1,18 +1,22 @@
 # NEXT STEPS: Phase 4 - Implementation & Verification
 
-The storage layer (M2.1, M2.2, M2.3) is complete. We have an append-only event log and a reader for replay.
+The API server shell (M3.1) is now implemented and wired into the daemon. It starts in the background and shuts down gracefully.
 
-## Current Objective: Epic 3 - API Layer (M3.1)
+## Current Objective: Epic 3 - API Layer (M3.2 & M3.3)
 
-Now we need to expose this functionality via an API.
+We need to make the API useful by implementing the Intent negotiation endpoint and basic diagnostics.
 
 ### Tasks for Next Session:
-1.  **Implement HTTP Server Shell**: Create `pkg/api/server.go`.
-    -   Define a `Server` struct.
-    -   Bind to `127.0.0.1:8090`.
-    -   Setup a basic router (using `net/http` or `chi` if we decide to add deps, but `net/http` preferred for now).
-    -   M3.1: Server Shell & Middleware.
-2.  **Wire up Main**: Update `cmd/ratelord-d/main.go` to start the server.
+1.  **Implement Intent Endpoint (Stub)**: Update `pkg/api/server.go`.
+    -   Define `IntentRequest` and `IntentResponse` structs (matching `API_SPEC.md`).
+    -   Implement `handleIntent` to accept POST requests.
+    -   Validate input (agent_id, scope, etc.).
+    -   Return a hardcoded `approved` decision for now (just to prove plumbing).
+    -   M3.2: Intent Endpoint.
+2.  **Add Diagnostics**:
+    -   Implement `GET /v1/events` to list recent events from the store.
+    -   This helps verification without needing a CLI tool yet.
+    -   M3.3: Health & Diagnostics.
 
 ## Reference
 - **Plan**: `TASKS.md` (Epic 3)

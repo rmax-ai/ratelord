@@ -58,7 +58,7 @@ Focus: The immutable SQLite ledger that serves as the source of truth.
 
 ## Epic 3: API Layer & Agent Contract
 Focus: The HTTP/Socket interface for agents to negotiate intents.
-- [ ] **M3.1: HTTP Server Shell**
+- [x] **M3.1: HTTP Server Shell**
     - Bind listener to `127.0.0.1:8090`.
     - Setup router and middleware (logging, panic recovery).
 - [ ] **M3.2: Intent Endpoint (Stub)**

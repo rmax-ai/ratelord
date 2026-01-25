@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
+	"github.com/rmax/ratelord/pkg/api"
 	"github.com/rmax/ratelord/pkg/store"
 )
 
@@ -29,6 +32,14 @@ func main() {
 	}
 	fmt.Printf(`{"level":"info","msg":"store_initialized","path":"%s"}`+"\n", dbPath)
 
+	// M3.1: Start HTTP Server (in background)
+	srv := api.NewServer(st)
+	go func() {
+		if err := srv.Start(); err != nil {
+			fmt.Printf(`{"level":"error","msg":"server_error","error":"%v"}`+"\n", err)
+		}
+	}()
+
 	// M1.2: Handle SIGINT/SIGTERM for graceful shutdown
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -36,6 +47,15 @@ func main() {
 	// Block until a signal is received
 	sig := <-sigs
 	fmt.Printf(`{"level":"info","msg":"shutdown_initiated","signal":"%s"}`+"\n", sig)
+
+	// Shutdown Server
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Stop(ctx); err != nil {
+		fmt.Printf(`{"level":"error","msg":"server_shutdown_error","error":"%v"}`+"\n", err)
+	} else {
+		fmt.Println(`{"level":"info","msg":"server_stopped"}`)
+	}
 
 	// Cleanup
 	if err := st.Close(); err != nil {
