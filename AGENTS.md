@@ -16,6 +16,7 @@ This repo is in a docs-first bootstrapping phase. Agents must optimize for conce
 ## Repo operational rules
 
 - Ignore (never read/modify): `bin/`, `node_modules/`, `package.json`, `bun.lock`.
+- Do not modify `AGENTS.md`, `loop.sh`, or `LOOP_PROMPT.md` unless explicitly instructed by the user.
 - Small iterations: produce the smallest coherent delta; update tracking docs each iteration.
 - Maintain tracking docs:
   - `TASKS.md`: hierarchical task list (what remains)
