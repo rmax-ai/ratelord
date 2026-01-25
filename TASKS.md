@@ -20,3 +20,4 @@
 - [x] Phase 4: Project Management
     - [x] Initialize PROGRESS.md
     - [x] Initialize PHASE_LEDGER.md
+    - [x] Harden orchestration loop (loop.sh & LOOP_PROMPT.md)
