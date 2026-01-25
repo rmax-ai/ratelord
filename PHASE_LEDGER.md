@@ -19,3 +19,4 @@
 - **Action**: Defined Phase 4 Implementation Plan (Epics, Milestones, and Test Strategy) in `TASKS.md` and `TEST_STRATEGY.md`.
 - [x] **M2.1: SQLite Initialization** (Epic 2) - Implemented `pkg/store/types.go` (Event structs) and `pkg/store/sqlite.go` (connection, WAL, schema migration). Verified with `pkg/store/store_test.go`.
 - **Action**: Committed M2.1 code changes to git repository.
+- [x] **M2.2 & M2.3: Event Reader & Replay** (Epic 2) - Implemented `ReadEvents` in `pkg/store/sqlite.go` and verified with comprehensive tests in `pkg/store/store_test.go`.

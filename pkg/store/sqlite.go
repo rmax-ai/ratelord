@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -161,4 +162,74 @@ func (s *Store) AppendEvent(ctx context.Context, evt *Event) error {
 	}
 
 	return nil
+}
+
+// ReadEvents retrieves events ingested after a specific timestamp.
+// This is used for replaying the event log to rebuild state.
+func (s *Store) ReadEvents(ctx context.Context, since time.Time, limit int) ([]*Event, error) {
+	query := `
+	SELECT
+		event_id,
+		event_type,
+		schema_version,
+		ts_event,
+		ts_ingest,
+		origin_kind,
+		origin_id,
+		writer_id,
+		agent_id,
+		identity_id,
+		workload_id,
+		scope_id,
+		correlation_id,
+		causation_id,
+		payload
+	FROM events
+	WHERE ts_ingest > ?
+	ORDER BY ts_ingest ASC
+	LIMIT ?;
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, since, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []*Event
+
+	for rows.Next() {
+		var evt Event
+		var payload []byte
+
+		err := rows.Scan(
+			&evt.EventID,
+			&evt.EventType,
+			&evt.SchemaVersion,
+			&evt.TsEvent,
+			&evt.TsIngest,
+			&evt.Source.OriginKind,
+			&evt.Source.OriginID,
+			&evt.Source.WriterID,
+			&evt.Dimensions.AgentID,
+			&evt.Dimensions.IdentityID,
+			&evt.Dimensions.WorkloadID,
+			&evt.Dimensions.ScopeID,
+			&evt.Correlation.CorrelationID,
+			&evt.Correlation.CausationID,
+			&payload,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan event row: %w", err)
+		}
+
+		evt.Payload = json.RawMessage(payload)
+		events = append(events, &evt)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return events, nil
 }

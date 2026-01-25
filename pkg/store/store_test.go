@@ -158,3 +158,94 @@ func TestAppendEvent(t *testing.T) {
 		t.Errorf("expected payload %s, got %s", evt.Payload, pay)
 	}
 }
+
+func TestReadEvents(t *testing.T) {
+	// Setup
+	tmpDir, err := os.MkdirTemp("", "ratelord-store-test-read")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	dbPath := filepath.Join(tmpDir, "ratelord.db")
+	store, err := NewStore(dbPath)
+	if err != nil {
+		t.Fatalf("NewStore failed: %v", err)
+	}
+	defer store.Close()
+
+	// Seed multiple events with increasing timestamps
+	baseTime := time.Now().UTC().Truncate(time.Second) // Truncate for stable comparison
+
+	events := []*Event{
+		{
+			EventID:    "evt_1",
+			TsIngest:   baseTime.Add(1 * time.Second),
+			Payload:    json.RawMessage(`{"seq": 1}`),
+			Dimensions: EventDimensions{AgentID: "a", IdentityID: "i", WorkloadID: "w", ScopeID: "s"},
+		},
+		{
+			EventID:    "evt_2",
+			TsIngest:   baseTime.Add(2 * time.Second),
+			Payload:    json.RawMessage(`{"seq": 2}`),
+			Dimensions: EventDimensions{AgentID: "a", IdentityID: "i", WorkloadID: "w", ScopeID: "s"},
+		},
+		{
+			EventID:    "evt_3",
+			TsIngest:   baseTime.Add(3 * time.Second),
+			Payload:    json.RawMessage(`{"seq": 3}`),
+			Dimensions: EventDimensions{AgentID: "a", IdentityID: "i", WorkloadID: "w", ScopeID: "s"},
+		},
+	}
+
+	for _, evt := range events {
+		// Fill mandatory fields
+		evt.EventType = EventTypeUsageObserved
+		evt.SchemaVersion = 1
+		evt.TsEvent = evt.TsIngest
+		evt.Source = EventSource{OriginKind: "test", OriginID: "test", WriterID: "test"}
+
+		if err := store.AppendEvent(context.Background(), evt); err != nil {
+			t.Fatalf("failed to seed event %s: %v", evt.EventID, err)
+		}
+	}
+
+	// Test 1: Read all from beginning
+	// Use a time definitely before the first event
+	readAll, err := store.ReadEvents(context.Background(), baseTime, 10)
+	if err != nil {
+		t.Fatalf("ReadEvents (all) failed: %v", err)
+	}
+	if len(readAll) != 3 {
+		t.Errorf("expected 3 events, got %d", len(readAll))
+	} else {
+		if readAll[0].EventID != "evt_1" {
+			t.Errorf("expected first event to be evt_1, got %s", readAll[0].EventID)
+		}
+		if readAll[2].EventID != "evt_3" {
+			t.Errorf("expected last event to be evt_3, got %s", readAll[2].EventID)
+		}
+	}
+
+	// Test 2: Read from offset (after evt_1)
+	readPartial, err := store.ReadEvents(context.Background(), baseTime.Add(1*time.Second), 10)
+	if err != nil {
+		t.Fatalf("ReadEvents (partial) failed: %v", err)
+	}
+	if len(readPartial) != 2 {
+		t.Errorf("expected 2 events, got %d", len(readPartial))
+	} else {
+		if readPartial[0].EventID != "evt_2" {
+			t.Errorf("expected first returned event to be evt_2, got %s", readPartial[0].EventID)
+		}
+	}
+
+	// Test 3: Limit
+	readLimit, err := store.ReadEvents(context.Background(), baseTime, 2)
+	if err != nil {
+		t.Fatalf("ReadEvents (limit) failed: %v", err)
+	}
+	if len(readLimit) != 2 {
+		t.Errorf("expected 2 events (limit), got %d", len(readLimit))
+	}
+}

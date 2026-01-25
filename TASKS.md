@@ -51,9 +51,9 @@ Focus: The immutable SQLite ledger that serves as the source of truth.
     - Implement `AppendEvent` function.
     - Ensure atomic writes.
     - *Acceptance*: `D-04` (Event Immutability).
-- [ ] **M2.3: Event Reader & Replay**
-    - Implement `ReadEvents` iterator (from offset).
-    - Implement basic replay loop to restore in-memory state on startup.
+- [x] **M2.3: Event Reader & Replay**
+    - [x] Implement `ReadEvents` iterator (from offset).
+    - [x] Implement basic replay loop to restore in-memory state on startup.
     - *Acceptance*: `D-02` (Crash Recovery), `D-05` (State Derivation).
 
 ## Epic 3: API Layer & Agent Contract
