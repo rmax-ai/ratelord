@@ -1,0 +1,13 @@
+{
+  "name": "inactivity-forcer",
+  "description": "Detects session inactivity and forces the session to abort",
+  "version": "1.0.0",
+  "author": "rmax",
+  "plugin": {
+    "file": "inactivity-forcer.js",
+    "location": "project"
+  },
+  "hooks": {
+    "session": ["session.idle"]
+  }
+}
