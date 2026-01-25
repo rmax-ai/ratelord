@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -127,6 +128,17 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, 
 	return false
 }
 
+func (pe *PolicyEngine) calculateWaitTime(poolState PoolState) float64 {
+	if poolState.ResetAt.IsZero() {
+		return 0
+	}
+	timeLeft := time.Until(poolState.ResetAt)
+	if timeLeft > 0 {
+		return timeLeft.Seconds()
+	}
+	return 0
+}
+
 func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}, poolState PoolState) PolicyEvaluationResult {
 	switch action {
 	case "deny":
@@ -144,7 +156,10 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 		// If "wait_seconds" is explicitly provided
 		if w, ok := params["wait_seconds"].(float64); ok {
 			wait = w
+		} else if wInt, ok := params["wait_seconds"].(int); ok {
+			wait = float64(wInt)
 		}
+
 		// TODO: Implement algorithms like linear backoff if params["algorithm"] is set
 
 		return PolicyEvaluationResult{
@@ -156,14 +171,15 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 		}
 
 	case "defer":
-		// Wait until reset
-		var wait float64
-		if !poolState.ResetAt.IsZero() {
-			timeLeft := time.Until(poolState.ResetAt)
-			if timeLeft > 0 {
-				wait = timeLeft.Seconds()
-			}
+		// Wait until reset + jitter
+		wait := pe.calculateWaitTime(poolState)
+
+		// Add jitter to avoid thundering herd (default 100ms - 1s)
+		jitterMax := 1.0
+		if j, ok := params["jitter_max_seconds"].(float64); ok {
+			jitterMax = j
 		}
+		wait += rand.Float64() * jitterMax
 
 		return PolicyEvaluationResult{
 			Decision: DecisionApproveWithModifications,

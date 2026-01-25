@@ -112,9 +112,9 @@ func TestPolicyShapeAndDefer(t *testing.T) {
 		t.Errorf("Expected wait_seconds modification for defer")
 	} else {
 		wait, ok := waitValDefer.(float64)
-		// Check range since time.Now() moves
-		if !ok || wait < 9.0 || wait > 10.0 {
-			t.Errorf("Expected wait_seconds ~10.0, got %v", waitValDefer)
+		// Check range since time.Now() moves and we added jitter (up to 1s)
+		if !ok || wait < 9.0 || wait > 11.5 {
+			t.Errorf("Expected wait_seconds ~10.0-11.0, got %v", waitValDefer)
 		}
 	}
 }

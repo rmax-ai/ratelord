@@ -130,9 +130,17 @@ func main() {
 						if mods := decision.Modifications; mods != nil {
 							if val, ok := mods["wait_seconds"]; ok {
 								var seconds float64
-								fmt.Sscanf(val, "%fs", &seconds)
+								if s, ok := val.(float64); ok {
+									seconds = s
+								} else if sStr, ok := val.(string); ok {
+									// Fallback for string format if ever needed
+									fmt.Sscanf(sStr, "%fs", &seconds)
+								}
+
 								// Actually wait to simulate compliance
-								time.Sleep(time.Duration(seconds * float64(time.Second)))
+								if seconds > 0 {
+									time.Sleep(time.Duration(seconds * float64(time.Second)))
+								}
 							}
 						}
 					} else {
