@@ -1,24 +1,23 @@
 # NEXT STEPS: Phase 4 - Implementation & Verification
 
-The system now has a basic identity registration loop (CLI -> API -> Store -> Projection).
+The system now has identity registration, usage tracking (stubbed data), and a basic policy engine wired up.
 
-## Current Objective: Epic 5 - Usage Tracking & Policy Engine (M5.1 & M5.2)
+## Current Objective: Epic 6 - Provider Integration & Real Data (M6.1 & M6.2)
 
-We need to implement the core logic for tracking usage against limits and making policy decisions.
+We need to start ingesting real data to drive the usage projection and make the policy engine useful.
 
 ### Tasks for Next Session:
-1.  **Implement Usage Tracking**:
-    -   Create `pkg/engine/usage.go`.
-    -   Implement `UsageProjection` to track usage by identity/scope/window.
-    -   Hook it into the `Replay` loop.
-    -   M5.1: Usage Tracking.
+1.  **Define Provider Interface**:
+    -   Create `pkg/provider/types.go`.
+    -   Define the `Provider` interface (Poll, status).
+    -   M6.1: Provider Abstraction.
 
-2.  **Implement Policy Engine**:
-    -   Create `pkg/engine/policy.go`.
-    -   Implement `Evaluate(intent)` which checks usage against limits.
-    -   Update `POST /v1/intent` to use the real policy engine instead of the stub.
-    -   M5.2: Policy Enforcement.
+2.  **Implement Mock Provider**:
+    -   Create `pkg/provider/mock.go`.
+    -   Implement a provider that generates synthetic usage data.
+    -   Wire it into `ratelord-d` main loop to emit `provider_poll_observed` events.
+    -   M6.2: Mock Data Flow.
 
 ## Reference
-- **Plan**: `TASKS.md` (Epic 5 - To Be Added)
-- **Architecture**: `ARCHITECTURE.md` (Policy Engine)
+- **Plan**: `TASKS.md` (Epic 6 - To Be Added)
+- **Architecture**: `ARCHITECTURE.md` (Provider Integration)
