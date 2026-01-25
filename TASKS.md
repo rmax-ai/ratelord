@@ -104,7 +104,7 @@ Focus: Connect to external sources (or mocks) to ingest real usage/limit data.
     - Create `pkg/provider/mock/mock.go`.
     - Implement a provider that emits synthetic usage/limit events.
     - *Acceptance*: `T-02` (Mock Data Ingestion).
-- [ ] **M6.3: Polling Orchestrator**
+- [x] **M6.3: Polling Orchestrator**
     - Create `pkg/engine/poller.go`.
     - Implement the loop that ticks and calls `Provider.Poll()`.
     - Ingest results into Event Log (`provider_poll_observed`).

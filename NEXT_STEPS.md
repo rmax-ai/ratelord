@@ -1,23 +1,27 @@
 # NEXT STEPS: Phase 4 - Implementation & Verification
 
-The system now has a provider interface and a mock implementation. The next critical step is to actually run the provider and ingest its data.
+The provider integration is now complete, with polling orchestrator implemented. The next step is to implement the forecasting engine to predict time-to-exhaustion.
 
-## Current Objective: Epic 6 - Provider Integration (M6.3)
+## Current Objective: Epic 7 - Forecasting (Prediction Engine)
 
-We need to implement the polling loop that drives the provider and writes observations to the store.
+We need to implement the forecast models and loop to compute predictions based on usage history.
 
 ### Tasks for Next Session:
-1.  **Implement Polling Orchestrator**:
-    -   Create `pkg/engine/poller.go`.
-    -   Implement `Poller` struct that manages a set of Providers.
-    -   Run a loop (ticker) that calls `Poll()` on each provider.
-    -   Convert `PollResult` into `store.Event` (provider_poll_observed, usage_observed, etc.).
-    -   Append events to the store.
-    -   M6.3: Continuous Polling.
+1. **Implement Forecast Model Interface**:
+   - Create `pkg/engine/forecast/types.go`.
+   - Define `Model` interface (Inputs -> Distribution).
+   - M7.1: Forecast Model Interface.
 
-2.  **Wire up Main**:
-    -   Update `cmd/ratelord-d/main.go` to initialize the `Poller`, register the `MockProvider`, and start the polling loop.
+2. **Implement Linear Burn Model**:
+   - Implement simple linear regression model.
+   - Calculate P99 time-to-exhaustion based on recent history.
+   - M7.2: Linear Burn Model.
+
+3. **Implement Forecast Loop**:
+   - Trigger forecasts after `usage_observed` events.
+   - Emit `forecast_computed` events.
+   - M7.3: Forecast Loop.
 
 ## Reference
-- **Plan**: `TASKS.md` (Epic 6)
-- **Architecture**: `ARCHITECTURE.md` (Provider Integration)
+- **Plan**: `TASKS.md` (Epic 7)
+- **Architecture**: `ARCHITECTURE.md` (Prediction Engine)

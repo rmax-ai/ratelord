@@ -31,3 +31,4 @@
 | pkg/provider/mock.go | COMMITTED | Agent | 2026-01-25 |
 | cmd/ratelord/main.go | COMMITTED | Agent | 2026-01-25 |
 | TASKS.md | UPDATED | Orchestrator | 2026-01-25 |
+| Epic 6: Provider Integration | COMPLETED | Agent | 2026-01-25 |
