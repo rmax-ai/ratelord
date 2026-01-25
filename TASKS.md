@@ -1,10 +1,10 @@
 # TASKS: ratelord Documentation & Bootstrapping
 
 - [ ] Phase 1: Foundational Documents
-    - [ ] 1. VISION.md (Orchestrator Initial Draft)
-    - [ ] 2. CONSTITUTION.md (Orchestrator Initial Draft)
-    - [ ] 3. ARCHITECTURE.md
-    - [ ] 4. CONSTRAINTS.md
+    - [x] 1. VISION.md (Orchestrator Initial Draft)
+    - [x] 2. CONSTITUTION.md (Orchestrator Initial Draft)
+    - [x] 3. ARCHITECTURE.md
+    - [x] 4. CONSTRAINTS.md
     - [ ] 5. IDENTITIES.md
     - [ ] 6. DATA_MODEL.md
 - [ ] Phase 2: Behavioral & Engine Specs

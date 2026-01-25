@@ -12,11 +12,13 @@ This document defines the immutable laws that govern the development and runtime
 
 ## Article III: The Negotiation Mandate
 1. No agent shall perform a constrained action without first submitting an `Intent`.
-2. The system shall prefer "Approve with Modifications" (throttling/deferral) over "Deny," provided safety is maintained.
+2. The system shall prefer `approve_with_modifications` (throttling/deferral) over `deny_with_reason`, provided safety is maintained.
+3. Every `deny_with_reason` response MUST include a clear, actionable rationale based on forecasts or hard limits.
 
 ## Article IV: Scoping Rigor
-1. No data point exists in a vacuum. Every event must be scoped to an Agent, an Identity, and a Workload.
-2. Global limits are simply the root node of the constraint graph.
+1. No data point exists in a vacuum. Every event must be scoped to an Agent, an Identity, a Workload, and a Scope (e.g., repo/org).
+2. Use sentinel identifiers (e.g., `sentinel:global`) when a specific scope dimension is unknown or not applicable; nulls are not permitted for core dimensions.
+3. Global limits are simply the root node of the constraint graph.
 
 ## Article V: Predictive Priority
 1. Defensive logic must be triggered by *forecasts* (e.g., P90 time-to-exhaustion) rather than raw threshold breaches.

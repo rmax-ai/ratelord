@@ -4,9 +4,9 @@
 | :--- | :--- | :--- | :--- |
 | PROJECT_SEED.md | COMPLETED | Orchestrator | 2024-05-22 |
 | VISION.md | DRAFT | Orchestrator | 2024-05-22 |
-| CONSTITUTION.md | DRAFT | Orchestrator | 2024-05-22 |
-| ARCHITECTURE.md | PENDING | Sub-Agent | - |
-| CONSTRAINTS.md | PENDING | Sub-Agent | - |
+| CONSTITUTION.md | DRAFT | Orchestrator | 2026-01-25 |
+| ARCHITECTURE.md | DRAFT | Orchestrator | 2026-01-25 |
+| CONSTRAINTS.md | DRAFT | Orchestrator | 2026-01-25 |
 | IDENTITIES.md | PENDING | Sub-Agent | - |
 | DATA_MODEL.md | PENDING | Sub-Agent | - |
 | PREDICTION.md | PENDING | Sub-Agent | - |

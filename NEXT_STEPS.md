@@ -1,6 +1,6 @@
 # NEXT STEPS: ratelord Phase 1
 
-1. [ ] **Sub-Agent Assignment**: Delegate the drafting of `ARCHITECTURE.md` and `CONSTRAINTS.md` to sub-agents.
-2. [ ] **Architecture Review**: Orchestrator review of `ARCHITECTURE.md` focusing on the hierarchical graph implementation and SQLite schema.
-3. [ ] **Constraint Modeling**: Ensure `CONSTRAINTS.md` correctly defines the P90/P99 exhaustion logic.
-4. [ ] **Update Progress**: Reflect findings in `PROGRESS.md` and `PHASE_LEDGER.md`.
+1. [ ] **Orchestrator review pass**: Re-read `VISION.md`, `CONSTITUTION.md`, `ARCHITECTURE.md`, `CONSTRAINTS.md` for terminology alignment (constraint graph, pool, scope, identity) and remove any contradictions.
+2. [ ] **Sub-Agent assignment**: Delegate drafting of `IDENTITIES.md` (identity taxonomy + ownership + sharing semantics).
+3. [ ] **Sub-Agent assignment**: Delegate drafting of `DATA_MODEL.md` (event types + projection model, consistent with ARCHITECTURE).
+4. [ ] **Update tracking**: Reflect new in-flight docs in `PROGRESS.md` and append decisions/open questions to `PHASE_LEDGER.md` if needed.
