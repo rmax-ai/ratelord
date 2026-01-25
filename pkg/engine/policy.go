@@ -77,7 +77,7 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) Pol
 		// For now, assume "global" or match
 
 		for _, rule := range policy.Rules {
-			if pe.checkCondition(rule.Condition, intent) {
+			if pe.checkCondition(rule.Condition, intent, policy.Limit) {
 				return pe.applyAction(rule.Action, rule.Params)
 			}
 		}
@@ -90,7 +90,7 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) Pol
 	}
 }
 
-func (pe *PolicyEngine) checkCondition(cond string, intent Intent) bool {
+func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64) bool {
 	// Very basic DSL parser for M9.3
 	// Supported: "remaining < X"
 
@@ -103,10 +103,17 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent) bool {
 		return false
 	}
 
+	var remaining int64
+	if limit > 0 {
+		remaining = limit - poolState.Used
+	} else {
+		remaining = poolState.Remaining
+	}
+
 	var threshold int64
 	// Try to parse "remaining < 100"
 	if n, err := fmt.Sscanf(cond, "remaining < %d", &threshold); err == nil && n == 1 {
-		return poolState.Remaining < threshold
+		return remaining < threshold
 	}
 
 	return false

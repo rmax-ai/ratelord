@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rmax/ratelord/pkg/engine"
+	"github.com/rmax/ratelord/pkg/provider"
 	"github.com/rmax/ratelord/pkg/store"
 )
 
@@ -21,33 +22,37 @@ type Server struct {
 	identities *engine.IdentityProjection
 	usage      *engine.UsageProjection
 	policy     *engine.PolicyEngine
+	poller     *engine.Poller
 }
 
 // NewServer creates a new API server instance
 func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine) *Server {
+	return NewServerWithPoller(st, identities, usage, policy, nil)
+}
+
+// NewServerWithPoller creates a new API server instance with poller access (for debug endpoints)
+func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, poller *engine.Poller) *Server {
 	mux := http.NewServeMux()
 
 	// Register routes
 	mux.HandleFunc("/v1/health", handleHealth)
 
-	// We need a closure here because NewServer is creating the mux before the Server struct exists entirely.
-	// However, we are inside NewServer, so we don't have 's' yet.
-	// But we will create 's' at the end.
-	// A cleaner way is to define handlers as methods on Server, but we need the instance to register them.
-	// Since standard http.ServeMux doesn't support registering methods on a nil instance easily without wrappers.
-	// Let's defer registration or use a wrapper struct that we can close over.
-
-	// Refactoring NewServer to instantiate Server first, then register routes.
 	s := &Server{
 		store:      st,
 		identities: identities,
 		usage:      usage,
 		policy:     policy,
+		poller:     poller,
 	}
 
 	mux.HandleFunc("/v1/intent", s.handleIntent)
 	mux.HandleFunc("/v1/identities", s.handleIdentities)
 	mux.HandleFunc("/v1/events", s.handleEvents)
+
+	// Debug endpoints
+	if poller != nil {
+		mux.HandleFunc("/debug/provider/inject", s.handleDebugInject)
+	}
 
 	// Middleware: Logging & Panic Recovery
 	handler := withLogging(withRecovery(mux))
@@ -109,8 +114,9 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		WorkloadID: req.WorkloadID,
 		ScopeID:    req.ScopeID,
 		// ProviderID and PoolID would be resolved here.
-		// For the stub, we leave them empty or check if they are in ClientContext?
-		// req.ClientContext is map[string]interface{}.
+		// For bootstrapping, map scope "default" to mock provider
+		ProviderID:   "mock-provider-1",
+		PoolID:       "default",
 		ExpectedCost: 1, // Default cost
 	}
 
@@ -132,6 +138,50 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		fmt.Printf(`{"level":"error","msg":"failed_to_encode_response","error":"%v"}`+"\n", err)
+	}
+
+	// Update usage on approval
+	if result.Decision == "approve" {
+		poolState, exists := s.usage.GetPoolState("mock-provider-1", "default")
+		if exists {
+			newUsed := poolState.Used + 1
+			newRemaining := poolState.Remaining - 1
+			now := time.Now()
+			payload, _ := json.Marshal(map[string]interface{}{
+				"provider_id": "mock-provider-1",
+				"pool_id":     "default",
+				"used":        newUsed,
+				"remaining":   newRemaining,
+			})
+			evt := store.Event{
+				EventID:       store.EventID(fmt.Sprintf("usage_intent_%d", now.UnixNano())),
+				EventType:     store.EventTypeUsageObserved,
+				SchemaVersion: 1,
+				TsEvent:       now,
+				TsIngest:      now,
+				Source: store.EventSource{
+					OriginKind: "daemon",
+					OriginID:   "api",
+					WriterID:   "ratelord-d",
+				},
+				Dimensions: store.EventDimensions{
+					AgentID:    store.SentinelSystem,
+					IdentityID: store.SentinelGlobal,
+					WorkloadID: store.SentinelSystem,
+					ScopeID:    store.SentinelGlobal,
+				},
+				Correlation: store.EventCorrelation{
+					CorrelationID: fmt.Sprintf("intent_%s", intent.IntentID),
+					CausationID:   store.SentinelUnknown,
+				},
+				Payload: payload,
+			}
+			if err := s.store.AppendEvent(r.Context(), &evt); err != nil {
+				fmt.Printf(`{"level":"error","msg":"failed_to_append_usage_event","error":"%v"}`+"\n", err)
+			} else {
+				s.usage.Apply(evt)
+			}
+		}
 	}
 }
 
@@ -248,6 +298,55 @@ func (s *Server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(events); err != nil {
 		fmt.Printf(`{"level":"error","msg":"failed_to_encode_events","error":"%v"}`+"\n", err)
 	}
+}
+
+// handleDebugInject allows manual injection of usage into a provider (for drift testing)
+func (s *Server) handleDebugInject(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, `{"error":"method_not_allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ProviderID string `json:"provider_id"`
+		PoolID     string `json:"pool_id"`
+		Amount     int64  `json:"amount"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, `{"error":"invalid_json_body"}`, http.StatusBadRequest)
+		return
+	}
+
+	if s.poller == nil {
+		http.Error(w, `{"error":"poller_not_configured"}`, http.StatusServiceUnavailable)
+		return
+	}
+
+	prov := s.poller.GetProvider(provider.ProviderID(req.ProviderID))
+	if prov == nil {
+		http.Error(w, `{"error":"provider_not_found"}`, http.StatusNotFound)
+		return
+	}
+
+	// Check if provider supports injection
+	type Injector interface {
+		InjectUsage(poolID string, amount int64) error
+	}
+
+	injector, ok := prov.(Injector)
+	if !ok {
+		http.Error(w, `{"error":"provider_does_not_support_injection"}`, http.StatusBadRequest)
+		return
+	}
+
+	if err := injector.InjectUsage(req.PoolID, req.Amount); err != nil {
+		http.Error(w, fmt.Sprintf(`{"error":"injection_failed","details":"%v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"injected"}`))
 }
 
 // handleHealth returns simple status

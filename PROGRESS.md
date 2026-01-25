@@ -44,3 +44,5 @@
 | Epic 8: TUI & Visualization | COMPLETED | Agent | 2026-01-25 |
 | Epic 9: System Stabilization | COMPLETED | Agent | 2026-01-25 |
 | M10.1: Simulation Script | COMPLETED | Agent | 2026-01-25 |
+| M10.2: Verify Drift Detection | COMPLETED | Orchestrator | 2026-01-25 |
+| M10.3: Verify Policy Enforcement | COMPLETED | Orchestrator | 2026-01-25 |

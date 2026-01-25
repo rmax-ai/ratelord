@@ -8,11 +8,8 @@ The system components are stabilized. Now we need to verify full system behavior
 
 ### Tasks for Next Session:
 
-1.  **M10.2: Verification of Drift Detection**
-
-2.  **M10.3: Verification of Policy Enforcement**
-
-3.  **M10.4: Final Acceptance Run**
+1.  **M10.4: Final Acceptance Run**
+    - Execute full suite of Acceptance Tests.
 
 ## Reference
 - **Plan**: `TASKS.md`

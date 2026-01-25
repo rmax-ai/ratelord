@@ -108,7 +108,8 @@ func main() {
 	go poller.Start(pollerCtx)
 
 	// M3.1: Start HTTP Server (in background)
-	srv := api.NewServer(st, identityProj, usageProj, policyEngine)
+	// Use NewServerWithPoller to enable debug endpoints
+	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller)
 	go func() {
 		if err := srv.Start(); err != nil {
 			fmt.Printf(`{"level":"error","msg":"server_error","error":"%v"}`+"\n", err)

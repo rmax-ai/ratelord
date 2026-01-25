@@ -2,7 +2,7 @@
 node_modules/
 
 # Build outputs
-bin/
+/bin/
 
 # Package files
 package.json
@@ -27,3 +27,9 @@ bun.lock
 
 *.db
 *.db-*
+
+/ratelord
+/ratelord-d
+/ratelord-tui
+/ratelord-sim
+daemon_pid.txt

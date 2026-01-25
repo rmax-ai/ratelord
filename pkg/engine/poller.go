@@ -39,6 +39,18 @@ func (p *Poller) Register(provider provider.Provider) {
 	p.providers = append(p.providers, provider)
 }
 
+// GetProvider returns a registered provider by ID (helper for testing/debugging)
+func (p *Poller) GetProvider(id provider.ProviderID) provider.Provider {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	for _, prov := range p.providers {
+		if prov.ID() == id {
+			return prov
+		}
+	}
+	return nil
+}
+
 // Start begins the polling loop in a background goroutine
 func (p *Poller) Start(ctx context.Context) {
 	ticker := time.NewTicker(p.interval)

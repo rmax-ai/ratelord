@@ -10,6 +10,7 @@ type PolicyDefinition struct {
 	ID    string           `json:"id"`
 	Scope string           `json:"scope"` // e.g., "global", "env:dev"
 	Type  string           `json:"type"`  // "hard", "soft"
+	Limit int64            `json:"limit,omitempty"`
 	Rules []RuleDefinition `json:"rules"`
 }
 

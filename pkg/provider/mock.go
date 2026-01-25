@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -43,12 +44,30 @@ func NewMockProvider(id string) *MockProvider {
 	mp.pools["default"] = &MockPool{
 		ID:        "default",
 		Limit:     5000,
-		Used:      100,
+		Used:      0,
 		ResetFreq: 1 * time.Hour,
 		ResetAt:   time.Now().Add(1 * time.Hour),
 	}
 
 	return mp
+}
+
+// InjectUsage allows manually increasing usage on a pool to simulate drift
+func (p *MockProvider) InjectUsage(poolID string, amount int64) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	pool, ok := p.pools[poolID]
+	if !ok {
+		return fmt.Errorf("pool %s not found", poolID)
+	}
+
+	if pool.Used+amount > pool.Limit {
+		pool.Used = pool.Limit
+	} else {
+		pool.Used += amount
+	}
+	return nil
 }
 
 func (p *MockProvider) ID() ProviderID {

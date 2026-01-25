@@ -153,11 +153,11 @@ Focus: Proving the system works as a cohesive whole using the strategies in `TES
 - [x] **M10.1: End-to-End Simulation Script**
     - Create a script/tool to generate realistic mock workloads.
     - Simulate multiple agents with different consumption patterns.
-- [ ] **M10.2: Verification of Drift Detection**
+- [x] **M10.2: Verification of Drift Detection**
     - Manually inject usage into Mock Provider.
     - Verify Daemon detects drift and adjusts.
     - *Acceptance*: `P-03` (Drift Detection).
-- [ ] **M10.3: Verification of Policy Enforcement**
+- [x] **M10.3: Verification of Policy Enforcement**
     - Drive usage to limit.
     - Verify Intents are denied.
     - *Acceptance*: `Pol-01` (Hard Limit), `Pol-02` (Load Shedding).
