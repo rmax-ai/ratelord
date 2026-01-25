@@ -1,26 +1,25 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-	log.Println("Starting ratelord-d")
+	// M1.3: Emit system_started log on boot (structured)
+	fmt.Println(`{"level":"info","msg":"system_started","component":"ratelord-d"}`)
 
-	// TODO: Initialize SQLite DB, create tables, log system_started event
+	// M1.2: Handle SIGINT/SIGTERM for graceful shutdown
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	// Signal handling for graceful shutdown
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	// Block until a signal is received
+	sig := <-sigs
+	fmt.Printf(`{"level":"info","msg":"shutdown_initiated","signal":"%s"}`+"\n", sig)
 
-	sig := <-sigChan
-	log.Printf("Received signal: %v. Shutting down gracefully", sig)
+	// TODO: Clean up resources (DB, listeners)
 
-	// TODO: Stop accepting new intents, flush WAL
-
-	log.Println("Shutdown complete")
-	os.Exit(0)
+	fmt.Println(`{"level":"info","msg":"shutdown_complete"}`)
 }

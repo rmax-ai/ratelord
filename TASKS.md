@@ -27,17 +27,19 @@
 
 ## Epic 1: Foundation & Daemon Lifecycle
 Focus: Getting the process to run, manage its lifecycle, and handle signals correctly.
-- [ ] **M1.1: Project Skeleton & Configuration**
+- [x] **M1.1: Project Skeleton**
     - Create directory structure (`cmd/ratelord-d`, `pkg/engine`, `pkg/store`, `pkg/api`).
-    - Implement configuration loader (env vars, defaults).
     - *Dependency*: None
-- [ ] **M1.2: Daemon Entrypoint & Signal Handling**
+- [x] **M1.2: Daemon Entrypoint & Signal Handling**
     - Implement main process loop.
     - Handle `SIGINT`/`SIGTERM` for graceful shutdown.
     - *Acceptance*: `D-03` (Graceful Shutdown).
-- [ ] **M1.3: Logging & Observability**
+- [x] **M1.3: Logging & Observability**
     - Setup structured logging (stdout/stderr).
     - Emit `system_started` log on boot.
+- [ ] **M1.4: Configuration**
+    - Implement configuration loader (env vars, defaults).
+    - *Note*: Split from M1.1 to ensure atomic commits.
 
 ## Epic 2: Storage Layer (Event Sourcing)
 Focus: The immutable SQLite ledger that serves as the source of truth.
