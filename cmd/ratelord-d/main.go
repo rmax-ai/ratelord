@@ -36,21 +36,34 @@ func main() {
 	// M4.2: Initialize Identity Projection
 	identityProj := engine.NewIdentityProjection()
 
+	// M5.1: Initialize Usage Projection
+	usageProj := engine.NewUsageProjection()
+
 	// Replay events to build projection
 	// NOTE: This blocks startup, but safe for small event logs
 	events, err := st.ReadEvents(context.Background(), time.Time{}, 10000) // arbitrary large limit, from beginning
 	if err == nil {
+		// Replay identity events
 		if err := identityProj.Replay(events); err != nil {
-			fmt.Printf(`{"level":"error","msg":"failed_to_replay_events","error":"%v"}`+"\n", err)
+			fmt.Printf(`{"level":"error","msg":"failed_to_replay_identity_events","error":"%v"}`+"\n", err)
 		} else {
-			fmt.Printf(`{"level":"info","msg":"projection_replayed","events_count":%d}`+"\n", len(events))
+			fmt.Printf(`{"level":"info","msg":"identity_projection_replayed","events_count":%d}`+"\n", len(events))
+		}
+		// Replay usage events
+		if err := usageProj.Replay(events); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_replay_usage_events","error":"%v"}`+"\n", err)
+		} else {
+			fmt.Printf(`{"level":"info","msg":"usage_projection_replayed","events_count":%d}`+"\n", len(events))
 		}
 	} else {
 		fmt.Printf(`{"level":"error","msg":"failed_to_read_events","error":"%v"}`+"\n", err)
 	}
 
+	// M5.2: Initialize Policy Engine
+	policyEngine := engine.NewPolicyEngine(usageProj)
+
 	// M3.1: Start HTTP Server (in background)
-	srv := api.NewServer(st, identityProj)
+	srv := api.NewServer(st, identityProj, usageProj, policyEngine)
 	go func() {
 		if err := srv.Start(); err != nil {
 			fmt.Printf(`{"level":"error","msg":"server_error","error":"%v"}`+"\n", err)

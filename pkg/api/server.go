@@ -19,10 +19,12 @@ type Server struct {
 	store      *store.Store
 	server     *http.Server
 	identities *engine.IdentityProjection
+	usage      *engine.UsageProjection
+	policy     *engine.PolicyEngine
 }
 
 // NewServer creates a new API server instance
-func NewServer(st *store.Store, identities *engine.IdentityProjection) *Server {
+func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine) *Server {
 	mux := http.NewServeMux()
 
 	// Register routes
@@ -39,6 +41,8 @@ func NewServer(st *store.Store, identities *engine.IdentityProjection) *Server {
 	s := &Server{
 		store:      st,
 		identities: identities,
+		usage:      usage,
+		policy:     policy,
 	}
 
 	mux.HandleFunc("/v1/intent", s.handleIntent)
@@ -94,12 +98,33 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// STUB LOGIC: Hardcoded approval
-	// In the future, this will consult the Policy Engine.
+	// M5.2: Use Policy Engine
+	// Construct Intent object
+	// Note: In a real system we would infer ProviderID/PoolID from context or graph.
+	// For now, we assume if they are passed in client_context or similar we use them,
+	// or we default to empty.
+	intent := engine.Intent{
+		IntentID:   "intent_" + fmt.Sprintf("%d", time.Now().UnixNano()),
+		IdentityID: req.IdentityID,
+		WorkloadID: req.WorkloadID,
+		ScopeID:    req.ScopeID,
+		// ProviderID and PoolID would be resolved here.
+		// For the stub, we leave them empty or check if they are in ClientContext?
+		// req.ClientContext is map[string]interface{}.
+		ExpectedCost: 1, // Default cost
+	}
+
+	// Evaluate
+	result := s.policy.Evaluate(intent)
+
+	// Persist the decision
+	// TODO: Write intent_submitted and intent_decided events to store.
+	// For M5.2, we just return the result.
+
 	resp := DecisionResponse{
-		IntentID:   "intent_stub_" + fmt.Sprintf("%d", time.Now().UnixNano()),
-		Decision:   "approve",
-		Reason:     "policy_engine_stub_auto_approval",
+		IntentID:   intent.IntentID,
+		Decision:   string(result.Decision),
+		Reason:     result.Reason,
 		ValidUntil: time.Now().Add(5 * time.Minute).Format(time.RFC3339),
 	}
 

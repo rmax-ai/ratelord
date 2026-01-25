@@ -2,11 +2,13 @@ package api
 
 // IntentRequest matches the POST /v1/intent body schema
 type IntentRequest struct {
-	AgentID     string `json:"agent_id"`
-	ScopeID     string `json:"scope_id"`
-	WorkloadID  string `json:"workload_id"`
-	Priority    string `json:"priority,omitempty"` // low, normal, critical
-	Description string `json:"description,omitempty"`
+	AgentID       string                 `json:"agent_id"`
+	IdentityID    string                 `json:"identity_id"`
+	ScopeID       string                 `json:"scope_id"`
+	WorkloadID    string                 `json:"workload_id"`
+	Priority      string                 `json:"priority,omitempty"` // low, normal, critical
+	Description   string                 `json:"description,omitempty"`
+	ClientContext map[string]interface{} `json:"client_context,omitempty"`
 }
 
 // DecisionResponse matches the response for POST /v1/intent
