@@ -135,15 +135,15 @@ Focus: Visualize the state of the system for the operator.
 
 ## Epic 9: System Stabilization & TUI Refinement
 Focus: Improving the robustness of the existing components and enhancing the TUI.
-- [ ] **M9.1: TUI Drill-Down Views**
+- [x] **M9.1: TUI Drill-Down Views**
     - View detailed Event payloads.
     - View active Policy rules and current Usage stats in detail.
     - *Acceptance*: `T-01` (Real-time Stream detailed view).
-- [ ] **M9.2: Error Handling & Reconnection**
+- [x] **M9.2: Error Handling & Reconnection**
     - Implement reconnection logic in TUI if Daemon restarts.
     - Handle missing configuration or DB errors gracefully.
     - *Acceptance*: Robustness during `D-02` (Crash Recovery).
-- [ ] **M9.3: Configurable Policy Loading**
+- [x] **M9.3: Configurable Policy Loading**
     - Load `policy.yaml` from disk on startup.
     - Support `SIGHUP` to reload policy.
     - *Acceptance*: `Pol-03` (Policy Hot Reload).

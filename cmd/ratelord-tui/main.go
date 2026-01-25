@@ -15,6 +15,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// View Modes
+type ViewMode int
+
+const (
+	ViewDashboard ViewMode = iota
+	ViewEventDetail
+)
+
 // Config
 const (
 	daemonURL      = "http://localhost:8090"
@@ -30,6 +38,7 @@ var (
 	mainStyle   = lipgloss.NewStyle().MarginLeft(1)
 	statusStyle = lipgloss.NewStyle().Bold(true)
 	errorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("196"))
+	warnStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("208")) // Orange
 	okStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("42"))
 
 	// Layout styles
@@ -51,9 +60,17 @@ var (
 	eventTypeStyle  = lipgloss.NewStyle().Width(25).Bold(true)
 	eventAgentStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("99")) // Purple
 
+	selectedStyle = lipgloss.NewStyle().
+			Background(lipgloss.Color("57")). // Indigo background
+			Foreground(lipgloss.Color("255")) // White text
+
 	denyStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("196")) // Red
 	approveStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("42"))  // Green
 	infoStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("39"))  // Blue
+
+	// Detail View Styles
+	jsonKeyStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("33"))
+	jsonValStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("255"))
 )
 
 // API Types (mirrored from pkg/store and pkg/api to avoid CGO deps)
@@ -89,12 +106,14 @@ type dataMsg struct {
 }
 
 type model struct {
-	spinner    spinner.Model
-	viewport   viewport.Model
-	events     []Event
-	identities map[string]Identity
-	err        error
-	ready      bool
+	spinner       spinner.Model
+	viewport      viewport.Model
+	events        []Event
+	identities    map[string]Identity
+	err           error
+	ready         bool
+	mode          ViewMode
+	selectedEvent int // Index into events slice
 }
 
 func initialModel() model {
@@ -112,6 +131,7 @@ func initialModel() model {
 		spinner:    s,
 		events:     []Event{},
 		identities: make(map[string]Identity),
+		mode:       ViewDashboard,
 	}
 }
 
@@ -134,9 +154,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "q" || msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		// Pass key messages to viewport
-		m.viewport, cmd = m.viewport.Update(msg)
-		cmds = append(cmds, cmd)
+
+		// Mode Switching
+		if m.mode == ViewDashboard {
+			switch msg.String() {
+			case "enter":
+				if len(m.events) > 0 {
+					m.mode = ViewEventDetail
+				}
+			case "up", "k":
+				if m.selectedEvent > 0 {
+					m.selectedEvent--
+					m.updateViewportContent()
+				}
+			case "down", "j":
+				if m.selectedEvent < len(m.events)-1 {
+					m.selectedEvent++
+					m.updateViewportContent()
+				}
+			}
+		} else if m.mode == ViewEventDetail {
+			if msg.String() == "esc" || msg.String() == "backspace" {
+				m.mode = ViewDashboard
+			}
+		}
+
+		// Only update viewport if we are in Dashboard mode
+		if m.mode == ViewDashboard {
+			m.viewport, cmd = m.viewport.Update(msg)
+			cmds = append(cmds, cmd)
+		}
 		return m, tea.Batch(cmds...)
 
 	case spinner.TickMsg:
@@ -149,10 +196,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case dataMsg:
 		if msg.err != nil {
 			m.err = msg.err
+			// Keep old data to prevent flickering
 		} else {
 			m.err = nil
 			m.events = msg.events
 			m.identities = msg.identities
+
+			// Adjust selection index if list shrank
+			if m.selectedEvent >= len(m.events) && len(m.events) > 0 {
+				m.selectedEvent = len(m.events) - 1
+			}
+
 			m.updateViewportContent()
 		}
 
@@ -180,14 +234,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *model) updateViewportContent() {
 	var sb strings.Builder
 
-	// Sort events by time (newest first)
-	// API usually returns them sorted, but good to be safe if we were merging
-	// For display, we usually want newest at bottom for logs, or top?
-	// The prompt says "scrolling viewport", usually implies log style.
-	// Let's print them in the order received, which is likely desc or asc.
-	// If API returns limit=20, it's probably the last 20.
-
-	for _, e := range m.events {
+	// Render events
+	for i, e := range m.events {
 		ts := e.TsEvent.Format("15:04:05")
 
 		// Colorize based on event type
@@ -201,24 +249,32 @@ func (m *model) updateViewportContent() {
 			typeStr = infoStyle.Render(e.EventType)
 		}
 
-		// Format: [TIMESTAMP] [TYPE] Agent: [AGENT_ID]
-		line := fmt.Sprintf("%s %s %s\n",
+		line := fmt.Sprintf("%s %s %s",
 			eventTimeStyle.Render(ts),
 			typeStr,
 			eventAgentStyle.Render(fmt.Sprintf("Agent: %s", e.Dimensions.AgentID)),
 		)
-		sb.WriteString(line)
+
+		// Highlight selected line
+		if i == m.selectedEvent {
+			line = selectedStyle.Render(" " + line + " ")
+		} else {
+			line = " " + line + " " // Add padding to match selected
+		}
+
+		sb.WriteString(line + "\n")
 	}
 
 	m.viewport.SetContent(sb.String())
-	// Auto-scroll to bottom to see newest if they are appended?
-	// If the API returns newest first (desc), we might want to print them normally.
-	// Let's assume standard log view.
 }
 
 func (m model) View() string {
 	if !m.ready {
 		return fmt.Sprintf("\n%s Initializing...", m.spinner.View())
+	}
+
+	if m.mode == ViewEventDetail {
+		return m.eventDetailView()
 	}
 
 	// Top Pane: Identities / Usage
@@ -251,13 +307,55 @@ func (m model) View() string {
 	// Status Footer
 	var status string
 	if m.err != nil {
-		status = errorStyle.Render(fmt.Sprintf("Offline: %v", m.err))
+		status = warnStyle.Render(fmt.Sprintf("⚠ Reconnecting... (%v)", m.err))
 	} else {
 		status = okStyle.Render(fmt.Sprintf("Online • %d Events • %d Identities", len(m.events), len(m.identities)))
 	}
-	footer := subtleStyle.Render(fmt.Sprintf("\n%s\nPress q to quit", status))
+	footer := subtleStyle.Render(fmt.Sprintf("\n%s\nPress q to quit • Enter to inspect • Up/Down to navigate", status))
 
 	return lipgloss.JoinVertical(lipgloss.Left, topPane, header, bottomPane, footer)
+}
+
+func (m model) eventDetailView() string {
+	if len(m.events) == 0 || m.selectedEvent >= len(m.events) {
+		return "No event selected."
+	}
+
+	e := m.events[m.selectedEvent]
+
+	// Pretty print payload
+	var prettyPayload string
+	if len(e.Payload) > 0 {
+		var obj interface{}
+		if err := json.Unmarshal(e.Payload, &obj); err == nil {
+			b, _ := json.MarshalIndent(obj, "", "  ")
+			prettyPayload = string(b)
+		} else {
+			prettyPayload = string(e.Payload)
+		}
+	} else {
+		prettyPayload = "{}"
+	}
+
+	// Stylize the output
+	var sb strings.Builder
+	sb.WriteString(headerStyle.Render("Event Detail"))
+	sb.WriteString("\n\n")
+
+	sb.WriteString(fmt.Sprintf("%s: %s\n", jsonKeyStyle.Render("ID"), jsonValStyle.Render(e.EventID)))
+	sb.WriteString(fmt.Sprintf("%s: %s\n", jsonKeyStyle.Render("Type"), jsonValStyle.Render(e.EventType)))
+	sb.WriteString(fmt.Sprintf("%s: %s\n", jsonKeyStyle.Render("Time"), jsonValStyle.Render(e.TsEvent.Format(time.RFC3339))))
+	sb.WriteString(fmt.Sprintf("%s: %s\n", jsonKeyStyle.Render("Agent"), jsonValStyle.Render(e.Dimensions.AgentID)))
+	sb.WriteString(fmt.Sprintf("%s: %s\n", jsonKeyStyle.Render("Identity"), jsonValStyle.Render(e.Dimensions.IdentityID)))
+	sb.WriteString("\n")
+	sb.WriteString(jsonKeyStyle.Render("Payload:"))
+	sb.WriteString("\n")
+	sb.WriteString(jsonValStyle.Render(prettyPayload))
+
+	sb.WriteString("\n\n")
+	sb.WriteString(subtleStyle.Render("Press Esc to return"))
+
+	return paneStyle.Render(sb.String())
 }
 
 // Commands

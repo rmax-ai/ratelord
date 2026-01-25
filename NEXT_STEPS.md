@@ -1,19 +1,20 @@
 # NEXT STEPS: Phase 4 - Implementation & Verification
 
-The TUI Dashboard (Epic 8) is now functional, providing visibility into the system state. The core implementation phase is largely complete. The next steps involve stabilizing the TUI and verifying the full system behavior.
+The TUI Dashboard (Epic 8) and Policy Engine are now stabilized, providing visibility into the system state and enforcing rules. The core implementation phase is largely complete. The next steps involve verifying the full system behavior.
 
-## Current Objective: System Stabilization & Final Verification
+## Current Objective: Full System Verification
 
-We have a working daemon, policy engine, forecast engine, and TUI. Now we need to ensure they work cohesively.
+The system components are stabilized. Now we need to verify full system behavior.
 
 ### Tasks for Next Session:
-1.  **M9.1: TUI Drill-Down Views**
-    - Implement detail views for Events and Policy rules in the TUI.
-    - Allow inspecting JSON payloads of events.
-2.  **M9.2: Error Handling & Reconnection**
-    - Ensure TUI recovers if the Daemon is restarted (critical for dev loop).
-3.  **M9.3: Configurable Policy Loading**
-    - Allow defining `policy.yaml` to control limits, rather than hardcoded defaults.
+
+1.  **M10.1: End-to-End Simulation Script**
+
+2.  **M10.2: Verification of Drift Detection**
+
+3.  **M10.3: Verification of Policy Enforcement**
+
+4.  **M10.4: Final Acceptance Run**
 
 ## Reference
 - **Plan**: `TASKS.md`

@@ -26,6 +26,7 @@ func main() {
 		panic(fmt.Sprintf("failed to get cwd: %v", err))
 	}
 	dbPath := filepath.Join(cwd, "ratelord.db")
+	policyPath := filepath.Join(cwd, "policy.json")
 
 	// M2.1: Initialize SQLite Store
 	st, err := store.NewStore(dbPath)
@@ -76,6 +77,15 @@ func main() {
 	// M5.2: Initialize Policy Engine
 	policyEngine := engine.NewPolicyEngine(usageProj)
 
+	// M9.3: Initial Policy Load
+	if cfg, err := engine.LoadPolicyConfig(policyPath); err == nil {
+		policyEngine.UpdatePolicies(cfg)
+		fmt.Printf(`{"level":"info","msg":"policy_loaded","path":"%s","policies_count":%d}`+"\n", policyPath, len(cfg.Policies))
+	} else if !os.IsNotExist(err) {
+		// Log error if file exists but failed to load; ignore if missing (default mode)
+		fmt.Printf(`{"level":"error","msg":"failed_to_load_policy","error":"%v"}`+"\n", err)
+	}
+
 	// M6.3: Initialize Polling Orchestrator
 	// Use the new Poller to drive the provider loop
 	poller := engine.NewPoller(st, 10*time.Second, forecaster) // Poll every 10s for demo
@@ -100,12 +110,31 @@ func main() {
 	}()
 
 	// M1.2: Handle SIGINT/SIGTERM for graceful shutdown
+	// M9.3: Handle SIGHUP for policy reload
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
-	// Block until a signal is received
-	sig := <-sigs
-	fmt.Printf(`{"level":"info","msg":"shutdown_initiated","signal":"%s"}`+"\n", sig)
+	// Block until a shutdown signal is received
+	var shutdownSig os.Signal
+	for {
+		sig := <-sigs
+		if sig == syscall.SIGHUP {
+			fmt.Println(`{"level":"info","msg":"reload_signal_received"}`)
+			if cfg, err := engine.LoadPolicyConfig(policyPath); err == nil {
+				policyEngine.UpdatePolicies(cfg)
+				fmt.Printf(`{"level":"info","msg":"policy_reloaded","policies_count":%d}`+"\n", len(cfg.Policies))
+			} else {
+				fmt.Printf(`{"level":"error","msg":"failed_to_reload_policy","error":"%v"}`+"\n", err)
+			}
+			continue
+		}
+
+		// If not SIGHUP, it's a shutdown signal
+		shutdownSig = sig
+		break
+	}
+
+	fmt.Printf(`{"level":"info","msg":"shutdown_initiated","signal":"%s"}`+"\n", shutdownSig)
 
 	// Shutdown Server
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
