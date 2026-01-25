@@ -2,7 +2,8 @@
 
 | Document | Status | Owner | Last Updated |
 | :--- | :--- | :--- | :--- |
-| PROJECT_SEED.md | COMPLETED | Orchestrator | 2024-05-22 |
+| PROJECT_CONTEXT.md | ACTIVE | Orchestrator | 2026-01-25 |
+| PROJECT_SEED.md | SUPERSEDED | Orchestrator | 2024-05-22 |
 | VISION.md | COMPLETED | Orchestrator | 2024-05-22 |
 | CONSTITUTION.md | COMPLETED | Orchestrator | 2026-01-25 |
 | ARCHITECTURE.md | COMPLETED | Orchestrator | 2026-01-25 |

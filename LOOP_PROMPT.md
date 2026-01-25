@@ -1,6 +1,6 @@
 # LOOP PROMPT: Ratelord Orchestrator
 
-Maintain the bootstrapping and implementation process for **ratelord** following the rules in `AGENTS.md`.
+Maintain the **implementation and maintenance** process for **ratelord** following the rules in `AGENTS.md`.
 
 ## Execution Protocol
 - **Single Task Focus**: Each iteration (one execution) must pick the **highest leverage task** from `NEXT_STEPS.md` or `TASKS.md` and complete it. **Do not multitask.**
@@ -14,17 +14,17 @@ Maintain the bootstrapping and implementation process for **ratelord** following
 
 ## Context & Constraints
 - **Role**: Orchestrator (Coordinate sub-agents, ensure consistency, enforce architecture).
-- **Core Principles**: Local-first, Daemon Authority, Event-sourced, Predictive, Intent Negotiation.
+- **Core Principles**: Local-first, Daemon Authority, Event-sourced, Predictive, Intent Negotiation (See `PROJECT_CONTEXT.md`).
 - **Rules**:
     - Always read `NEXT_STEPS.md` first.
     - Document decisions before implementation.
-    - No implementation unless Phase 4 is explicitly active in `NEXT_STEPS.md`.
+    - Ensure code changes are verified by tests (`pkg/`) or acceptance tools (`ratelord-sim`).
 
 ## Signaling Completion
 - If you have completed the current high-leverage task and there are **pending tasks** remaining, output `<promise>NEXT_TASK</promise>`.
 - If **all tasks** in the current scope/phase are done and no more work remains, output `<promise>DONE</promise>`.
 
 ## Sub-Agent Usage
-- Delegate large drafting or implementation tasks to sub-agents.
-- Ensure sub-agents are briefed with `PROJECT_SEED.md` and the specific relevant specs.
+- Delegate drafting, implementation, or verification tasks to sub-agents.
+- Ensure sub-agents are briefed with `PROJECT_CONTEXT.md` and the specific relevant specs.
 - Perform a consistency check on all sub-agent output before finalizing.

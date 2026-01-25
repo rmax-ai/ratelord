@@ -2,7 +2,7 @@
 
 This repo is in an active implementation and validation phase. Agents must optimize for conceptual consistency, auditability, and code quality.
 
-## Non-negotiables (from PROJECT_SEED.md)
+## Non-negotiables (from PROJECT_CONTEXT.md)
 
 - Orchestrator coordinates work; docs maintained alongside code.
 - Local-first, zero-ops: design for a single-machine daemon + local state.
@@ -26,14 +26,14 @@ This repo is in an active implementation and validation phase. Agents must optim
 
 ## Document-first workflow
 
-- Start by reading: `PROJECT_SEED.md`, then `NEXT_STEPS.md`, then the document(s) you will touch.
+- Start by reading: `PROJECT_CONTEXT.md`, then `NEXT_STEPS.md`, then the document(s) you will touch.
 - Work off a manifest: keep a clear list of required docs and current status in `PROGRESS.md`.
 - Each doc change must preserve the system invariants (see Non-negotiables) and avoid scope drift.
 - Code changes must follow successful docs updates (for features) or be small, self-contained fixes.
 
 ## Document manifest (authoritative set)
 
-Required order (see `PROJECT_SEED.md`):
+Required order (see `PROJECT_CONTEXT.md`):
 
 1. `VISION.md`
 2. `CONSTITUTION.md`
@@ -71,7 +71,7 @@ Optional:
 
 ## Sub-agent usage
 
-- Orchestrator delegates drafting/refinement per document; sub-agents work strictly from `PROJECT_SEED.md` + current manifest.
+- Orchestrator delegates drafting/refinement per document; sub-agents work strictly from `PROJECT_CONTEXT.md` + current manifest.
 - Sub-agents should propose: outline, key definitions, invariants, and open questions; avoid speculative implementation.
 - Orchestrator performs final integration pass for consistency and updates tracking docs.
 
