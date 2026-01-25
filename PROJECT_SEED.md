@@ -342,12 +342,6 @@ The project is successful when:
 > Model identities, scopes, and shared pools explicitly.
 > Never assume isolation unless proven.
 
----
-
-> “You cannot control what you do not model.” — Jay W. Forrester
-
----
-
 ## 16. Orchestrator Execution Protocol (Final Instructions)
 
 1. **Sub-Agent Delegation**: The orchestrator must delegate the creation and refinement of each document in the "Required Document Set" to sub-agents.
