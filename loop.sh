@@ -5,12 +5,19 @@ set -euo pipefail
 # Improves upon original by adding iteration limits, structured logging,
 # and explicitly referencing the sentinel-checked LOOP_PROMPT.md.
 
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <goal_description>"
+  exit 1
+fi
+
+CURENNT_GOAL=$1
+
 MAX_ITERATIONS=50
 LOG_DIR="logs"
 PROMPT_FILE="LOOP_PROMPT.md"
 OPENCODE_BIN=$(command -v opencode || echo "opencode")
 OPENCODE_AGENT="orchestrator"
-OPENCODE_GOAL="Follow execution protocol $PROMPT_FILE."
+OPENCODE_GOAL="Follow execution protocol $PROMPT_FILE to achieve $CURENNT_GOAL."
 OPENCODE_COMMAND="run --agent $OPENCODE_AGENT $OPENCODE_GOAL -f $PROMPT_FILE"
 
 # Colors for TUI-lite experience
