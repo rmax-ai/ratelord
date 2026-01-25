@@ -7,13 +7,13 @@ The TUI Dashboard (Epic 8) is now functional, providing visibility into the syst
 We have a working daemon, policy engine, forecast engine, and TUI. Now we need to ensure they work cohesively.
 
 ### Tasks for Next Session:
-1.  **Enhance TUI**:
-    -   Add "Drill-Down" views (Epic 8, continued).
-    -   Improve error handling and reconnection logic.
-2.  **Verify Full Loop**:
-    -   Run a mock workload generator script.
-    -   Observe forecasts changing in real-time in the TUI.
-    -   Verify denial policies kick in when limits are reached.
+1.  **M9.1: TUI Drill-Down Views**
+    - Implement detail views for Events and Policy rules in the TUI.
+    - Allow inspecting JSON payloads of events.
+2.  **M9.2: Error Handling & Reconnection**
+    - Ensure TUI recovers if the Daemon is restarted (critical for dev loop).
+3.  **M9.3: Configurable Policy Loading**
+    - Allow defining `policy.yaml` to control limits, rather than hardcoded defaults.
 
 ## Reference
 - **Plan**: `TASKS.md`

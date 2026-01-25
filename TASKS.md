@@ -132,3 +132,34 @@ Focus: Visualize the state of the system for the operator.
     - Render Usage Bars per pool.
     - Render recent Event Log.
     - *Acceptance*: `T-04` (Dashboard).
+
+## Epic 9: System Stabilization & TUI Refinement
+Focus: Improving the robustness of the existing components and enhancing the TUI.
+- [ ] **M9.1: TUI Drill-Down Views**
+    - View detailed Event payloads.
+    - View active Policy rules and current Usage stats in detail.
+    - *Acceptance*: `T-01` (Real-time Stream detailed view).
+- [ ] **M9.2: Error Handling & Reconnection**
+    - Implement reconnection logic in TUI if Daemon restarts.
+    - Handle missing configuration or DB errors gracefully.
+    - *Acceptance*: Robustness during `D-02` (Crash Recovery).
+- [ ] **M9.3: Configurable Policy Loading**
+    - Load `policy.yaml` from disk on startup.
+    - Support `SIGHUP` to reload policy.
+    - *Acceptance*: `Pol-03` (Policy Hot Reload).
+
+## Epic 10: Full System Verification
+Focus: Proving the system works as a cohesive whole using the strategies in `TEST_STRATEGY.md`.
+- [ ] **M10.1: End-to-End Simulation Script**
+    - Create a script/tool to generate realistic mock workloads.
+    - Simulate multiple agents with different consumption patterns.
+- [ ] **M10.2: Verification of Drift Detection**
+    - Manually inject usage into Mock Provider.
+    - Verify Daemon detects drift and adjusts.
+    - *Acceptance*: `P-03` (Drift Detection).
+- [ ] **M10.3: Verification of Policy Enforcement**
+    - Drive usage to limit.
+    - Verify Intents are denied.
+    - *Acceptance*: `Pol-01` (Hard Limit), `Pol-02` (Load Shedding).
+- [ ] **M10.4: Final Acceptance Run**
+    - Execute full suite of Acceptance Tests.
