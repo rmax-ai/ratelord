@@ -27,5 +27,7 @@
 | pkg/engine/projection.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/usage.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/policy.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/provider/types.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/provider/mock.go | COMMITTED | Agent | 2026-01-25 |
 | cmd/ratelord/main.go | COMMITTED | Agent | 2026-01-25 |
 | TASKS.md | UPDATED | Orchestrator | 2026-01-25 |

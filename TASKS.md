@@ -96,11 +96,11 @@ Focus: Implement the core logic for tracking usage against limits and making pol
 
 ## Epic 6: Provider Integration (Ingestion)
 Focus: Connect to external sources (or mocks) to ingest real usage/limit data.
-- [ ] **M6.1: Provider Interface & Registry**
+- [x] **M6.1: Provider Interface & Registry**
     - Create `pkg/provider/types.go` (Provider interface).
     - Implement a `ProviderRegistry` in `pkg/engine`.
     - *Dependency*: None.
-- [ ] **M6.2: Mock Provider**
+- [x] **M6.2: Mock Provider**
     - Create `pkg/provider/mock/mock.go`.
     - Implement a provider that emits synthetic usage/limit events.
     - *Acceptance*: `T-02` (Mock Data Ingestion).
