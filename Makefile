@@ -1,6 +1,6 @@
 .PHONY: build install clean test generate
 
-BINARIES := ratelord ratelord-d ratelord-tui
+BINARIES := ratelord ratelord-d ratelord-tui ratelord-sim
 BUILD_DIR := bin
 
 # Get version info for ldflags
@@ -38,10 +38,18 @@ ifeq ($(shell uname),Darwin)
 	@echo "Signed $@ for macOS"
 endif
 
+ratelord-sim: cmd/ratelord-sim/main.go
+	go build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$@ ./cmd/ratelord-sim
+ifeq ($(shell uname),Darwin)
+	@codesign -s - -f $(BUILD_DIR)/$@ 2>/dev/null || true
+	@echo "Signed $@ for macOS"
+endif
+
 install: generate
 	go install -ldflags "$(LDFLAGS)" ./cmd/ratelord
 	go install -ldflags "$(LDFLAGS)" ./cmd/ratelord-d
 	go install -ldflags "$(LDFLAGS)" ./cmd/ratelord-tui
+	go install -ldflags "$(LDFLAGS)" ./cmd/ratelord-sim
 
 clean:
 	rm -f $(BUILD_DIR)/*
