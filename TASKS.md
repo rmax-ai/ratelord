@@ -150,7 +150,7 @@ Focus: Improving the robustness of the existing components and enhancing the TUI
 
 ## Epic 10: Full System Verification
 Focus: Proving the system works as a cohesive whole using the strategies in `TEST_STRATEGY.md`.
-- [ ] **M10.1: End-to-End Simulation Script**
+- [x] **M10.1: End-to-End Simulation Script**
     - Create a script/tool to generate realistic mock workloads.
     - Simulate multiple agents with different consumption patterns.
 - [ ] **M10.2: Verification of Drift Detection**

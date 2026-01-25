@@ -16,6 +16,12 @@ import (
 	"github.com/rmax/ratelord/pkg/store"
 )
 
+var (
+	Version   = "dev"
+	Commit    = "unknown"
+	BuildTime = "unknown"
+)
+
 func main() {
 	// M1.3: Emit system_started log on boot (structured)
 	fmt.Println(`{"level":"info","msg":"system_started","component":"ratelord-d"}`)

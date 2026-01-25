@@ -9,6 +9,14 @@ import (
 	"os"
 )
 
+var (
+	Version   = "dev"
+	Commit    = "unknown"
+	BuildTime = "unknown"
+)
+
+// IdentityRegistration matches the payload for POST /v1/identities
+
 // IdentityRegistration matches the payload for POST /v1/identities
 type IdentityRegistration struct {
 	IdentityID string                 `json:"identity_id"`

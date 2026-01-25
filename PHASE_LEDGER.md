@@ -23,3 +23,4 @@
 - [x] **M4.1 & M4.2: Identity & CLI** (Epic 4) - Implemented `ratelord identity add`, `POST /v1/identities` (event write), and `GET /v1/identities` (projection read). Verified end-to-end registration and state restoration.
 - [x] **Epic 7: Forecasting** - Implemented forecast model interface, linear burn model, and forecast loop integration. Added `pkg/engine/forecast/` package with types, linear model, projection for history, and service for event emission. Wired into poller and main daemon.
 - [x] **M8.1 & M8.2: TUI Foundation & Dashboard** (Epic 8) - Initialized `ratelord-tui` with Bubbletea, implemented polling loop, connected to daemon, and built dashboard view with identity list and live event stream.
+- [x] **M10.1: End-to-End Simulation Script** (Epic 10) - Implemented `ratelord-sim` tool to generate realistic traffic patterns and verify system stability.
