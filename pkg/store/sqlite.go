@@ -233,3 +233,76 @@ func (s *Store) ReadEvents(ctx context.Context, since time.Time, limit int) ([]*
 
 	return events, nil
 }
+
+// ReadRecentEvents retrieves the N most recent events, ordered by ingestion time descending.
+// This is primarily used for the diagnostics/dashboard view.
+func (s *Store) ReadRecentEvents(ctx context.Context, limit int) ([]*Event, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+
+	query := `
+	SELECT
+		event_id,
+		event_type,
+		schema_version,
+		ts_event,
+		ts_ingest,
+		origin_kind,
+		origin_id,
+		writer_id,
+		agent_id,
+		identity_id,
+		workload_id,
+		scope_id,
+		correlation_id,
+		causation_id,
+		payload
+	FROM events
+	ORDER BY ts_ingest DESC
+	LIMIT ?;
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query recent events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []*Event
+
+	for rows.Next() {
+		var evt Event
+		var payload []byte
+
+		err := rows.Scan(
+			&evt.EventID,
+			&evt.EventType,
+			&evt.SchemaVersion,
+			&evt.TsEvent,
+			&evt.TsIngest,
+			&evt.Source.OriginKind,
+			&evt.Source.OriginID,
+			&evt.Source.WriterID,
+			&evt.Dimensions.AgentID,
+			&evt.Dimensions.IdentityID,
+			&evt.Dimensions.WorkloadID,
+			&evt.Dimensions.ScopeID,
+			&evt.Correlation.CorrelationID,
+			&evt.Correlation.CausationID,
+			&payload,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan event row: %w", err)
+		}
+
+		evt.Payload = json.RawMessage(payload)
+		events = append(events, &evt)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return events, nil
+}

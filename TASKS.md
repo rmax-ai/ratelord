@@ -61,12 +61,12 @@ Focus: The HTTP/Socket interface for agents to negotiate intents.
 - [x] **M3.1: HTTP Server Shell**
     - Bind listener to `127.0.0.1:8090`.
     - Setup router and middleware (logging, panic recovery).
-- [ ] **M3.2: Intent Endpoint (Stub)**
+- [x] **M3.2: Intent Endpoint (Stub)**
     - Implement `POST /v1/intent` handler.
     - Validate JSON schema.
     - Return mock "Approved" decision to verify connectivity.
     - *Acceptance*: `A-01` (Approve Intent), `A-02` (Latency).
-- [ ] **M3.3: Health & Diagnostics**
+- [x] **M3.3: Health & Diagnostics**
     - Implement `GET /v1/health`.
     - Implement `GET /v1/events` (basic list).
 
