@@ -80,3 +80,16 @@ Focus: Allow registration of the first identity to prove the write-path works.
     - Implement in-memory `IdentityProjection` built during replay.
     - Serve `GET /v1/identities` to list registered actors.
     - *Acceptance*: `T-03` (Identity List).
+
+## Epic 5: Usage Tracking & Policy Engine
+Focus: Implement the core logic for tracking usage against limits and making policy decisions.
+- [ ] **M5.1: Usage Tracking**
+    - Create `pkg/engine/usage.go`.
+    - Implement `UsageProjection` to track usage by identity/scope/window.
+    - Hook it into the `Replay` loop.
+    - *Acceptance*: `D-07` (Usage Tracking).
+- [ ] **M5.2: Policy Enforcement**
+    - Create `pkg/engine/policy.go`.
+    - Implement `Evaluate(intent)` which checks usage against limits.
+    - Update `POST /v1/intent` to use the real policy engine.
+    - *Acceptance*: `A-03` (Policy Enforcement).
