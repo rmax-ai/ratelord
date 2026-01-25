@@ -1,30 +1,20 @@
 # NEXT STEPS: Phase 4 - Implementation & Verification
 
-The forecasting engine is now integrated (Epic 7). The final epic before functional completion is the TUI dashboard to visualize the system state.
+The TUI Dashboard (Epic 8) is now functional, providing visibility into the system state. The core implementation phase is largely complete. The next steps involve stabilizing the TUI and verifying the full system behavior.
 
-## Current Objective: Epic 8 - TUI & Visualization
+## Current Objective: System Stabilization & Final Verification
 
-We need to implement a terminal user interface to visualize the system state (Identities, Pools, Forecasts).
+We have a working daemon, policy engine, forecast engine, and TUI. Now we need to ensure they work cohesively.
 
 ### Tasks for Next Session:
-1. **Initialize TUI Foundation**:
-   - Create `cmd/ratelord-tui/main.go` (or similar).
-   - Initialize Bubbletea model.
-   - Connect to `GET /v1/events` and `GET /v1/identities`.
-   - M8.1: TUI Foundation.
-
-2. **Implement Dashboard View**:
-   - Render Usage Bars per pool (Capacity vs Used).
-   - Render Time-to-Exhaustion (Forecast) if available.
-   - Render recent Event Log scrolling view.
-   - M8.2: Dashboard View.
-
-3. **Verify End-to-End**:
-   - Run daemon.
-   - Register identity.
-   - Ingest mock usage.
-   - Verify TUI shows updates.
+1.  **Enhance TUI**:
+    -   Add "Drill-Down" views (Epic 8, continued).
+    -   Improve error handling and reconnection logic.
+2.  **Verify Full Loop**:
+    -   Run a mock workload generator script.
+    -   Observe forecasts changing in real-time in the TUI.
+    -   Verify denial policies kick in when limits are reached.
 
 ## Reference
-- **Plan**: `TASKS.md` (Epic 8)
+- **Plan**: `TASKS.md`
 - **Design**: `TUI_SPEC.md`

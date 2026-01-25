@@ -36,4 +36,6 @@
 | pkg/engine/forecast/service.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/poller.go | UPDATED | Agent | 2026-01-25 |
 | cmd/ratelord-d/main.go | UPDATED | Agent | 2026-01-25 |
+| cmd/ratelord-tui/main.go | CREATED | Agent | 2026-01-25 |
 | Epic 7: Forecasting | COMPLETED | Agent | 2026-01-25 |
+| Epic 8: TUI & Visualization | IN_PROGRESS | Agent | 2026-01-25 |

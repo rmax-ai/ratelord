@@ -125,10 +125,10 @@ Focus: Translate raw usage history into time-to-exhaustion predictions.
 
 ## Epic 8: TUI & Visualization (Read-Only)
 Focus: Visualize the state of the system for the operator.
-- [ ] **M8.1: TUI Foundation**
+- [x] **M8.1: TUI Foundation**
     - Initialize Bubbletea model.
     - Connect to `GET /v1/events` and `GET /v1/identities`.
-- [ ] **M8.2: Dashboard View**
+- [x] **M8.2: Dashboard View**
     - Render Usage Bars per pool.
     - Render recent Event Log.
     - *Acceptance*: `T-04` (Dashboard).
