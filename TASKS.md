@@ -1,0 +1,22 @@
+# TASKS: ratelord Documentation & Bootstrapping
+
+- [ ] Phase 1: Foundational Documents
+    - [x] 1. VISION.md (Orchestrator Initial Draft)
+    - [x] 2. CONSTITUTION.md (Orchestrator Initial Draft)
+    - [ ] 3. ARCHITECTURE.md
+    - [ ] 4. CONSTRAINTS.md
+    - [ ] 5. IDENTITIES.md
+    - [ ] 6. DATA_MODEL.md
+- [ ] Phase 2: Behavioral & Engine Specs
+    - [ ] 7. PREDICTION.md
+    - [ ] 8. POLICY_ENGINE.md
+    - [ ] 9. AGENT_CONTRACT.md
+    - [ ] 10. API_SPEC.md
+- [ ] Phase 3: Interface & Workflow Specs
+    - [ ] 11. TUI_SPEC.md
+    - [ ] 12. WEB_UI_SPEC.md
+    - [ ] 13. WORKFLOWS.md
+    - [ ] 14. ACCEPTANCE.md
+- [ ] Phase 4: Project Management
+    - [x] Initialize PROGRESS.md
+    - [x] Initialize PHASE_LEDGER.md
