@@ -8,24 +8,27 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rmax/ratelord/pkg/engine/forecast"
 	"github.com/rmax/ratelord/pkg/provider"
 	"github.com/rmax/ratelord/pkg/store"
 )
 
 // Poller manages the polling loop for registered providers
 type Poller struct {
-	store     *store.Store
-	providers []provider.Provider
-	interval  time.Duration
-	mu        sync.RWMutex
+	store      *store.Store
+	providers  []provider.Provider
+	interval   time.Duration
+	forecaster *forecast.Forecaster
+	mu         sync.RWMutex
 }
 
 // NewPoller creates a new poller instance
-func NewPoller(store *store.Store, interval time.Duration) *Poller {
+func NewPoller(store *store.Store, interval time.Duration, forecaster *forecast.Forecaster) *Poller {
 	return &Poller{
-		store:     store,
-		providers: make([]provider.Provider, 0),
-		interval:  interval,
+		store:      store,
+		providers:  make([]provider.Provider, 0),
+		interval:   interval,
+		forecaster: forecaster,
 	}
 }
 
@@ -154,6 +157,9 @@ func (p *Poller) poll(ctx context.Context, prov provider.Provider) {
 
 		if err := p.store.AppendEvent(ctx, usageEvent); err != nil {
 			log.Printf("Failed to append usage event: %v", err)
+		} else if p.forecaster != nil {
+			// Trigger forecast computation
+			p.forecaster.OnUsageObserved(ctx, usageEvent)
 		}
 	}
 }

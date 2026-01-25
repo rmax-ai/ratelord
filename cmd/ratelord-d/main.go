@@ -11,6 +11,7 @@ import (
 
 	"github.com/rmax/ratelord/pkg/api"
 	"github.com/rmax/ratelord/pkg/engine"
+	"github.com/rmax/ratelord/pkg/engine/forecast"
 	"github.com/rmax/ratelord/pkg/provider"
 	"github.com/rmax/ratelord/pkg/store"
 )
@@ -40,6 +41,11 @@ func main() {
 	// M5.1: Initialize Usage Projection
 	usageProj := engine.NewUsageProjection()
 
+	// M7.3: Initialize Forecast Projection and Forecaster
+	forecastProj := forecast.NewForecastProjection(20) // Window size of 20 points
+	linearModel := &forecast.LinearModel{}
+	forecaster := forecast.NewForecaster(st, forecastProj, linearModel)
+
 	// Replay events to build projection
 	// NOTE: This blocks startup, but safe for small event logs
 	events, err := st.ReadEvents(context.Background(), time.Time{}, 10000) // arbitrary large limit, from beginning
@@ -56,6 +62,13 @@ func main() {
 		} else {
 			fmt.Printf(`{"level":"info","msg":"usage_projection_replayed","events_count":%d}`+"\n", len(events))
 		}
+		// Replay forecast projection
+		for _, event := range events {
+			if event.EventType == store.EventTypeUsageObserved {
+				forecaster.OnUsageObserved(context.Background(), event)
+			}
+		}
+		fmt.Printf(`{"level":"info","msg":"forecast_projection_replayed"}` + "\n")
 	} else {
 		fmt.Printf(`{"level":"error","msg":"failed_to_read_events","error":"%v"}`+"\n", err)
 	}
@@ -65,7 +78,7 @@ func main() {
 
 	// M6.3: Initialize Polling Orchestrator
 	// Use the new Poller to drive the provider loop
-	poller := engine.NewPoller(st, 10*time.Second) // Poll every 10s for demo
+	poller := engine.NewPoller(st, 10*time.Second, forecaster) // Poll every 10s for demo
 	// Register the mock provider (M6.2)
 	// IMPORTANT: For the demo, we assume the mock provider is available in the 'pkg/provider' package via a factory or similar,
 	// but currently it resides in 'pkg/provider/mock.go' which is in package 'provider'.

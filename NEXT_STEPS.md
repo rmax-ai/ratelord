@@ -1,27 +1,22 @@
-# NEXT STEPS: Phase 4 - Implementation & Verification
+# NEXT STEPS: Phase 5 - Testing & Validation
 
-The provider integration is now complete, with polling orchestrator implemented. The next step is to implement the forecasting engine to predict time-to-exhaustion.
+Epic 7 (Forecasting) is now complete. The forecast loop is integrated into the main engine, computing predictions after each `usage_observed` event.
 
-## Current Objective: Epic 7 - Forecasting (Prediction Engine)
+## Next Objectives
 
-We need to implement the forecast models and loop to compute predictions based on usage history.
+Move to Phase 5: Testing & Validation.
 
-### Tasks for Next Session:
-1. **Implement Forecast Model Interface**:
-   - Create `pkg/engine/forecast/types.go`.
-   - Define `Model` interface (Inputs -> Distribution).
-   - M7.1: Forecast Model Interface.
+- **Epic 8: Testing Infrastructure** - Implement comprehensive test suites for all components.
+- **Epic 9: Integration Testing** - End-to-end testing of the full daemon loop.
+- **Epic 10: Performance & Load Testing** - Validate prediction accuracy and system performance.
 
-2. **Implement Linear Burn Model**:
-   - Implement simple linear regression model.
-   - Calculate P99 time-to-exhaustion based on recent history.
-   - M7.2: Linear Burn Model.
+## Immediate Next Task
 
-3. **Implement Forecast Loop**:
-   - Trigger forecasts after `usage_observed` events.
-   - Emit `forecast_computed` events.
-   - M7.3: Forecast Loop.
+1. **Run Integration Test**: Start the daemon and verify forecast events are emitted.
+2. **Validate Predictions**: Check that forecasts are reasonable and events are stored correctly.
+3. **Update API**: If needed, add endpoints to query forecasts.
 
 ## Reference
-- **Plan**: `TASKS.md` (Epic 7)
+- **Completed**: `TASKS.md` (Epic 7)
 - **Architecture**: `ARCHITECTURE.md` (Prediction Engine)
+- **Test Strategy**: `TEST_STRATEGY.md`

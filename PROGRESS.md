@@ -29,6 +29,11 @@
 | pkg/engine/policy.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/provider/types.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/provider/mock.go | COMMITTED | Agent | 2026-01-25 |
-| cmd/ratelord/main.go | COMMITTED | Agent | 2026-01-25 |
-| TASKS.md | UPDATED | Orchestrator | 2026-01-25 |
-| Epic 6: Provider Integration | COMPLETED | Agent | 2026-01-25 |
+| pkg/engine/forecast/types.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/engine/forecast/linear.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/engine/forecast/linear_test.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/engine/forecast/projection.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/engine/forecast/service.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/engine/poller.go | UPDATED | Agent | 2026-01-25 |
+| cmd/ratelord-d/main.go | UPDATED | Agent | 2026-01-25 |
+| Epic 7: Forecasting | COMPLETED | Agent | 2026-01-25 |

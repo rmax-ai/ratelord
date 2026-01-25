@@ -21,3 +21,4 @@
 - **Action**: Committed M2.1 code changes to git repository.
 - [x] **M2.2 & M2.3: Event Reader & Replay** (Epic 2) - Implemented `ReadEvents` in `pkg/store/sqlite.go` and verified with comprehensive tests in `pkg/store/store_test.go`.
 - [x] **M4.1 & M4.2: Identity & CLI** (Epic 4) - Implemented `ratelord identity add`, `POST /v1/identities` (event write), and `GET /v1/identities` (projection read). Verified end-to-end registration and state restoration.
+- [x] **Epic 7: Forecasting** - Implemented forecast model interface, linear burn model, and forecast loop integration. Added `pkg/engine/forecast/` package with types, linear model, projection for history, and service for event emission. Wired into poller and main daemon.
