@@ -7,7 +7,10 @@
 ## Immediate Actions
 
 1. **Phase 7: Real Providers (Continued)**:
-   - Focus on **M16: Dogfooding & Tuning**.
+   - **M16: Dogfooding & Tuning**:
+     - Setup `deploy/dogfood` with real policy/scripts (M16.1).
+     - Execute operational run (M16.2).
+     - Analyze forecast accuracy on real data (M16.3).
    - Deploy `ratelord-d` internally to monitor CI/CD tokens.
    - Tune the linear burn model based on real bursty data.
 

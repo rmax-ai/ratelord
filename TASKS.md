@@ -219,8 +219,15 @@ Focus: Track OpenAI usage limits (RPM, TPM) via header inspection or Tier API.
     - *Refinement*: OpenAI's headers `x-ratelimit-limit-requests` etc. are returned on requests. We might need a "Passive" provider that ingests data from a sidecar/proxy, or we proactively poll a lightweight endpoint to check headers.
 
 ## Epic 16: Dogfooding & Tuning
-Focus: Internal usage to validate stability.
-- [ ] **M16.1: Internal Deployment**
-    - Run `ratelord-d` monitoring the `ratelord` repo CI/CD tokens.
-- [ ] **M16.2: Model Tuning**
-    - Adjust linear burn model based on real bursty data.
+Focus: Internal usage to validate stability using real GitHub tokens.
+- [ ] **M16.1: Dogfood Environment Setup**
+    - Create `deploy/dogfood` directory.
+    - Create `deploy/dogfood/policy.json` (or `policy.yaml`) monitoring GitHub rate limits for the current user/token.
+    - Create `deploy/dogfood/run.sh` to boot the daemon with this local configuration.
+- [ ] **M16.2: Operational Run**
+    - Execute `run.sh` locally.
+    - Generate usage (via `gh` CLI or `ratelord` identity) to populate the event log.
+    - *Verify*: Ensure `provider_poll_observed` and `usage_observed` events are recorded.
+- [ ] **M16.3: Analysis & Tuning**
+    - Analyze the resulting event log to compare `forecast_computed` vs actual usage trends.
+    - Determine if the Linear Burn Model needs tuning for bursty traffic.
