@@ -62,7 +62,8 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
 
   # Run opencode with the orchestrator agent.
   # Run in background to monitor for inactivity (5 minute timeout).
-  ($OPENCODE_BIN $OPENCODE_COMMAND 2>&1 | tee -a "$LOG_FILE" 2>&1) &
+  ($OPENCODE_BIN $OPENCODE_COMMAND 2>&1 | tee -a "$LOG_FILE" 2>&1
+   grep -v INFO) &
   PID=$!
 
   TIMEOUT=300
