@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("sqlite3", "deploy/dogfood/ratelord.db")
+	db, err := sql.Open("sqlite3", "./ratelord.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,6 +27,20 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var forecastComputed int
+	err = db.QueryRow("SELECT count(*) FROM events WHERE event_type = 'forecast_computed'").Scan(&forecastComputed)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var usageObserved int
+	err = db.QueryRow("SELECT count(*) FROM events WHERE event_type = 'usage_observed'").Scan(&usageObserved)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Printf("Total events: %d\n", total)
 	fmt.Printf("Provider poll observed events: %d\n", pollObserved)
+	fmt.Printf("Usage observed events: %d\n", usageObserved)
+	fmt.Printf("Forecast computed events: %d\n", forecastComputed)
 }
