@@ -35,7 +35,7 @@ Clients (TUI/Web) do not mutate state. They subscribe to read models and render:
 
 Responsibilities:
 
-- Provider integration orchestration (poll scheduling, cursors, backoff).
+- Provider integration orchestration (poll scheduling, state persistence, backoff).
 - Event ingestion and normalization (validate, de-dup, attribute identity/scope/pool).
 - Append-only event log writes (backed by SQLite in WAL mode).
 - Projection maintenance (materialized read models).
@@ -216,6 +216,7 @@ Typical observation categories:
 - Observations are normalized into domain events and appended to the event log.
 - Events must be immutable and self-describing (type + schema version + payload).
 - De-duplication and idempotency occur at ingestion (e.g., provider cursor + hash of observation).
+- Provider state (cursors/watermarks) is persisted via `provider_poll_observed` events to ensure continuity across restarts.
 
 ### 3) Projections / Snapshots (Derived Read Models)
 

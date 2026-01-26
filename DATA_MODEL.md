@@ -115,7 +115,8 @@ A provider poll occurred and produced an observation.
 Payload (typical):
 
 - `provider_id`
-- `poll_id` or provider cursor (opaque)
+- `poll_id`: unique identifier for this poll cycle
+- `state`: opaque provider-specific state blob (cursors, watermarks) for next poll
 - `status`: success/partial
 - `observation_summary`: high-level counts/markers (not raw secrets)
 - `raw_ref`: optional reference to locally stored raw data if explicitly enabled and scrubbed

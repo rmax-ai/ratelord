@@ -48,6 +48,9 @@ func main() {
 	// M5.1: Initialize Usage Projection
 	usageProj := engine.NewUsageProjection()
 
+	// Initialize Provider Projection
+	providerProj := engine.NewProviderProjection()
+
 	// M7.3: Initialize Forecast Projection and Forecaster
 	forecastProj := forecast.NewForecastProjection(20) // Window size of 20 points
 	linearModel := &forecast.LinearModel{}
@@ -69,6 +72,9 @@ func main() {
 		} else {
 			fmt.Printf(`{"level":"info","msg":"usage_projection_replayed","events_count":%d}`+"\n", len(events))
 		}
+		// Replay provider events
+		providerProj.Replay(events)
+		fmt.Printf(`{"level":"info","msg":"provider_projection_replayed","events_count":%d}`+"\n", len(events))
 		// Replay forecast projection
 		for _, event := range events {
 			if event.EventType == store.EventTypeUsageObserved {
@@ -101,6 +107,10 @@ func main() {
 	// So we can instantiate it directly.
 	mockProv := provider.NewMockProvider("mock-provider-1")
 	poller.Register(mockProv)
+
+	// Restore provider state from event stream
+	poller.RestoreProviders(providerProj.GetState)
+	fmt.Println(`{"level":"info","msg":"restored_provider_state_from_event_stream"}`)
 
 	// Start Poller in background
 	pollerCtx, pollerCancel := context.WithCancel(context.Background())

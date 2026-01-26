@@ -17,6 +17,7 @@ type PollResult struct {
 
 	// Usage data
 	Usage []UsageObservation
+	State []byte
 }
 
 // UsageObservation represents a single point of usage data
@@ -35,4 +36,7 @@ type Provider interface {
 
 	// Poll retrieves the current usage state from the provider
 	Poll(ctx context.Context) (PollResult, error)
+
+	// Restore restores the provider state from a previous poll
+	Restore(state []byte) error
 }

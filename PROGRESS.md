@@ -6,10 +6,10 @@
 | PROJECT_SEED.md | SUPERSEDED | Orchestrator | 2024-05-22 |
 | VISION.md | COMPLETED | Orchestrator | 2024-05-22 |
 | CONSTITUTION.md | COMPLETED | Orchestrator | 2026-01-25 |
-| ARCHITECTURE.md | COMPLETED | Orchestrator | 2026-01-25 |
+| ARCHITECTURE.md | UPDATED | Docs | 2026-01-26 |
 | CONSTRAINTS.md | COMPLETED | Orchestrator | 2026-01-25 |
 | IDENTITIES.md | COMPLETED | Orchestrator | 2026-01-25 |
-| DATA_MODEL.md | COMPLETED | Orchestrator | 2026-01-25 |
+| DATA_MODEL.md | UPDATED | Docs | 2026-01-26 |
 | PREDICTION.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | POLICY_ENGINE.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | AGENT_CONTRACT.md | COMPLETED | Sub-Agent | 2026-01-25 |

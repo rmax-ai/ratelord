@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -74,6 +75,12 @@ func (p *MockProvider) ID() ProviderID {
 	return p.id
 }
 
+func (p *MockProvider) Restore(state []byte) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return json.Unmarshal(state, &p.pools)
+}
+
 func (p *MockProvider) Poll(ctx context.Context) (PollResult, error) {
 	// Simulate network latency
 	select {
@@ -111,10 +118,16 @@ func (p *MockProvider) Poll(ctx context.Context) (PollResult, error) {
 		})
 	}
 
+	state, err := json.Marshal(p.pools)
+	if err != nil {
+		return PollResult{}, fmt.Errorf("failed to marshal state: %w", err)
+	}
+
 	return PollResult{
 		ProviderID: p.id,
 		Status:     "success",
 		Timestamp:  now,
 		Usage:      observations,
+		State:      state,
 	}, nil
 }

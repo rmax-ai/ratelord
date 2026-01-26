@@ -32,13 +32,6 @@ func NewPoller(store *store.Store, interval time.Duration, forecaster *forecast.
 	}
 }
 
-// Register adds a provider to the polling list
-func (p *Poller) Register(provider provider.Provider) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.providers = append(p.providers, provider)
-}
-
 // GetProvider returns a registered provider by ID (helper for testing/debugging)
 func (p *Poller) GetProvider(id provider.ProviderID) provider.Provider {
 	p.mu.RLock()
@@ -49,6 +42,33 @@ func (p *Poller) GetProvider(id provider.ProviderID) provider.Provider {
 		}
 	}
 	return nil
+}
+
+// RestoreProviders restores state for all registered providers using the provided lookup function
+func (p *Poller) RestoreProviders(stateLookup func(id provider.ProviderID) []byte) {
+	p.mu.RLock()
+	providers := make([]provider.Provider, len(p.providers))
+	copy(providers, p.providers)
+	p.mu.RUnlock()
+
+	for _, prov := range providers {
+		state := stateLookup(prov.ID())
+		if state != nil {
+			err := prov.Restore(state)
+			if err != nil {
+				log.Printf("Failed to restore state for provider %s: %v", prov.ID(), err)
+			} else {
+				log.Printf("Successfully restored state for provider %s", prov.ID())
+			}
+		}
+	}
+}
+
+// Register adds a provider to the poller
+func (p *Poller) Register(prov provider.Provider) {
+	p.mu.Lock()
+	p.providers = append(p.providers, prov)
+	p.mu.Unlock()
 }
 
 // Start begins the polling loop in a background goroutine
@@ -120,6 +140,7 @@ func (p *Poller) poll(ctx context.Context, prov provider.Provider) {
 	pollPayload := map[string]interface{}{
 		"provider_id": string(result.ProviderID),
 		"status":      result.Status,
+		"state":       result.State,
 		"observation_summary": map[string]interface{}{
 			"usage_count": len(result.Usage),
 		},
