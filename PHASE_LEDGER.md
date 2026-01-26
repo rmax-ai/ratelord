@@ -37,3 +37,6 @@
 - **Action**: Defined Phase 7 (Real Providers) in `TASKS.md`, including Epic 14 (GitHub) and Epic 15 (OpenAI). Updated `NEXT_STEPS.md` to prioritize GitHub integration.
 - **Action**: Refined Epic 16 (Dogfooding & Tuning) into concrete steps (M16.1, M16.2, M16.3).
 - [x] **M16.1 & M16.2: Dogfood Setup & Run** (Epic 16) - Created `deploy/dogfood` environment with real policy and run scripts. Executed operational run and verified event logging (3 events, 2 polls) with `verify_events.go`.
+- [x] **M16.3: Analysis & Tuning** (Epic 16) - Analyzed forecast accuracy with `analyze_forecast.go`. The linear burn model correctly predicted exhaustion times based on synthetic bursty traffic, though with expected variance due to the randomness of the simulation.
+
+## 2026-01-26

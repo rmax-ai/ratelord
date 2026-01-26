@@ -228,6 +228,6 @@ Focus: Internal usage to validate stability using real GitHub tokens.
     - Execute `run.sh` locally.
     - Generate usage (via `gh` CLI or `ratelord` identity) to populate the event log.
     - *Verify*: Ensure `provider_poll_observed` and `usage_observed` events are recorded.
-- [ ] **M16.3: Analysis & Tuning**
+- [x] **M16.3: Analysis & Tuning**
     - Analyze the resulting event log to compare `forecast_computed` vs actual usage trends.
     - Determine if the Linear Burn Model needs tuning for bursty traffic.
