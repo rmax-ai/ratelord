@@ -70,10 +70,21 @@ func TestPoll_Success(t *testing.T) {
 		t.Errorf("Expected 2 usages, got %d", len(result.Usage))
 	}
 	// Check core
-	core := result.Usage[0]
-	if core.PoolID != "github:core" {
-		t.Errorf("Expected pool github:core, got %s", core.PoolID)
+	// Note: The order of iteration over map is random in Go, so we can't guarantee core is first.
+	// We need to find "github:core".
+	var core *provider.UsageObservation
+	for _, u := range result.Usage {
+		if u.PoolID == "github:core" {
+			v := u // Create a copy to take address
+			core = &v
+			break
+		}
 	}
+
+	if core == nil {
+		t.Fatalf("Expected pool github:core not found")
+	}
+
 	if core.Used != 1 {
 		t.Errorf("Expected used 1, got %d", core.Used)
 	}
