@@ -194,7 +194,7 @@ Focus: Ensure drift detection and provider state survive restarts.
     - [x] Tag v1.0.0.
     - [x] Write Release Notes.
 - [x] **M13.2: Deployment Guide**
-    - [x] Write DEPLOYMENT.md (Systemd, Docker, K8s).
+    - Write DEPLOYMENT.md (Systemd, Docker, K8s).
 
 # Phase 7: Day 2 Operations - Real Providers
 
@@ -233,3 +233,15 @@ Focus: Internal usage to validate stability using real GitHub tokens.
 - [x] **M16.3: Analysis & Tuning**
     - Analyze the resulting event log to compare `forecast_computed` vs actual usage trends.
     - Determine if the Linear Burn Model needs tuning for bursty traffic.
+
+# Phase 8: Expansion
+
+## Epic 17: Client SDKs
+Focus: Language-specific bindings for the Agent Contract (Intent Negotiation).
+- [ ] **M17.1: SDK Specification**
+    - Draft `CLIENT_SDK_SPEC.md`.
+    - Define interfaces for `Ask`, `Propose`, `Feedback`.
+- [ ] **M17.2: Go SDK**
+    - Implement `pkg/client`.
+    - Provide `NewClient(httpEndpoint)`.
+    - Implement `Ask(ctx, intent)`.
