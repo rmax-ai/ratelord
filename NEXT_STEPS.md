@@ -7,9 +7,9 @@
 ## Immediate Actions
 
 1. **Phase 7: Real Providers (Continued)**:
-   - Focus on **M15: OpenAI Provider**.
-   - Create `pkg/provider/openai/` and implement the interface.
-   - Requires research on best "passive" vs "active" strategy for OpenAI (headers vs dashboard).
+   - Focus on **M16: Dogfooding & Tuning**.
+   - Deploy `ratelord-d` internally to monitor CI/CD tokens.
+   - Tune the linear burn model based on real bursty data.
 
 ## Reference
 - **Release Notes**: `RELEASE_NOTES.md`

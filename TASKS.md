@@ -210,9 +210,9 @@ Focus: Implement the first real provider to track GitHub API rate limits (Core, 
 
 ## Epic 15: OpenAI Provider
 Focus: Track OpenAI usage limits (RPM, TPM) via header inspection or Tier API.
-- [ ] **M15.1: OpenAI Configuration**
+- [x] **M15.1: OpenAI Configuration**
     - Define config structure (API Key, Org ID).
-- [ ] **M15.2: OpenAI Poller**
+- [x] **M15.2: OpenAI Poller**
     - Implement `pkg/provider/openai/openai.go`.
     - Note: OpenAI limits are often response-header based, necessitating a "Probe" or "Proxy" approach, or just polling the `dashboard/billing` hidden APIs if available (unlikely stable).
     - *Decision*: Start with a "Probe" mode or just manual quota setting + local counting if API is unavailable.
