@@ -13,6 +13,7 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
 	"github.com/rmax-ai/ratelord/pkg/provider"
+	"github.com/rmax-ai/ratelord/pkg/provider/github"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -90,7 +91,9 @@ func main() {
 	policyEngine := engine.NewPolicyEngine(usageProj)
 
 	// M9.3: Initial Policy Load
+	var policyCfg *engine.PolicyConfig
 	if cfg, err := engine.LoadPolicyConfig(policyPath); err == nil {
+		policyCfg = cfg
 		policyEngine.UpdatePolicies(cfg)
 		fmt.Printf(`{"level":"info","msg":"policy_loaded","path":"%s","policies_count":%d}`+"\n", policyPath, len(cfg.Policies))
 	} else if !os.IsNotExist(err) {
@@ -107,6 +110,22 @@ func main() {
 	// So we can instantiate it directly.
 	mockProv := provider.NewMockProvider("mock-provider-1")
 	poller.Register(mockProv)
+
+	// Register GitHub Providers (M14.2)
+	if policyCfg != nil {
+		for _, ghCfg := range policyCfg.Providers.GitHub {
+			token := ""
+			if ghCfg.TokenEnvVar != "" {
+				token = os.Getenv(ghCfg.TokenEnvVar)
+				if token == "" {
+					fmt.Printf(`{"level":"warn","msg":"github_token_env_var_empty","env_var":"%s","provider_id":"%s"}`+"\n", ghCfg.TokenEnvVar, ghCfg.ID)
+				}
+			}
+			ghProv := github.NewGitHubProvider(provider.ProviderID(ghCfg.ID), token, ghCfg.EnterpriseURL)
+			poller.Register(ghProv)
+			fmt.Printf(`{"level":"info","msg":"github_provider_registered","id":"%s"}`+"\n", ghCfg.ID)
+		}
+	}
 
 	// Restore provider state from event stream
 	poller.RestoreProviders(providerProj.GetState)
