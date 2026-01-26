@@ -95,6 +95,21 @@ The URL is the source of truth for navigation state to enable deep-linking.
 *   **SimulationRunner**: "Run" button + progress indicator.
 *   **ComparisonView**: Split view showing `Actual` vs `Simulated` outcomes.
 
+### 5.5 Identity Explorer (/identities)
+*   **Purpose**: Visualize the hierarchical relationship between Agents, Scopes, and Pools.
+*   **Data Transformation**: The API (`GET /v1/identities`) returns a flat list of identities. The UI must reconstruct the hierarchy client-side:
+    *   **Roots**: Identities with no parent are root nodes (typically Agents).
+    *   **Children**: Identities where `parent_id` matches a root become children (Scopes).
+    *   **Leaves**: Deepest level nodes are typically Pools.
+*   **Visualizer**:
+    *   **TreeTable**: Primary view. A collapsible table where rows can be expanded to show children.
+    *   **Columns**:
+        *   **ID**: The identity identifier (e.g., `agent:foo`).
+        *   **Kind**: Icon/Badge indicating Agent, Scope, or Pool.
+        *   **Current Usage**: Sparkline or progress bar (if usage data is linked).
+        *   **Last Active**: Relative timestamp (e.g., "2m ago").
+*   **Interaction**: Clicking a row navigates to `/history` filtered by that identity ID.
+
 ## 6. State Management & Data Sync
 
 ### 6.1 Server State (TanStack Query)

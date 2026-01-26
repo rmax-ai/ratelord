@@ -25,9 +25,9 @@ export interface Event {
 }
 
 export interface Identity {
-  identity_id: string;
-  provider_id?: string;
-  // Add more fields as needed
+  id: string;
+  kind: string;
+  labels: Record<string, string>;
 }
 
 export interface Status {
