@@ -36,8 +36,16 @@ export interface Status {
 }
 
 export const api = {
-  async fetchEvents(): Promise<Event[]> {
-    const response = await fetch(`${API_BASE}/events`);
+  async fetchEvents(params?: { from?: string; to?: string; limit?: number }): Promise<Event[]> {
+    const searchParams = new URLSearchParams();
+    if (params?.from) searchParams.append('from', params.from);
+    if (params?.to) searchParams.append('to', params.to);
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+    const queryString = searchParams.toString();
+    const url = queryString ? `${API_BASE}/events?${queryString}` : `${API_BASE}/events`;
+
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch events');
     return response.json();
   },
