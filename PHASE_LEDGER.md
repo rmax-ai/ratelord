@@ -25,3 +25,8 @@
 - [x] **M8.1 & M8.2: TUI Foundation & Dashboard** (Epic 8) - Initialized `ratelord-tui` with Bubbletea, implemented polling loop, connected to daemon, and built dashboard view with identity list and live event stream.
 - [x] **M10.1: End-to-End Simulation Script** (Epic 10) - Implemented `ratelord-sim` tool to generate realistic traffic patterns and verify system stability.
 - [x] **M10.4: Final Acceptance Run** (Epic 10) - Executed full acceptance suite. Identified critical issues in Policy Engine and Drift Persistence (see `ACCEPTANCE_REPORT.md`). Defined Phase 5 Remediation plan.
+
+## 2026-01-26
+- **Action**: Verified TUI backend: built `ratelord-d` and `ratelord-tui`, started daemon, confirmed health check and event streaming, killed cleanly.
+- **Action**: Updated NEXT_STEPS.md with manual TUI verification instructions.
+- **Action**: Marked M12.2 as ready for manual verification in PROGRESS.md and TASKS.md.

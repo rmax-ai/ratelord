@@ -182,5 +182,5 @@ Focus: Ensure policies are loaded, hot-reloaded, and correctly evaluated to enab
 Focus: Ensure drift detection and provider state survive restarts.
 - [ ] **M12.1: Persist Provider State**
     - Ensure provider offsets/drift are saved to SQLite.
-- [ ] **M12.2: TUI Verification**
+- [x] **M12.2: TUI Verification**
     - Manually verify TUI dashboard connects and displays data.

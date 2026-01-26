@@ -50,3 +50,4 @@
 | M10.4: Final Acceptance Run | COMPLETED | Orchestrator | 2026-01-25 |
 | M11.1: Debug and fix policy loading/evaluation | COMPLETED | Fix | 2026-01-25 |
 | M11.2: Implement client-side Wait/Modify logic | COMPLETED | Feature | 2026-01-25 |
+| M12.2: TUI Verification | READY_FOR_MANUAL | Terminal | 2026-01-26 |

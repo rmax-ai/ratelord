@@ -14,9 +14,11 @@
    - Task: Ensure `Poller` or `Provider` exposes a way to "restore" state from the replayed event stream (e.g., last seen cursor/timestamp).
 
 2. **TUI Verification (M12.2)**:
-   - Run the daemon (`go run cmd/ratelord-d/main.go`).
-   - Run the TUI (`go run cmd/ratelord-tui/main.go`).
-   - Verify it looks correct. (Manual step for user, or automated if possible).
+    - Backend verified: daemon builds, starts, serves health/events, and polls providers.
+    - Run the daemon: `go run cmd/ratelord-d/main.go` (or `./ratelord-d` if built).
+    - In another terminal, run the TUI: `go run cmd/ratelord-tui/main.go` (or `./ratelord-tui`).
+    - Verify the TUI displays usage bars, event log, and updates in real-time.
+    - Manual step: Confirm visuals and interactivity work as expected.
 
 ## Reference
 - **Report**: `ACCEPTANCE_REPORT.md`
