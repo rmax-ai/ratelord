@@ -59,4 +59,8 @@
 | Epic 15: OpenAI Provider | COMPLETED | Agent | 2026-01-26 |
 | pkg/client/types.go | CREATED | Implement | 2026-01-26 |
 | pkg/client/client.go | CREATED | Implement | 2026-01-26 |
-| Epic 17: Client SDKs | IN_PROGRESS | Orchestrator | 2026-01-26 |
+| pkg/client/client_test.go | COMMITTED | Implement | 2026-01-26 |
+| examples/go/basic/main.go | COMMITTED | Implement | 2026-01-26 |
+| examples/go/basic/README.md | COMMITTED | Implement | 2026-01-26 |
+| M17.2: Go SDK | COMPLETED | Orchestrator | 2026-01-26 |
+| Epic 17: Client SDKs | COMPLETED | Orchestrator | 2026-01-26 |
