@@ -35,3 +35,5 @@
 - **Action**: Updated NEXT_STEPS.md with manual TUI verification instructions.
 - **Action**: Marked M12.2 as ready for manual verification in PROGRESS.md and TASKS.md.
 - **Action**: Defined Phase 7 (Real Providers) in `TASKS.md`, including Epic 14 (GitHub) and Epic 15 (OpenAI). Updated `NEXT_STEPS.md` to prioritize GitHub integration.
+- **Action**: Refined Epic 16 (Dogfooding & Tuning) into concrete steps (M16.1, M16.2, M16.3).
+- [x] **M16.1 & M16.2: Dogfood Setup & Run** (Epic 16) - Created `deploy/dogfood` environment with real policy and run scripts. Executed operational run and verified event logging (3 events, 2 polls) with `verify_events.go`.
