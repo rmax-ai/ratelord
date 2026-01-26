@@ -8,10 +8,12 @@
 
 1. **Phase 7: Real Providers (Continued)**:
    - **M16: Dogfooding & Tuning**:
-     - Setup `deploy/dogfood` with real policy/scripts (M16.1).
-     - Execute operational run (M16.2).
-     - Analyze forecast accuracy on real data (M16.3).
-   - Deploy `ratelord-d` internally to monitor CI/CD tokens.
+     - [x] Setup `deploy/dogfood` with real policy/scripts (M16.1).
+     - [x] Execute operational run (M16.2).
+     - [ ] **Analyze forecast accuracy on real data (M16.3)**:
+       - Run `deploy/dogfood/run.sh` for a longer period (e.g. 1 hour) or simulate bursty usage.
+       - Query `forecast_computed` events.
+       - Compare predicted `exhaustion_time` vs actual usage slope.
    - Tune the linear burn model based on real bursty data.
 
 ## Reference
