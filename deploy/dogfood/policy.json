@@ -1,0 +1,28 @@
+{
+  "policies": [
+    {
+      "id": "github-core-hard-limit",
+      "scope": "global",
+      "type": "hard",
+      "limit": 5000,
+      "rules": [
+        {
+          "name": "deny-exceeded-limit",
+          "condition": "remaining < 0",
+          "action": "deny",
+          "params": {
+            "reason": "hard limit exceeded for GitHub core requests"
+          }
+        }
+      ]
+    }
+  ],
+  "providers": {
+    "github": [
+      {
+        "id": "github-main",
+        "token_env_var": "GITHUB_TOKEN"
+      }
+    ]
+  }
+}

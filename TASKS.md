@@ -220,7 +220,7 @@ Focus: Track OpenAI usage limits (RPM, TPM) via header inspection or Tier API.
 
 ## Epic 16: Dogfooding & Tuning
 Focus: Internal usage to validate stability using real GitHub tokens.
-- [ ] **M16.1: Dogfood Environment Setup**
+- [x] **M16.1: Dogfood Environment Setup**
     - Create `deploy/dogfood` directory.
     - Create `deploy/dogfood/policy.json` (or `policy.yaml`) monitoring GitHub rate limits for the current user/token.
     - Create `deploy/dogfood/run.sh` to boot the daemon with this local configuration.
