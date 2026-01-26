@@ -224,7 +224,7 @@ Focus: Internal usage to validate stability using real GitHub tokens.
     - Create `deploy/dogfood` directory.
     - Create `deploy/dogfood/policy.json` (or `policy.yaml`) monitoring GitHub rate limits for the current user/token.
     - Create `deploy/dogfood/run.sh` to boot the daemon with this local configuration.
-- [ ] **M16.2: Operational Run**
+- [x] **M16.2: Operational Run**
     - Execute `run.sh` locally.
     - Generate usage (via `gh` CLI or `ratelord` identity) to populate the event log.
     - *Verify*: Ensure `provider_poll_observed` and `usage_observed` events are recorded.
