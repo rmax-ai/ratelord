@@ -184,3 +184,10 @@ Focus: Ensure drift detection and provider state survive restarts.
     - Ensure provider offsets/drift are saved to SQLite.
 - [x] **M12.2: TUI Verification**
     - Manually verify TUI dashboard connects and displays data.
+
+# Phase 6: Release Prep
+
+## Epic 13: 1.0.0 Release
+- [x] **M13.1: Release Tagging & Notes**
+    - Tag v1.0.0.
+    - Write Release Notes.
