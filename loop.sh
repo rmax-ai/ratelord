@@ -48,6 +48,10 @@ echo -e "${BLUE}📂 Logs: $LOG_DIR/${NC}"
 trap 'echo -e "\n${YELLOW}🛑 Loop interrupted by user. Cleaning up...${NC}"; exit 1' SIGINT
 
 START_TIME=$(date +%s)
+SUM_DURATION=0
+MIN_DURATION=999999
+MAX_DURATION=0
+COMPLETED_ITERS=0
 
 for ((i=1; i<=MAX_ITERATIONS; i++)); do
   ITER_START=$(date +%s)
@@ -114,6 +118,12 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
 
   ITER_END=$(date +%s)
   DURATION=$((ITER_END - ITER_START))
+
+  SUM_DURATION=$((SUM_DURATION + DURATION))
+  ((COMPLETED_ITERS++))
+  (( DURATION < MIN_DURATION )) && MIN_DURATION=$DURATION
+  (( DURATION > MAX_DURATION )) && MAX_DURATION=$DURATION
+
   echo -e "${GREEN}Iteration $i complete (${DURATION}s). Continuing...${NC}"
 done
 
@@ -121,6 +131,17 @@ END_TIME=$(date +%s)
 TOTAL_DURATION=$((END_TIME - START_TIME))
 
 echo -e "\n${BLUE}🏁 Loop finished in ${TOTAL_DURATION}s.${NC}"
+
+if (( COMPLETED_ITERS > 0 )); then
+  AVG_DURATION=$(( SUM_DURATION / COMPLETED_ITERS ))
+  echo -e "${BLUE}📊 Stats:${NC}"
+  echo -e "   - Iterations: $COMPLETED_ITERS"
+  echo -e "   - Total time: ${TOTAL_DURATION}s"
+  echo -e "   - Avg time:   ${AVG_DURATION}s"
+  echo -e "   - Min time:   ${MIN_DURATION}s"
+  echo -e "   - Max time:   ${MAX_DURATION}s"
+fi
+
 if (( i > MAX_ITERATIONS )); then
   echo -e "${YELLOW}🛑 Reached maximum iterations ($MAX_ITERATIONS).${NC}" | tee -a "$LOG_DIR/final_status.log"
 else
