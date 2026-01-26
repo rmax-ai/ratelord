@@ -16,6 +16,7 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/provider/github"
 	"github.com/rmax-ai/ratelord/pkg/provider/openai"
 	"github.com/rmax-ai/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/web"
 )
 
 var (
@@ -153,6 +154,16 @@ func main() {
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
 	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller)
+
+	// Load and set web assets
+	webAssets, err := web.Assets()
+	if err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_load_web_assets","error":"%v"}`+"\n", err)
+	} else {
+		srv.SetStaticFS(webAssets)
+		fmt.Println(`{"level":"info","msg":"web_assets_loaded"}`)
+	}
+
 	go func() {
 		if err := srv.Start(); err != nil {
 			fmt.Printf(`{"level":"error","msg":"server_error","error":"%v"}`+"\n", err)

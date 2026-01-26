@@ -15,6 +15,9 @@ LDFLAGS := -X main.Version=$(VERSION) \
 generate:
 	go generate ./...
 
+web-build:
+	cd web && npm install && npm run build
+
 build: generate $(BINARIES)
 
 ratelord: cmd/ratelord/main.go
@@ -24,7 +27,7 @@ ifeq ($(shell uname),Darwin)
 	@echo "Signed $@ for macOS"
 endif
 
-ratelord-d: cmd/ratelord-d/main.go
+ratelord-d: web-build cmd/ratelord-d/main.go
 	go build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$@ ./cmd/ratelord-d
 ifeq ($(shell uname),Darwin)
 	@codesign -s - -f $(BUILD_DIR)/$@ 2>/dev/null || true
@@ -53,6 +56,7 @@ install: generate
 
 clean:
 	rm -f $(BUILD_DIR)/*
+	rm -rf web/dist web/node_modules
 
 test:
 	go test ./...

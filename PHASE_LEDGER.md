@@ -37,4 +37,6 @@
 - [x] **M16.1 & M16.2: Dogfood Setup & Run** (Epic 16) - Created `deploy/dogfood` environment with real policy and run scripts. Executed operational run and verified event logging (3 events, 2 polls) with `verify_events.go`.
 - [x] **M16.3: Analysis & Tuning** (Epic 16) - Analyzed forecast accuracy with `analyze_forecast.go`. The linear burn model correctly predicted exhaustion times based on synthetic bursty traffic, though with expected variance due to the randomness of the simulation.
 - [x] **M13.2: Deployment Guide** (Epic 13) - Drafted `DEPLOYMENT.md` covering Systemd, Docker, and Kubernetes Sidecar patterns.
-- [x] **M17.1: SDK Specification** (Epic 17) - Drafted `CLIENT_SDK_SPEC.md` defining the SDK interface, contract, and architecture for Go, Python, and TS.
+- [x] **M17.2: Go SDK** (Epic 17) - Implemented `pkg/client` with types, client, and tests. Created example usage in `examples/go/basic/`.
+- [x] **M17.3: Python SDK** (Epic 17) - Implemented `sdk/python` package with client, tests, and README. Verified PyPI structure and fail-closed behavior.
+- **Action**: Implemented Web UI Dashboard View: Created API client (`web/src/lib/api.ts`), AppShell layout (`web/src/layouts/AppShell.tsx`), Dashboard page (`web/src/pages/Dashboard.tsx`), and updated App.tsx for routing. Built successfully with TypeScript and Vite.

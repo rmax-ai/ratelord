@@ -2,91 +2,130 @@
 
 ## 1. Philosophy & Purpose
 
-The Web UI is the secondary, analytical interface for `ratelord`. Unlike the TUI, which focuses on real-time operations and "now," the Web UI is designed for **historical analysis**, **scenario simulation**, and **broad-scale monitoring**.
+The Web UI is the **analytical** interface for `ratelord`. While the TUI handles real-time operations, the Web UI focuses on **historical analysis**, **scenario simulation**, and **broad-scale monitoring**.
 
-It answers questions that require deep temporal context or hypothetical reasoning:
-*   "Why did we exhaust the search quota last Tuesday?"
-*   "What happens if we double our agent count next week?"
-*   "How has our burn rate efficiency trended over the last 30 days?"
+**Core Mission**: Answer "Why did this happen?" and "What if we change X?" using deep temporal context.
 
-### 1.1 Key Distinctions
-| Feature | TUI (Operational) | Web UI (Analytical) |
+**Key Distinctions**:
+*   **Time Horizon**: Historical (days/weeks) vs. TUI's Real-time (minutes).
+*   **Interaction**: Deep drill-down and simulation vs. TUI's observation.
+*   **Write Access**: Read-only (except local simulation configs).
+
+## 2. Technology Stack
+
+We enforce a strict, modern stack to ensure maintainability and performance.
+
+*   **Language**: TypeScript
+*   **Framework**: React 18+
+*   **Build Tool**: Vite
+*   **Styling**: Tailwind CSS (Utility-first)
+*   **Routing**: React Router v6
+*   **State/Fetching**: TanStack Query (React Query)
+*   **Visualization**: Recharts (for time-series), React Flow (for node graphs - optional but recommended for Identity Explorer)
+*   **Icons**: Lucide React
+
+## 3. Architecture & Build Pipeline
+
+The Web UI is a Single Page Application (SPA) designed to be embedded directly into the `ratelord-d` binary.
+
+### 3.1 Build Process
+1.  **Source**: `web/` directory in the repo root.
+2.  **Build**: `npm run build` generates static assets (HTML, CSS, JS) into `web/dist`.
+3.  **Embedding**:
+    *   Go server uses `//go:embed` to bundle `web/dist` into the binary.
+    *   A generic HTTP handler serves `index.html` for all non-API routes (SPA fallback) to support client-side routing.
+
+### 3.2 Directory Structure
+```
+web/
+├── src/
+│   ├── components/      # Shared atomic components (Button, Card, Badge)
+│   ├── features/        # Feature-specific modules (dashboard, simulation)
+│   │   ├── components/  # Feature-scoped components
+│   │   ├── hooks/       # Feature-scoped data hooks
+│   │   └── types.ts     # Feature-scoped types
+│   ├── hooks/           # Global hooks (useTheme, useEventStream)
+│   ├── layouts/         # Page layouts (AppShell)
+│   ├── lib/             # Utilities (api client, formatters)
+│   ├── pages/           # Route entry points
+│   ├── App.tsx          # Root component + Providers
+│   └── main.tsx         # Entry point
+├── index.html
+├── tailwind.config.js
+├── tsconfig.json
+└── vite.config.ts
+```
+
+## 4. Routing & Navigation
+
+The URL is the source of truth for navigation state to enable deep-linking.
+
+| Route | View | Description |
 | :--- | :--- | :--- |
-| **Time Horizon** | Real-time (minutes/hours) | Historical (days/weeks/months) |
-| **Interactivity** | Low (observation focused) | High (drilling down, simulation) |
-| **Write Access** | Read-only | Read-only (Simulations are local/ephemeral) |
-| **Primary Use** | Monitoring & Alerting | Root Cause Analysis & Planning |
+| `/` | **Dashboard** | High-level metrics, health summary, and recent alerts. |
+| `/history` | **History** | Event log explorer with time-range filtering. |
+| `/identities` | **Explorer** | Hierarchical view of Agents, Scopes, and Pools. |
+| `/simulate` | **Scenario Lab** | "What-if" analysis sandbox. |
+| `/settings` | **Settings** | Local UI preferences (theme, refresh rate). |
 
-## 2. Technical Architecture
+**Query Parameters**:
+*   All views involving time must respect `?from=<ts>&to=<ts>` params.
+*   Views involving filters must respect `?agent=<id>&scope=<id>`.
 
-### 2.1 Stack & Deployment
-*   **Hosting**: The Web UI is a single-page application (SPA) embedded directly within the `ratelord-d` binary.
-    *   Served via the daemon's internal HTTP server (e.g., at `http://localhost:8080/ui`).
-    *   Zero external dependencies for deployment (no separate `npm run start` required for end-users).
-*   **Framework**: Lightweight, component-based architecture (e.g., React, Vue, or Svelte).
-    *   Must support client-side routing.
-    *   State management should be minimal, relying on the daemon's API as the source of truth.
-*   **Visualization**: High-performance charting library (e.g., Recharts, D3, or Vega) capable of rendering dense time-series data.
+## 5. Component Hierarchy
 
-### 2.2 Data Interaction
-*   **API Consumption**: The Web UI consumes the REST API defined in `API_SPEC.md`.
-    *   `/v1/history`: For historical trends and event logs.
-    *   `/v1/simulate`: For the Scenario Lab (daemon runs logic sandbox).
-    *   `/v1/status`: For current high-level dashboard metrics.
-*   **Read-Only Nature**: The Web UI does not modify live state (limits, policies, or configurations). All "write" actions are strictly for configuring local simulation parameters or view filters.
+### 5.1 AppShell (Layout)
+*   **SidebarNavigation**: Collapsible main nav.
+*   **GlobalHeader**: Breadcrumbs, connection status indicator (Daemon: Online/Offline), theme toggle.
+*   **MainContent**: Router outlet.
 
-## 3. Core Views
+### 5.2 Dashboard (`/`)
+*   **MetricGrid**: Grid of `MetricCard` components (Current Usage, Burn Rate, Violations).
+*   **BurnRateChart**: Recharts `AreaChart` showing usage vs limits over time.
+*   **RecentAlertsFeed**: Condensed list of recent `deny` or `throttle` events.
 
-### 3.1 Dashboard (The "Long View")
-*   **Purpose**: High-level health summary with a focus on trends rather than instantaneous values.
-*   **Key Metrics**:
-    *   **Burn Rate Efficiency**: 7-day / 30-day trend lines for key quotas.
-    *   **Exhaustion Events**: Heatmap of exhaustion events by day/hour.
-    *   **Top Consumers**: Aggregated usage by Agent ID and Scope over selected time windows.
-*   **Widgets**:
-    *   "Risk Forecast": Probability of exhaustion in the next 24h based on current trends.
-    *   "Policy Violations": Count of throttles/denials over time.
+### 5.3 History (`/history`)
+*   **TimeRangePicker**: Specialized control for selecting absolute or relative windows (Last 1h, Last 7d).
+*   **EventTimeline**: Visual scrubber/minimap of event density.
+*   **EventList**: Virtualized list of raw events.
+*   **EventDetailPanel**: Slide-over or modal showing full JSON payload of a selected event.
 
-### 3.2 Time-Travel / History
-*   **Purpose**: forensic analysis of past states.
-*   **Interaction**:
-    *   **Timeline Scrubber**: A visual slider to navigate through the event log.
-    *   **Event Inspector**: Detailed view of specific events (e.g., a `policy_trigger` or `intent_denied` event), showing the exact context (identity, scope, pool) at that moment.
-    *   **State Reconstruction**: Ability to view the "Constraint Graph" as it existed at a specific timestamp (replayed from the event log).
+### 5.4 Scenario Lab (`/simulate`)
+*   **SimulationConfig**: Form to set baseline time range and modifiers (multiplier, limit changes).
+*   **SimulationRunner**: "Run" button + progress indicator.
+*   **ComparisonView**: Split view showing `Actual` vs `Simulated` outcomes.
 
-### 3.3 Scenario Lab (Simulator)
-*   **Purpose**: "What-if" analysis using the daemon's prediction engine in a sandboxed environment.
-*   **Workflow**:
-    1.  **Select Baseline**: Choose a historical period (e.g., "Last Tuesday's traffic") as the base load.
-    2.  **Apply Modifiers**:
-        *   "Traffic x 2.0"
-        *   "Limit Reduced by 50%"
-        *   "Add 5 new Agents"
-    3.  **Run Simulation**: The daemon processes the baseline + modifiers through the policy and prediction engines without affecting live state.
-    4.  **Visualize Outcome**:
-        *   "Projected Time-to-Exhaustion"
-        *   "Estimated Denial Rate"
-        *   "Policy Trigger Heatmap"
-*   **Use Cases**: Capacity planning, policy testing, impact analysis of external changes (e.g., GitHub lowering API limits).
+## 6. State Management & Data Sync
 
-### 3.4 Identity & Scope Explorer
-*   **Purpose**: Visualizing the hierarchical constraint graph.
-*   **Visualization**: Interactive node-link diagram or tree map showing:
-    *   Agents -> Identities -> Scopes -> Pools.
-    *   Color-coded by usage intensity or risk level.
-*   **Drill-down**: Clicking a node reveals detailed history and policy configuration for that specific entity.
+### 6.1 Server State (TanStack Query)
+*   **Pattern**: We treat the Daemon as the source of truth.
+*   **Caching**: Aggressive caching for historical data (immutable).
+*   **Live Data**:
+    *   **Polling**: Default mechanism (e.g., every 5s) for dashboard metrics.
+    *   **Invalidation**: `refetchOnWindowFocus` enabled to ensure freshness.
 
-## 4. User Experience (UX) Guidelines
+### 6.2 Client State (Zustand/Context)
+*   Minimal client-only state:
+    *   Theme (Dark/Light)
+    *   Sidebar collapsed/expanded
+    *   Active simulation configuration (draft)
 
-*   **Dense Data, Clean Design**: Prioritize information density without clutter. Use sparklines and small multiples for repetitive metrics.
-*   **Local-First Performance**: UI should feel instant. Heavy computations (simulations) happen in the daemon, but UI interactions (filtering, zooming) should be client-side and snappy.
-*   **Deep Linking**: All views (especially specific time ranges and simulation configurations) must be URL-addressable for sharing context between engineers.
-*   **Dark Mode**: Default to dark mode to match developer tooling preferences (and the TUI aesthetic).
+## 7. API Integration
 
-## 5. Security & Access
-*   **Authentication**: If the daemon is configured with auth (e.g., for shared deployments), the Web UI must handle token management.
-*   **Scope Isolation**: In multi-tenant scenarios (future), the UI should only display data the authenticated user is permitted to see.
+The UI consumes the REST API defined in `API_SPEC.md`.
 
-## 6. Future Extensions
-*   **Policy Editor**: A visual builder for `POLICY_ENGINE.md` rules (export-only, to be committed to git).
-*   **Report Generation**: PDF/Markdown export of monthly usage reports for management.
+*   **Client**: Typed `fetch` wrapper (or `axios`) handling base URL configuration.
+*   **Error Handling**: Global toast notifications for API failures.
+*   **Types**: TypeScript interfaces generated from or manually synced with Go structs in `DATA_MODEL.md`.
+
+## 8. UX & Design Guidelines
+
+*   **Dark Mode First**: The UI should default to dark mode to match the CLI experience.
+*   **Information Density**: Use "sparklines" and compact tables. Avoid excessive whitespace.
+*   **Feedback**: Every action (especially simulation runs) must provide immediate visual feedback (loading skeletons, spinners).
+*   **Zero Configuration**: The UI must work out-of-the-box when the daemon starts.
+
+## 9. Security
+
+*   **Auth**: If the daemon enforces auth, the UI client must intercept 401s and redirect to a login prompt or generic "Unauthorized" state.
+*   **Sanitization**: All user input (filters, simulation params) must be sanitized before sending to API, though the API is the ultimate gatekeeper.

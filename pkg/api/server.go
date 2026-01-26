@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/fs"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
@@ -23,6 +26,7 @@ type Server struct {
 	usage      *engine.UsageProjection
 	policy     *engine.PolicyEngine
 	poller     *engine.Poller
+	staticFS   fs.FS
 }
 
 // NewServer creates a new API server instance
@@ -54,6 +58,11 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 		mux.HandleFunc("/debug/provider/inject", s.handleDebugInject)
 	}
 
+	// Static file handler (catch-all for SPA)
+	if s.staticFS != nil {
+		mux.Handle("/", s.handleStatic())
+	}
+
 	// Middleware: Logging & Panic Recovery
 	handler := withLogging(withRecovery(mux))
 
@@ -66,6 +75,11 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	}
 
 	return s
+}
+
+// SetStaticFS sets the filesystem for serving static web assets
+func (s *Server) SetStaticFS(fs fs.FS) {
+	s.staticFS = fs
 }
 
 // Start runs the HTTP server (blocking)
@@ -348,6 +362,47 @@ func (s *Server) handleDebugInject(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"injected"}`))
+}
+
+// handleStatic serves static web assets with SPA fallback
+func (s *Server) handleStatic() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+
+		// Skip API and debug routes
+		if strings.HasPrefix(path, "/v1/") || strings.HasPrefix(path, "/debug/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Try to serve the file directly
+		if file, err := s.staticFS.Open(path); err == nil {
+			defer file.Close()
+			if stat, err := file.Stat(); err == nil && !stat.IsDir() {
+				// Set content type based on extension
+				if strings.HasSuffix(path, ".css") {
+					w.Header().Set("Content-Type", "text/css")
+				} else if strings.HasSuffix(path, ".js") {
+					w.Header().Set("Content-Type", "application/javascript")
+				} else if strings.HasSuffix(path, ".html") {
+					w.Header().Set("Content-Type", "text/html")
+				}
+				io.Copy(w, file)
+				return
+			}
+		}
+
+		// Fallback to index.html for SPA routing
+		if indexFile, err := s.staticFS.Open("index.html"); err == nil {
+			defer indexFile.Close()
+			w.Header().Set("Content-Type", "text/html")
+			io.Copy(w, indexFile)
+			return
+		}
+
+		// If index.html not found, 404
+		http.NotFound(w, r)
+	})
 }
 
 // handleHealth returns simple status

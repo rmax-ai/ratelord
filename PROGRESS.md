@@ -64,4 +64,8 @@
 | examples/go/basic/README.md | COMMITTED | Implement | 2026-01-26 |
 | M17.2: Go SDK | COMPLETED | Orchestrator | 2026-01-26 |
 | Epic 17: Client SDKs | IN_PROGRESS | Orchestrator | 2026-01-26 |
-| M17.3: Python SDK | COMPLETED | Implement | 2026-01-26 |
+| web/src/lib/api.ts | CREATED | Implement | 2026-01-26 |
+| web/src/layouts/AppShell.tsx | CREATED | Implement | 2026-01-26 |
+| web/src/pages/Dashboard.tsx | CREATED | Implement | 2026-01-26 |
+| web/src/App.tsx | UPDATED | Implement | 2026-01-26 |
+| Web UI Dashboard Implementation | COMPLETED | Implement | 2026-01-26 |
