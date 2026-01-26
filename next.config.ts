@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   output: 'export',
-  basePath: '',
-  assetPrefix: '',
+  basePath: '/ratelord',
 };
 
 export default nextConfig;

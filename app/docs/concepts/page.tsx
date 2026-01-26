@@ -7,8 +7,8 @@ export default function Concepts() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-4xl font-bold mb-6">Core Concepts</h1>
-      
-      <div className="prose prose-slate dark:prose-invert max-w-none">
+
+      <div className="prose prose-slate max-w-none">
         <h2 className="text-2xl font-bold mt-8 mb-4">Constraint Graph</h2>
         <p>
           Ratelord models constraints as a directed graph. Resources are nodes in this graph, and relationships (like "belongs to" or "consumes") are edges. This allows for complex modeling of nested budgets.

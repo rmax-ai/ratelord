@@ -1,3 +1,5 @@
+import { CodeBlock } from '@/app/components/code-block';
+
 export const metadata = {
   title: 'API Reference - Ratelord',
   description: 'HTTP endpoints and protocol specification.',
@@ -7,14 +9,14 @@ export default function ApiReference() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-4xl font-bold mb-6">API Reference</h1>
-      
-      <div className="prose prose-slate dark:prose-invert max-w-none">
+
+      <div className="prose prose-slate max-w-none">
         <p className="lead text-xl text-muted-foreground mb-8">
           The Ratelord Daemon exposes a RESTful JSON API. All requests must be authenticated with an Identity Token.
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Base URL</h2>
-        <div className="bg-muted p-4 rounded-md my-4 font-mono text-sm">
+        <div className="bg-muted p-4 rounded-md my-4 font-mono text-sm px-4 py-2">
           <code>http://localhost:8090/v1</code>
         </div>
 
@@ -28,14 +30,15 @@ export default function ApiReference() {
             </h3>
             <p className="mb-4">Negotiate a budget for a planned action.</p>
             <h4 className="font-bold text-sm mb-2">Request Body</h4>
-            <div className="bg-muted p-4 rounded-md font-mono text-sm overflow-x-auto">
-{`{
+            <CodeBlock
+              language="json"
+              code={`{
   "identity_id": "agent-123",
   "scope": "github:api",
   "requested_amount": 100,
   "priority": "normal"
 }`}
-            </div>
+            />
           </div>
 
           <div className="border rounded-lg p-6">

@@ -35,7 +35,7 @@ export function Features() {
   ];
 
   return (
-    <section id="features" className="py-20 bg-muted/30">
+    <section id="features" className="py-20 bg-background">
       <div className="container px-4 md:px-6 mx-auto">
         <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">

@@ -7,14 +7,14 @@ export default function Architecture() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-4xl font-bold mb-6">System Architecture</h1>
-      
-      <div className="prose prose-slate dark:prose-invert max-w-none">
+
+      <div className="prose prose-slate max-w-none">
         <p className="lead text-xl text-muted-foreground mb-8">
           Ratelord is designed as a modular, event-sourced system that sits between your agents and the external APIs they consume.
         </p>
 
         <h2 className="text-2xl font-bold mt-8 mb-4">Core Components</h2>
-        
+
         <h3 className="text-xl font-bold mt-6 mb-3">1. The Daemon</h3>
         <p>
           The heart of Ratelord is a lightweight, zero-ops daemon written in Go. It acts as the single source of truth for all constraint states. It is responsible for:

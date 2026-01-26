@@ -8,9 +8,9 @@ export function Header() {
           <span>Ratelord</span>
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <Link href="#features" className="transition-colors hover:text-foreground/80 text-foreground/60">Features</Link>
-          <Link href="#docs" className="transition-colors hover:text-foreground/80 text-foreground/60">Documentation</Link>
-          <Link href="#about" className="transition-colors hover:text-foreground/80 text-foreground/60">About</Link>
+          <Link href="/#features" className="transition-colors hover:text-foreground/80 text-foreground/60">Features</Link>
+          <Link href="/#docs" className="transition-colors hover:text-foreground/80 text-foreground/60">Documentation</Link>
+          <Link href="/#about" className="transition-colors hover:text-foreground/80 text-foreground/60">About</Link>
         </nav>
         <div className="flex items-center space-x-4">
           <Link
@@ -29,7 +29,7 @@ export function Header() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-muted/50 py-12">
+    <footer className="border-t border-border bg-background py-12">
       <div className="container mx-auto px-4 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex flex-col gap-2">
           <span className="text-lg font-bold">Ratelord</span>
