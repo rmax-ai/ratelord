@@ -238,7 +238,7 @@ Focus: Internal usage to validate stability using real GitHub tokens.
 
 ## Epic 17: Client SDKs
 Focus: Language-specific bindings for the Agent Contract (Intent Negotiation).
-- [ ] **M17.1: SDK Specification**
+- [x] **M17.1: SDK Specification**
     - Draft `CLIENT_SDK_SPEC.md`.
     - Define interfaces for `Ask`, `Propose`, `Feedback`.
 - [ ] **M17.2: Go SDK**
