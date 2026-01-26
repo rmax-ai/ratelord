@@ -180,7 +180,7 @@ Focus: Ensure policies are loaded, hot-reloaded, and correctly evaluated to enab
 
 ## Epic 12: Persistence & Robustness
 Focus: Ensure drift detection and provider state survive restarts.
-- [ ] **M12.1: Persist Provider State**
+- [x] **M12.1: Persist Provider State**
     - Ensure provider offsets/drift are saved to SQLite.
 - [x] **M12.2: TUI Verification**
     - Manually verify TUI dashboard connects and displays data.
