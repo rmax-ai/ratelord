@@ -241,7 +241,7 @@ Focus: Language-specific bindings for the Agent Contract (Intent Negotiation).
 - [x] **M17.1: SDK Specification**
     - Draft `CLIENT_SDK_SPEC.md`.
     - Define interfaces for `Ask`, `Propose`, `Feedback`.
-- [ ] **M17.2: Go SDK**
+- [x] **M17.2: Go SDK**
     - Implement `pkg/client`.
     - Provide `NewClient(httpEndpoint)`.
     - Implement `Ask(ctx, intent)`.

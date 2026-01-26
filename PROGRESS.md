@@ -57,4 +57,6 @@
 | M12.2: TUI Verification | COMPLETED | Terminal | 2026-01-26 |
 | Epic 14: GitHub Provider | COMPLETED | Agent | 2026-01-26 |
 | Epic 15: OpenAI Provider | COMPLETED | Agent | 2026-01-26 |
-| Epic 16: Dogfooding & Tuning | COMPLETED | Orchestrator | 2026-01-26 |
+| pkg/client/types.go | CREATED | Implement | 2026-01-26 |
+| pkg/client/client.go | CREATED | Implement | 2026-01-26 |
+| Epic 17: Client SDKs | IN_PROGRESS | Orchestrator | 2026-01-26 |
