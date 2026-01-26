@@ -198,14 +198,14 @@ Focus: Ensure drift detection and provider state survive restarts.
 
 ## Epic 14: GitHub Provider
 Focus: Implement the first real provider to track GitHub API rate limits (Core, Search, GraphQL, Integration Manifests).
-- [ ] **M14.1: GitHub Configuration**
+- [x] **M14.1: GitHub Configuration**
     - Define config structure (PAT, Enterprise URL).
     - Update `pkg/engine/config.go`.
-- [ ] **M14.2: GitHub Poller**
+- [x] **M14.2: GitHub Poller**
     - Implement `pkg/provider/github/github.go`.
     - Fetch limits via `GET /rate_limit`.
     - Map `core`, `search`, `graphql` to pools.
-- [ ] **M14.3: GitHub Integration Test**
+- [x] **M14.3: GitHub Integration Test**
     - Verify against public GitHub API (using a safe/dummy token or recorded mock).
 
 ## Epic 15: OpenAI Provider

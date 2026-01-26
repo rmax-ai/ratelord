@@ -53,3 +53,4 @@
 | M11.2: Implement client-side Wait/Modify logic | COMPLETED | Feature | 2026-01-25 |
 | M12.1: Persist Provider State | COMPLETED | Fix | 2026-01-26 |
 | M12.2: TUI Verification | COMPLETED | Terminal | 2026-01-26 |
+| Epic 14: GitHub Provider | COMPLETED | Agent | 2026-01-26 |

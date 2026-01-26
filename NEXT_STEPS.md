@@ -6,10 +6,10 @@
 
 ## Immediate Actions
 
-1. **Phase 7: Real Providers**:
-   - Focus on **M14: GitHub Provider**.
-   - Create `pkg/provider/github/` and implement the interface.
-   - We need to read `TASKS.md` Epic 14 details.
+1. **Phase 7: Real Providers (Continued)**:
+   - Focus on **M15: OpenAI Provider**.
+   - Create `pkg/provider/openai/` and implement the interface.
+   - Requires research on best "passive" vs "active" strategy for OpenAI (headers vs dashboard).
 
 ## Reference
 - **Release Notes**: `RELEASE_NOTES.md`
