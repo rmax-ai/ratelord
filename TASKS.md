@@ -245,3 +245,8 @@ Focus: Language-specific bindings for the Agent Contract (Intent Negotiation).
     - Implement `pkg/client`.
     - Provide `NewClient(httpEndpoint)`.
     - Implement `Ask(ctx, intent)`.
+- [ ] **M17.3: Python SDK**
+    - Implement `ratelord` package (PyPI structure).
+    - Implement `Client` class with `ask()` method.
+    - Ensure fail-closed behavior and auto-wait.
+    - *Dependency*: M17.1.
