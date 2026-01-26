@@ -64,4 +64,4 @@
 | examples/go/basic/README.md | COMMITTED | Implement | 2026-01-26 |
 | M17.2: Go SDK | COMPLETED | Orchestrator | 2026-01-26 |
 | Epic 17: Client SDKs | IN_PROGRESS | Orchestrator | 2026-01-26 |
-| M17.3: Python SDK | PENDING | Implement | 2026-01-26 |
+| M17.3: Python SDK | COMPLETED | Implement | 2026-01-26 |
