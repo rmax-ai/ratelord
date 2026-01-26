@@ -14,7 +14,7 @@ export function Header() {
         </nav>
         <div className="flex items-center space-x-4">
           <Link
-            href="https://github.com/rmax/ratelord"
+            href="https://github.com/rmax-ai/ratelord"
             target="_blank"
             rel="noreferrer"
             className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
@@ -40,7 +40,7 @@ export function Footer() {
         <div className="flex gap-6 text-sm text-muted-foreground">
           <Link href="#" className="hover:underline">Privacy</Link>
           <Link href="#" className="hover:underline">Terms</Link>
-          <Link href="https://github.com/rmax/ratelord" className="hover:underline">GitHub</Link>
+          <Link href="https://github.com/rmax-ai/ratelord" className="hover:underline">GitHub</Link>
         </div>
         <div className="text-sm text-muted-foreground">
           &copy; {new Date().getFullYear()} Ratelord Project.

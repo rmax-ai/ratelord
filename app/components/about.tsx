@@ -43,13 +43,13 @@ export function About() {
                 <span className="text-muted-foreground">GitHub API (In Progress)</span>
               </div>
             </div>
-            
+
             <div className="mt-8 p-4 bg-primary/5 rounded-lg border border-primary/10">
               <h4 className="font-bold mb-2">Join the Development</h4>
               <p className="text-sm text-muted-foreground mb-4">
                 We are actively looking for contributors to help build the future of agentic constraint management.
               </p>
-              <a href="https://github.com/rmax/ratelord" target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">
+              <a href="https://github.com/rmax-ai/ratelord" target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">
                 View Open Issues &rarr;
               </a>
             </div>
