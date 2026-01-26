@@ -6,10 +6,10 @@
 
 ## Immediate Actions
 
-1. **Phase 7: Day 2 Operations**:
-   - Begin "dogfooding" internally.
-   - Monitor for bugs/regressions in production-like usage.
-   - **TODO**: Implement real providers (GitHub, OpenAI).
+1. **Phase 7: Real Providers**:
+   - Focus on **M14: GitHub Provider**.
+   - Create `pkg/provider/github/` and implement the interface.
+   - We need to read `TASKS.md` Epic 14 details.
 
 ## Reference
 - **Release Notes**: `RELEASE_NOTES.md`

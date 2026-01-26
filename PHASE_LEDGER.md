@@ -18,6 +18,10 @@
 - **Action**: Optimized loop for single-task leverage, frequent commits, and resettable progress tracking; added `NEXT_TASK` signal handling.
 - **Action**: Defined Phase 4 Implementation Plan (Epics, Milestones, and Test Strategy) in `TASKS.md` and `TEST_STRATEGY.md`.
 - [x] **M2.1: SQLite Initialization** (Epic 2) - Implemented `pkg/store/types.go` (Event structs) and `pkg/store/sqlite.go` (connection, WAL, schema migration). Verified with `pkg/store/store_test.go`.
+
+## 2026-01-26
+- **Action**: Improved `loop.sh` orchestration script with better argument handling (positional parameters for goal) and added post-run statistics (iteration count, total time, average/min/max duration).
+- **Action**: Fixed typoes and cleaned up usage messaging in `loop.sh`.
 - **Action**: Committed M2.1 code changes to git repository.
 - [x] **M2.2 & M2.3: Event Reader & Replay** (Epic 2) - Implemented `ReadEvents` in `pkg/store/sqlite.go` and verified with comprehensive tests in `pkg/store/store_test.go`.
 - [x] **M4.1 & M4.2: Identity & CLI** (Epic 4) - Implemented `ratelord identity add`, `POST /v1/identities` (event write), and `GET /v1/identities` (projection read). Verified end-to-end registration and state restoration.
@@ -30,3 +34,4 @@
 - **Action**: Verified TUI backend: built `ratelord-d` and `ratelord-tui`, started daemon, confirmed health check and event streaming, killed cleanly.
 - **Action**: Updated NEXT_STEPS.md with manual TUI verification instructions.
 - **Action**: Marked M12.2 as ready for manual verification in PROGRESS.md and TASKS.md.
+- **Action**: Defined Phase 7 (Real Providers) in `TASKS.md`, including Epic 14 (GitHub) and Epic 15 (OpenAI). Updated `NEXT_STEPS.md` to prioritize GitHub integration.

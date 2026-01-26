@@ -191,3 +191,36 @@ Focus: Ensure drift detection and provider state survive restarts.
 - [x] **M13.1: Release Tagging & Notes**
     - Tag v1.0.0.
     - Write Release Notes.
+    - [x] Tag v1.0.0.
+    - [x] Write Release Notes.
+
+# Phase 7: Day 2 Operations - Real Providers
+
+## Epic 14: GitHub Provider
+Focus: Implement the first real provider to track GitHub API rate limits (Core, Search, GraphQL, Integration Manifests).
+- [ ] **M14.1: GitHub Configuration**
+    - Define config structure (PAT, Enterprise URL).
+    - Update `pkg/engine/config.go`.
+- [ ] **M14.2: GitHub Poller**
+    - Implement `pkg/provider/github/github.go`.
+    - Fetch limits via `GET /rate_limit`.
+    - Map `core`, `search`, `graphql` to pools.
+- [ ] **M14.3: GitHub Integration Test**
+    - Verify against public GitHub API (using a safe/dummy token or recorded mock).
+
+## Epic 15: OpenAI Provider
+Focus: Track OpenAI usage limits (RPM, TPM) via header inspection or Tier API.
+- [ ] **M15.1: OpenAI Configuration**
+    - Define config structure (API Key, Org ID).
+- [ ] **M15.2: OpenAI Poller**
+    - Implement `pkg/provider/openai/openai.go`.
+    - Note: OpenAI limits are often response-header based, necessitating a "Probe" or "Proxy" approach, or just polling the `dashboard/billing` hidden APIs if available (unlikely stable).
+    - *Decision*: Start with a "Probe" mode or just manual quota setting + local counting if API is unavailable.
+    - *Refinement*: OpenAI's headers `x-ratelimit-limit-requests` etc. are returned on requests. We might need a "Passive" provider that ingests data from a sidecar/proxy, or we proactively poll a lightweight endpoint to check headers.
+
+## Epic 16: Dogfooding & Tuning
+Focus: Internal usage to validate stability.
+- [ ] **M16.1: Internal Deployment**
+    - Run `ratelord-d` monitoring the `ratelord` repo CI/CD tokens.
+- [ ] **M16.2: Model Tuning**
+    - Adjust linear burn model based on real bursty data.
