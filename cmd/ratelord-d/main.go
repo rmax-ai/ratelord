@@ -14,6 +14,7 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 	"github.com/rmax-ai/ratelord/pkg/provider/github"
+	"github.com/rmax-ai/ratelord/pkg/provider/openai"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -124,6 +125,19 @@ func main() {
 			ghProv := github.NewGitHubProvider(provider.ProviderID(ghCfg.ID), token, ghCfg.EnterpriseURL)
 			poller.Register(ghProv)
 			fmt.Printf(`{"level":"info","msg":"github_provider_registered","id":"%s"}`+"\n", ghCfg.ID)
+		}
+		// Register OpenAI Providers
+		for _, oaCfg := range policyCfg.Providers.OpenAI {
+			token := ""
+			if oaCfg.TokenEnvVar != "" {
+				token = os.Getenv(oaCfg.TokenEnvVar)
+				if token == "" {
+					fmt.Printf(`{"level":"warn","msg":"openai_token_env_var_empty","env_var":"%s","provider_id":"%s"}`+"\n", oaCfg.TokenEnvVar, oaCfg.ID)
+				}
+			}
+			oaProv := openai.NewOpenAIProvider(provider.ProviderID(oaCfg.ID), token, oaCfg.OrgID, oaCfg.BaseURL)
+			poller.Register(oaProv)
+			fmt.Printf(`{"level":"info","msg":"openai_provider_registered","id":"%s"}`+"\n", oaCfg.ID)
 		}
 	}
 
