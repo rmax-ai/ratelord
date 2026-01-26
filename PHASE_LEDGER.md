@@ -40,3 +40,5 @@
 - [x] **M17.2: Go SDK** (Epic 17) - Implemented `pkg/client` with types, client, and tests. Created example usage in `examples/go/basic/`.
 - [x] **M17.3: Python SDK** (Epic 17) - Implemented `sdk/python` package with client, tests, and README. Verified PyPI structure and fail-closed behavior.
 - **Action**: Implemented Web UI Dashboard View: Created API client (`web/src/lib/api.ts`), AppShell layout (`web/src/layouts/AppShell.tsx`), Dashboard page (`web/src/pages/Dashboard.tsx`), and updated App.tsx for routing. Built successfully with TypeScript and Vite.
+- [x] **M18.4: Build Integration** (Epic 18) - Integrated Web UI into daemon using `//go:embed`. Updated Makefile to build web assets and embed them into `cmd/ratelord-d`. Added `--web-dir` flag to serve dev builds or embedded assets by default.
+- [x] **Epic 18: Web UI Implementation** - Status: Completed. Implemented Dashboard, History, and Identity Explorer. React + Vite + Tailwind stack embedded in Go binary.

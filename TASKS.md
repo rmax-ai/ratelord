@@ -250,3 +250,24 @@ Focus: Language-specific bindings for the Agent Contract (Intent Negotiation).
     - Implement `Client` class with `ask()` method.
     - Ensure fail-closed behavior and auto-wait.
     - *Dependency*: M17.1.
+
+## Epic 18: Web UI Implementation
+Focus: Modern, graphical interface for observing system state.
+- [x] **M18.1: Spec Refinement**
+    - Refine `WEB_UI_SPEC.md` with implementation details.
+- [x] **M18.2: Project Scaffold**
+    - Initialize `web/` with React + Vite + Tailwind.
+    - Setup proxy to daemon API.
+- [x] **M18.3: Dashboard Implementation**
+    - Implement `AppShell` and `Dashboard` view.
+    - Connect to `GET /v1/events` and `GET /v1/identities`.
+- [x] **M18.4: Build Integration**
+    - Create `Makefile` rules for web build.
+    - Use `//go:embed` to serve UI from `ratelord-d`.
+    - *Acceptance*: `ratelord-d --web` serves the UI.
+- [x] **M18.5: History View**
+    - Implement `/history` route with `TimeRangePicker`, `EventTimeline`, and `EventList`.
+    - Support server-side filtering via URL params.
+- [x] **M18.6: Identity Explorer**
+    - Implement `/identities` route.
+    - Visualize hierarchy of Agents, Scopes, and Pools.
