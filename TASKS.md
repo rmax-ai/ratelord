@@ -193,6 +193,8 @@ Focus: Ensure drift detection and provider state survive restarts.
     - Write Release Notes.
     - [x] Tag v1.0.0.
     - [x] Write Release Notes.
+- [x] **M13.2: Deployment Guide**
+    - [x] Write DEPLOYMENT.md (Systemd, Docker, K8s).
 
 # Phase 7: Day 2 Operations - Real Providers
 

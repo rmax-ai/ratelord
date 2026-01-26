@@ -20,6 +20,7 @@
 | ACCEPTANCE.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | TEST_STRATEGY.md | COMPLETED | Orchestrator | 2026-01-25 |
 | RELEASE_NOTES.md | CREATED | Docs | 2026-01-26 |
+| DEPLOYMENT.md | CREATED | Docs | 2026-01-26 |
 | loop.sh | IMPROVED | Agent | 2026-01-25 |
 | LOOP_PROMPT.md | IMPROVED | Agent | 2026-01-25 |
 | pkg/store/types.go | COMMITTED | Agent | 2026-01-25 |
