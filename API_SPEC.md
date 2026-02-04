@@ -14,7 +14,13 @@ The daemon exposes a **JSON-over-HTTP** interface on `localhost`.
 
 ### 1.2 Configuration
 *   **Default Port**: `8090` (configurable via env `RATELORD_PORT`)
-*   **Bind Address**: `127.0.0.1`
+*   **Bind Address**: `127.0.0.1` (override via `RATELORD_LISTEN_ADDR`)
+*   **Database Path**: `./ratelord.db` (override via `RATELORD_DB_PATH`)
+*   **Policy Path**: `./policy.json` (override via `RATELORD_POLICY_PATH`)
+*   **Poll Interval**: `10s` (override via `RATELORD_POLL_INTERVAL`)
+*   **Web Assets**:
+    * `RATELORD_WEB_MODE=embedded|dir|off` (default: `embedded`)
+    * `RATELORD_WEB_DIR` (required when `web_mode=dir`)
 *   **Content-Type**: `application/json` required for all POST bodies.
 
 ---

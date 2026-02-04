@@ -5,16 +5,13 @@
 - **Core Features**: Daemon authority, Event sourcing, Policy Engine, Forecasting, TUI, and initial Mock Provider are live.
 - **Phase 7 Complete**: Real providers (GitHub, OpenAI) implemented. Dogfooding environment validated forecast accuracy.
 - **Documentation**: Deployment guide (`DEPLOYMENT.md`) is now available. `CLIENT_SDK_SPEC.md` has been drafted.
+- **M1.4 Complete**: Daemon configuration loader now supports env/flag overrides for storage, policy, polling, bind address, and web assets.
 
 ## Immediate Actions
 
- 1. **Phase 8: Operations & Expansion**:
-     - **Epic 18: Web UI**:
-       - [x] **M18.1-M18.4: Web UI V1**: Dashboard, Scaffolding, and Embedding are live.
-       - [x] **M18.5: History View**: Deep dive into event log history with filters.
-       - [x] **M18.6: Identity Explorer**: Detailed view of registered identities and their stats.
-
-     *Note: Epic 18 (Web UI) is now complete.*
+ 1. **Re-assess Backlog**:
+     - Confirm if any new milestones are required beyond M1.4.
+     - Capture new work in `TASKS.md` before starting the next iteration.
 
  ## Reference
 
