@@ -27,6 +27,8 @@ type Server struct {
 	policy     *engine.PolicyEngine
 	poller     *engine.Poller
 	staticFS   fs.FS
+	mux        *http.ServeMux
+	staticOn   bool
 }
 
 // NewServer creates a new API server instance
@@ -47,6 +49,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 		usage:      usage,
 		policy:     policy,
 		poller:     poller,
+		mux:        mux,
 	}
 
 	mux.HandleFunc("/v1/intent", s.handleIntent)
@@ -58,10 +61,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 		mux.HandleFunc("/debug/provider/inject", s.handleDebugInject)
 	}
 
-	// Static file handler (catch-all for SPA)
-	if s.staticFS != nil {
-		mux.Handle("/", s.handleStatic())
-	}
+	s.registerStaticHandler()
 
 	// Middleware: Logging & Panic Recovery
 	handler := withLogging(withRecovery(mux))
@@ -80,6 +80,22 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 // SetStaticFS sets the filesystem for serving static web assets
 func (s *Server) SetStaticFS(fs fs.FS) {
 	s.staticFS = fs
+	s.registerStaticHandler()
+}
+
+// SetAddr updates the server listen address.
+func (s *Server) SetAddr(addr string) {
+	if addr != "" {
+		s.server.Addr = addr
+	}
+}
+
+func (s *Server) registerStaticHandler() {
+	if s.mux == nil || s.staticFS == nil || s.staticOn {
+		return
+	}
+	s.mux.Handle("/", s.handleStatic())
+	s.staticOn = true
 }
 
 // Start runs the HTTP server (blocking)

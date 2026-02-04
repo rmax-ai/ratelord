@@ -27,7 +27,7 @@
 | pkg/store/types.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/store/sqlite.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/store/store_test.go | COMMITTED | Agent | 2026-01-25 |
-| pkg/api/server.go | COMMITTED | Agent | 2026-01-25 |
+| pkg/api/server.go | UPDATED | Agent | 2026-01-27 |
 | pkg/engine/projection.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/usage.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/policy.go | UPDATED | Agent | 2026-01-25 |
@@ -41,7 +41,8 @@
 | pkg/engine/poller.go | UPDATED | Agent | 2026-01-25 |
 | pkg/engine/config.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/loader.go | COMMITTED | Agent | 2026-01-25 |
-| cmd/ratelord-d/main.go | UPDATED | Agent | 2026-01-25 |
+| cmd/ratelord-d/main.go | UPDATED | Agent | 2026-01-27 |
+| cmd/ratelord-d/config.go | CREATED | Agent | 2026-01-27 |
 | cmd/ratelord-tui/main.go | CREATED | Agent | 2026-01-25 |
 | cmd/ratelord-sim/main.go | CREATED | Agent | 2026-01-25 |
 | Epic 7: Forecasting | COMPLETED | Agent | 2026-01-25 |

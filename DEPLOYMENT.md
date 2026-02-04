@@ -200,6 +200,15 @@ If you run multiple replicas of `ratelord` (e.g., 3 sidecars for 3 app replicas)
 
 ## 6. Configuration & Secrets Management
 
+### Runtime Configuration
+- `RATELORD_DB_PATH`: SQLite database path (default `./ratelord.db`).
+- `RATELORD_POLICY_PATH`: Policy file path (default `./policy.json`).
+- `RATELORD_PORT`: Override daemon port (default `8090`, sets bind to `127.0.0.1`).
+- `RATELORD_LISTEN_ADDR`: Full bind address (default `127.0.0.1:8090`).
+- `RATELORD_POLL_INTERVAL`: Provider poll interval (default `10s`).
+- `RATELORD_WEB_MODE`: `embedded`, `dir`, or `off` (default `embedded`).
+- `RATELORD_WEB_DIR`: Directory for web assets when `RATELORD_WEB_MODE=dir`.
+
 ### Policy (`policy.json`)
 - Treat as code. Version control it.
 - **Updates**:

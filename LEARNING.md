@@ -27,3 +27,15 @@ The "Required Document Set" is complete with 0 implementation code written, pres
 
 ### Challenges Encountered
 1.  **Context Continuity**: Deciding between `--continue` (stateful) and fresh runs (stateless). Fresh runs are safer for disk-sourced truth, but `--continue` can reduce repeated "orientation" overhead. We opted for NO `--continue` in the improved loop to allow the orchestrator to build on its internal reasoning.
+
+## 2026-01-27: Configuration Implementation
+
+### What Worked Well
+1.  **Env-first defaults**: Deriving flag defaults from environment variables kept runtime config flexible while preserving sane defaults.
+2.  **Centralized normalization**: A single validation/normalization pass reduced drift between CLI, env, and runtime usage.
+
+### Challenges Encountered
+1.  **Toolchain availability**: Go tooling was unavailable in the environment, so formatting and test runs required careful reporting.
+
+### Improvements for Implementation Phase
+1.  **Bootstrap check**: Add a quick bootstrap check for required toolchains before implementing code changes to reduce rework.
