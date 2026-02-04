@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
@@ -29,21 +28,20 @@ func main() {
 	// M1.3: Emit system_started log on boot (structured)
 	fmt.Println(`{"level":"info","msg":"system_started","component":"ratelord-d"}`)
 
-	// Configuration (M1.4 placeholder: hardcoded DB path for now)
-	cwd, err := os.Getwd()
+	cfg, err := LoadConfig(os.Args[1:])
 	if err != nil {
-		panic(fmt.Sprintf("failed to get cwd: %v", err))
+		fmt.Printf(`{"level":"fatal","msg":"failed_to_load_config","error":"%v"}`+"\n", err)
+		os.Exit(1)
 	}
-	dbPath := filepath.Join(cwd, "ratelord.db")
-	policyPath := filepath.Join(cwd, "policy.json")
+	fmt.Printf(`{"level":"info","msg":"config_loaded","db_path":"%s","policy_path":"%s","addr":"%s","poll_interval":"%s","web_assets_mode":"%s"}`+"\n", cfg.DBPath, cfg.PolicyPath, cfg.Addr, cfg.PollInterval, cfg.WebAssetsMode)
 
 	// M2.1: Initialize SQLite Store
-	st, err := store.NewStore(dbPath)
+	st, err := store.NewStore(cfg.DBPath)
 	if err != nil {
 		fmt.Printf(`{"level":"fatal","msg":"failed_to_init_store","error":"%v"}`+"\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf(`{"level":"info","msg":"store_initialized","path":"%s"}`+"\n", dbPath)
+	fmt.Printf(`{"level":"info","msg":"store_initialized","path":"%s"}`+"\n", cfg.DBPath)
 
 	// M4.2: Initialize Identity Projection
 	identityProj := engine.NewIdentityProjection()
@@ -94,10 +92,10 @@ func main() {
 
 	// M9.3: Initial Policy Load
 	var policyCfg *engine.PolicyConfig
-	if cfg, err := engine.LoadPolicyConfig(policyPath); err == nil {
-		policyCfg = cfg
-		policyEngine.UpdatePolicies(cfg)
-		fmt.Printf(`{"level":"info","msg":"policy_loaded","path":"%s","policies_count":%d}`+"\n", policyPath, len(cfg.Policies))
+	if loaded, err := engine.LoadPolicyConfig(cfg.PolicyPath); err == nil {
+		policyCfg = loaded
+		policyEngine.UpdatePolicies(loaded)
+		fmt.Printf(`{"level":"info","msg":"policy_loaded","path":"%s","policies_count":%d}`+"\n", cfg.PolicyPath, len(loaded.Policies))
 	} else if !os.IsNotExist(err) {
 		// Log error if file exists but failed to load; ignore if missing (default mode)
 		fmt.Printf(`{"level":"error","msg":"failed_to_load_policy","error":"%v"}`+"\n", err)
@@ -105,7 +103,7 @@ func main() {
 
 	// M6.3: Initialize Polling Orchestrator
 	// Use the new Poller to drive the provider loop
-	poller := engine.NewPoller(st, 10*time.Second, forecaster) // Poll every 10s for demo
+	poller := engine.NewPoller(st, cfg.PollInterval, forecaster)
 	// Register the mock provider (M6.2)
 	// IMPORTANT: For the demo, we assume the mock provider is available in the 'pkg/provider' package via a factory or similar,
 	// but currently it resides in 'pkg/provider/mock.go' which is in package 'provider'.
@@ -154,14 +152,27 @@ func main() {
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
 	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller)
+	srv.SetAddr(cfg.Addr)
 
 	// Load and set web assets
-	webAssets, err := web.Assets()
-	if err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_load_web_assets","error":"%v"}`+"\n", err)
-	} else {
-		srv.SetStaticFS(webAssets)
-		fmt.Println(`{"level":"info","msg":"web_assets_loaded"}`)
+	switch cfg.WebAssetsMode {
+	case "embedded":
+		webAssets, err := web.Assets()
+		if err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_load_web_assets","error":"%v"}`+"\n", err)
+		} else {
+			srv.SetStaticFS(webAssets)
+			fmt.Println(`{"level":"info","msg":"web_assets_loaded","mode":"embedded"}`)
+		}
+	case "fs":
+		if _, err := os.Stat(cfg.WebDir); err != nil {
+			fmt.Printf(`{"level":"error","msg":"web_assets_dir_unavailable","path":"%s","error":"%v"}`+"\n", cfg.WebDir, err)
+		} else {
+			srv.SetStaticFS(os.DirFS(cfg.WebDir))
+			fmt.Printf(`{"level":"info","msg":"web_assets_loaded","mode":"fs","path":"%s"}`+"\n", cfg.WebDir)
+		}
+	case "off":
+		fmt.Println(`{"level":"info","msg":"web_assets_disabled"}`)
 	}
 
 	go func() {
@@ -181,9 +192,9 @@ func main() {
 		sig := <-sigs
 		if sig == syscall.SIGHUP {
 			fmt.Println(`{"level":"info","msg":"reload_signal_received"}`)
-			if cfg, err := engine.LoadPolicyConfig(policyPath); err == nil {
-				policyEngine.UpdatePolicies(cfg)
-				fmt.Printf(`{"level":"info","msg":"policy_reloaded","policies_count":%d}`+"\n", len(cfg.Policies))
+			if loaded, err := engine.LoadPolicyConfig(cfg.PolicyPath); err == nil {
+				policyEngine.UpdatePolicies(loaded)
+				fmt.Printf(`{"level":"info","msg":"policy_reloaded","policies_count":%d}`+"\n", len(loaded.Policies))
 			} else {
 				fmt.Printf(`{"level":"error","msg":"failed_to_reload_policy","error":"%v"}`+"\n", err)
 			}

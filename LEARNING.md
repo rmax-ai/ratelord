@@ -27,3 +27,15 @@ The "Required Document Set" is complete with 0 implementation code written, pres
 
 ### Challenges Encountered
 1.  **Context Continuity**: Deciding between `--continue` (stateful) and fresh runs (stateless). Fresh runs are safer for disk-sourced truth, but `--continue` can reduce repeated "orientation" overhead. We opted for NO `--continue` in the improved loop to allow the orchestrator to build on its internal reasoning.
+
+## 2026-01-27: Configuration Implementation
+
+### What Worked Well
+1.  **Spec-to-implementation alignment**: Updating deployment and API docs before code changes kept configuration expectations consistent with actual runtime behavior.
+2.  **Explicit defaults**: Centralizing defaults for DB path, policy path, and poll interval simplified daemon startup and made overrides easy to reason about.
+
+### Challenges Encountered
+1.  **Legacy configuration naming**: Existing docs referenced `RATELORD_CONFIG_PATH`, requiring backward-compatible support while introducing a clearer `RATELORD_POLICY_PATH`.
+
+### Improvements for Implementation Phase
+1.  **Config validation surface**: Add a dedicated validation pass (with better error messaging) as more config knobs accumulate.

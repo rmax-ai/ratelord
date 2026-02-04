@@ -11,7 +11,8 @@ This guide covers deployment via Systemd, Docker, and Kubernetes.
 - **Configuration**:
   - `policy.json`: Defines pools, windows, and burst limits.
   - Environment Variables: Store sensitive tokens (e.g., `GITHUB_TOKEN`, `OPENAI_API_KEY`).
-- **Network**: Exposes an HTTP API on port `8090`.
+  - Daemon settings: `RATELORD_DB_PATH`, `RATELORD_POLICY_PATH` (or `RATELORD_CONFIG_PATH`), `RATELORD_ADDR`, `RATELORD_POLL_INTERVAL`, `RATELORD_WEB_ASSETS_MODE`, `RATELORD_WEB_DIR`.
+- **Network**: Exposes an HTTP API on port `8090` (default bind `127.0.0.1:8090`).
 - **Signals**:
   - `SIGINT` / `SIGTERM`: Graceful shutdown (checkpoints state).
   - `SIGHUP`: Hot-reload `policy.json`.
@@ -57,7 +58,7 @@ Type=simple
 User=ratelord
 Group=ratelord
 # Adjust path to binary
-ExecStart=/usr/local/bin/ratelord-d --config /etc/ratelord/policy.json --db /var/lib/ratelord/ratelord.db --addr 127.0.0.1:8090
+ExecStart=/usr/local/bin/ratelord-d --policy /etc/ratelord/policy.json --db /var/lib/ratelord/ratelord.db --addr 127.0.0.1:8090
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
@@ -107,7 +108,7 @@ COPY policy.json /etc/ratelord/policy.json
 # State volume
 VOLUME /data
 ENV RATELORD_DB_PATH=/data/ratelord.db
-ENV RATELORD_CONFIG_PATH=/etc/ratelord/policy.json
+ENV RATELORD_POLICY_PATH=/etc/ratelord/policy.json
 ENV RATELORD_ADDR=0.0.0.0:8090
 
 CMD ["ratelord-d"]
@@ -168,7 +169,7 @@ spec:
           args:
             - "--addr=127.0.0.1:8090"
             - "--db=/data/ratelord.db"
-            - "--config=/etc/config/policy.json"
+            - "--policy=/etc/config/policy.json"
           volumeMounts:
             - name: ratelord-data
               mountPath: /data

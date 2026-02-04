@@ -82,6 +82,11 @@ func (s *Server) SetStaticFS(fs fs.FS) {
 	s.staticFS = fs
 }
 
+// SetAddr sets the HTTP listen address.
+func (s *Server) SetAddr(addr string) {
+	s.server.Addr = addr
+}
+
 // Start runs the HTTP server (blocking)
 func (s *Server) Start() error {
 	fmt.Printf(`{"level":"info","msg":"server_starting","addr":"%s"}`+"\n", s.server.Addr)
