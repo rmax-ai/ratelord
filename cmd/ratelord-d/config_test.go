@@ -11,9 +11,14 @@ import (
 func TestLoadConfig_Defaults(t *testing.T) {
 	// Setup: Create temp dir and cd into it
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	config, err := LoadConfig([]string{})
 	if err != nil {
@@ -40,9 +45,14 @@ func TestLoadConfig_Defaults(t *testing.T) {
 
 func TestLoadConfig_EnvVars(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	// Set env vars
 	os.Setenv("RATELORD_DB_PATH", "/custom/db.db")
@@ -82,9 +92,14 @@ func TestLoadConfig_EnvVars(t *testing.T) {
 
 func TestLoadConfig_FlagOverridesEnv(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	// Set env vars
 	os.Setenv("RATELORD_ADDR", "env-addr:8080")
@@ -113,14 +128,19 @@ func TestLoadConfig_FlagOverridesEnv(t *testing.T) {
 
 func TestLoadConfig_InvalidPollInterval_Env(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	os.Setenv("RATELORD_POLL_INTERVAL", "invalid")
 	defer os.Unsetenv("RATELORD_POLL_INTERVAL")
 
-	_, err := LoadConfig([]string{})
+	_, err = LoadConfig([]string{})
 	if err == nil {
 		t.Fatal("expected error for invalid RATELORD_POLL_INTERVAL, got nil")
 	}
@@ -131,11 +151,16 @@ func TestLoadConfig_InvalidPollInterval_Env(t *testing.T) {
 
 func TestLoadConfig_InvalidPollInterval_Flag(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
-	_, err := LoadConfig([]string{"-poll-interval", "not-a-duration"})
+	_, err = LoadConfig([]string{"-poll-interval", "not-a-duration"})
 	if err == nil {
 		t.Fatal("expected error for invalid poll-interval flag, got nil")
 	}
@@ -146,11 +171,16 @@ func TestLoadConfig_InvalidPollInterval_Flag(t *testing.T) {
 
 func TestLoadConfig_EmptyAddr(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
-	_, err := LoadConfig([]string{"-addr", ""})
+	_, err = LoadConfig([]string{"-addr", ""})
 	if err == nil {
 		t.Fatal("expected error for empty addr, got nil")
 	}
@@ -161,11 +191,16 @@ func TestLoadConfig_EmptyAddr(t *testing.T) {
 
 func TestLoadConfig_EmptyAddr_Whitespace(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
-	_, err := LoadConfig([]string{"-addr", "   "})
+	_, err = LoadConfig([]string{"-addr", "   "})
 	if err == nil {
 		t.Fatal("expected error for whitespace-only addr, got nil")
 	}
@@ -176,11 +211,16 @@ func TestLoadConfig_EmptyAddr_Whitespace(t *testing.T) {
 
 func TestLoadConfig_WebAssets_FS_MissingWebDir(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
-	_, err := LoadConfig([]string{"-web-assets", "fs"})
+	_, err = LoadConfig([]string{"-web-assets", "fs"})
 	if err == nil {
 		t.Fatal("expected error when web-assets=fs but web-dir is missing, got nil")
 	}
@@ -191,9 +231,14 @@ func TestLoadConfig_WebAssets_FS_MissingWebDir(t *testing.T) {
 
 func TestLoadConfig_WebAssets_FS_WithWebDir(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	webDir := filepath.Join(tmpDir, "web")
 	config, err := LoadConfig([]string{"-web-assets", "fs", "-web-dir", webDir})
@@ -211,11 +256,16 @@ func TestLoadConfig_WebAssets_FS_WithWebDir(t *testing.T) {
 
 func TestLoadConfig_InvalidWebAssetsMode(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
-	_, err := LoadConfig([]string{"-web-assets", "invalid-mode"})
+	_, err = LoadConfig([]string{"-web-assets", "invalid-mode"})
 	if err == nil {
 		t.Fatal("expected error for invalid web-assets mode, got nil")
 	}
@@ -226,9 +276,14 @@ func TestLoadConfig_InvalidWebAssetsMode(t *testing.T) {
 
 func TestLoadConfig_PathResolution_Relative(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	config, err := LoadConfig([]string{
 		"-db", "data/ratelord.db",
@@ -251,9 +306,14 @@ func TestLoadConfig_PathResolution_Relative(t *testing.T) {
 
 func TestLoadConfig_PathResolution_Absolute(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	absDBPath := "/absolute/path/to/db.db"
 	absPolicyPath := "/absolute/path/to/policy.json"
@@ -276,9 +336,14 @@ func TestLoadConfig_PathResolution_Absolute(t *testing.T) {
 
 func TestLoadConfig_EnvPortOnly(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	os.Setenv("RATELORD_PORT", "3000")
 	defer os.Unsetenv("RATELORD_PORT")
@@ -296,9 +361,14 @@ func TestLoadConfig_EnvPortOnly(t *testing.T) {
 
 func TestLoadConfig_EnvAddrOverridesPort(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	os.Setenv("RATELORD_ADDR", "0.0.0.0:8080")
 	os.Setenv("RATELORD_PORT", "3000")
@@ -320,9 +390,14 @@ func TestLoadConfig_EnvAddrOverridesPort(t *testing.T) {
 
 func TestLoadConfig_PolicyPathFallback(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	// Test that RATELORD_CONFIG_PATH is used as fallback for RATELORD_POLICY_PATH
 	os.Setenv("RATELORD_CONFIG_PATH", "/fallback/config.json")
@@ -340,9 +415,14 @@ func TestLoadConfig_PolicyPathFallback(t *testing.T) {
 
 func TestLoadConfig_PolicyPathPrimaryOverFallback(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	// Test that RATELORD_POLICY_PATH takes precedence over RATELORD_CONFIG_PATH
 	os.Setenv("RATELORD_POLICY_PATH", "/primary/policy.json")
@@ -419,9 +499,14 @@ func TestResolvePath(t *testing.T) {
 
 func TestLoadConfig_WebDirResolution(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	// Test that web-dir gets resolved when web-assets=fs
 	config, err := LoadConfig([]string{
@@ -440,9 +525,14 @@ func TestLoadConfig_WebDirResolution(t *testing.T) {
 
 func TestLoadConfig_WebAssets_Embedded(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	config, err := LoadConfig([]string{"-web-assets", "embedded"})
 	if err != nil {
@@ -457,9 +547,14 @@ func TestLoadConfig_WebAssets_Embedded(t *testing.T) {
 
 func TestLoadConfig_WebAssets_Off(t *testing.T) {
 	tmpDir := t.TempDir()
-	oldWd, _ := os.Getwd()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
 	defer os.Chdir(oldWd)
-	os.Chdir(tmpDir)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
 
 	config, err := LoadConfig([]string{"-web-assets", "off"})
 	if err != nil {
