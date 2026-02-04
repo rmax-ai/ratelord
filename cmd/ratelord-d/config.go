@@ -44,6 +44,9 @@ func LoadConfig(args []string) (Config, error) {
 		if err != nil {
 			return Config{}, fmt.Errorf("invalid RATELORD_POLL_INTERVAL: %w", err)
 		}
+		if parsed <= 0 {
+			return Config{}, errors.New("RATELORD_POLL_INTERVAL must be positive")
+		}
 		pollInterval = parsed
 	}
 	webAssetsMode := envOrDefault("RATELORD_WEB_ASSETS_MODE", defaultWebAssetsMode)
@@ -70,6 +73,9 @@ func LoadConfig(args []string) (Config, error) {
 	pollIntervalParsed, err := time.ParseDuration(*flagPollInterval)
 	if err != nil {
 		return Config{}, fmt.Errorf("invalid poll interval: %w", err)
+	}
+	if pollIntervalParsed <= 0 {
+		return Config{}, errors.New("poll interval must be positive")
 	}
 
 	resolvedDBPath := resolvePath(*flagDB, cwd)
