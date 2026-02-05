@@ -41,7 +41,8 @@
 | pkg/engine/poller.go | UPDATED | Agent | 2026-01-25 |
 | pkg/engine/config.go | COMMITTED | Agent | 2026-01-25 |
 | pkg/engine/loader.go | COMMITTED | Agent | 2026-01-25 |
-| cmd/ratelord-d/main.go | UPDATED | Agent | 2026-01-25 |
+| cmd/ratelord-d/main.go | UPDATED | Agent | 2026-01-27 |
+| cmd/ratelord-d/config.go | CREATED | Agent | 2026-01-27 |
 | cmd/ratelord-tui/main.go | CREATED | Agent | 2026-01-25 |
 | cmd/ratelord-sim/main.go | CREATED | Agent | 2026-01-25 |
 | Epic 7: Forecasting | COMPLETED | Agent | 2026-01-25 |
@@ -55,6 +56,7 @@
 | M11.2: Implement client-side Wait/Modify logic | COMPLETED | Feature | 2026-01-25 |
 | M12.1: Persist Provider State | COMPLETED | Fix | 2026-01-26 |
 | M12.2: TUI Verification | COMPLETED | Terminal | 2026-01-26 |
+| M1.4: Configuration | COMPLETED | Agent | 2026-01-27 |
 | Epic 14: GitHub Provider | COMPLETED | Agent | 2026-01-26 |
 | Epic 15: OpenAI Provider | COMPLETED | Agent | 2026-01-26 |
 | pkg/client/types.go | CREATED | Implement | 2026-01-26 |

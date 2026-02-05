@@ -13,8 +13,8 @@ The daemon exposes a **JSON-over-HTTP** interface on `localhost`.
 *   **Local-First**: Bound strictly to `127.0.0.1` (or a Unix Domain Socket in future strict modes).
 
 ### 1.2 Configuration
-*   **Default Port**: `8090` (configurable via env `RATELORD_PORT`)
-*   **Bind Address**: `127.0.0.1`
+*   **Default Address**: `127.0.0.1:8090` (configurable via env `RATELORD_ADDR` or CLI `--addr`)
+*   **Port Override**: `RATELORD_PORT` (legacy; used when `RATELORD_ADDR` is unset)
 *   **Content-Type**: `application/json` required for all POST bodies.
 
 ---
