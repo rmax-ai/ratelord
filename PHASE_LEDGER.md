@@ -46,4 +46,6 @@
 
 ## 2026-02-06
 - [x] **M22.2: Temporal Rules** (Epic 22) - Implemented `TimeWindow` schema in `PolicyConfig`, `Matches` logic in `pkg/engine/policy_time.go`, and integrated it into the Policy Evaluator. Verified with unit tests covering timezone handling, day matching, and cross-midnight ranges.
+- **Action**: Expanded Phase 10 Epics (Adaptive Throttling, Trends, Webhooks) in `TASKS.md` with detailed implementation milestones.
+- [x] **M23.3: Secure Headers** (Epic 23) - Implemented `withSecureHeaders` middleware in `pkg/api/server.go` adding HSTS, CSP, XFO, etc. Verified with new unit test `pkg/api/server_test.go`.
 
