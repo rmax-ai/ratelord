@@ -1,6 +1,6 @@
 # CLUSTER_FEDERATION: Distributed Rate Governance
 
-**Status**: DRAFT
+**Status**: IMPLEMENTING
 **Owner**: Orchestrator
 **Related**: `ARCHITECTURE.md`
 
@@ -21,6 +21,8 @@ Currently, `ratelord` follows a "Same Machine Daemon" model. To support Kubernet
 - **Follower**: Sidecar daemons run next to agents. They request "Grants" (blocks of quota) from the Leader.
 
 ### 3.2 The Grant Protocol
+(See `API_SPEC.md` section 2.5 for the formal `POST /v1/federation/grant` specification)
+
 Instead of checking every request:
 1.  **Follower** boots -> Requests "Grant: 1000 tokens" from Leader.
 2.  **Leader** deducts 1000 from Global Bucket -> Returns OK.

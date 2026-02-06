@@ -432,8 +432,9 @@ Focus: Elevating "Cost" to a first-class constraint alongside Rate Limits (`FINA
 
 ## Epic 30: Cluster Federation
 Focus: Expanding from single-node daemon to distributed fleet governance (`CLUSTER_FEDERATION.md`).
-- [ ] **M30.1: Grant Protocol Definition**
-    - [ ] Define `GrantRequest` and `GrantResponse` structs.
+- [x] **M30.1: Grant Protocol Definition**
+    - [x] Define protocol in `API_SPEC.md` and `CLUSTER_FEDERATION.md`.
+    - [ ] Define `GrantRequest` and `GrantResponse` structs (Implementation).
     - [ ] Implement `POST /v1/federation/grant` endpoint on Leader.
 - [ ] **M30.2: Follower Mode**
     - [ ] Add `--mode=follower` flag to `ratelord-d`.

@@ -127,6 +127,31 @@ data: {"event_id": "...", "type": "usage_observed", ...}
 
 ---
 
+### 2.5 Cluster Federation
+
+**`POST /v1/federation/grant`**
+Follower daemons use this endpoint to request token grants from the leader.
+
+#### Request (`GrantRequest`)
+```json
+{
+  "follower_id": "string",   // ID of the requesting daemon
+  "pool_id": "string",       // The constraint pool (e.g., "github:core")
+  "amount": number           // Tokens requested
+}
+```
+
+#### Response (`GrantResponse`)
+```json
+{
+  "granted": number,         // Tokens actually granted (may be less than requested)
+  "valid_until": "string",   // ISO8601 timestamp when this grant expires
+  "remaining_global": number // Optional: Hint of global state
+}
+```
+
+---
+
 ## 3. Schemas & Validation
 
 All endpoints enforce strict JSON Schema validation.
