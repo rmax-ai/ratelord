@@ -9,7 +9,7 @@
 
  1. **Epic 30: Cluster Federation** (`CLUSTER_FEDERATION.md`):
        - [x] **M30.1: Grant Protocol Definition**: Define structs and endpoint.
-       - [ ] **M30.2: Follower Mode**: Add `--mode=follower` flag and `RemoteProvider`.
+       - [x] **M30.2: Follower Mode**: Add `--mode=follower` flag and `RemoteProvider`.
        - [ ] **M30.3: Leader State Store**: Abstract TokenBucket storage.
 
  2. **Epic 31: Release Automation** (`RELEASING.md`):

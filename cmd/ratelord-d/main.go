@@ -16,6 +16,7 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
 	"github.com/rmax-ai/ratelord/pkg/provider"
+	"github.com/rmax-ai/ratelord/pkg/provider/federated"
 	"github.com/rmax-ai/ratelord/pkg/provider/github"
 	"github.com/rmax-ai/ratelord/pkg/provider/openai"
 	"github.com/rmax-ai/ratelord/pkg/store"
@@ -35,15 +36,22 @@ type Config struct {
 	WebDir     string
 	TLSCert    string
 	TLSKey     string
+	Mode       string
+	LeaderURL  string
+	FollowerID string
 }
 
 func LoadConfig() Config {
 	// Defaults
 	cwd, _ := os.Getwd()
+	hostname, _ := os.Hostname()
 	cfg := Config{
 		DBPath:     filepath.Join(cwd, "ratelord.db"),
 		PolicyPath: filepath.Join(cwd, "policy.json"),
 		Port:       8090,
+		Mode:       "leader",
+		LeaderURL:  "http://localhost:8090",
+		FollowerID: hostname,
 	}
 
 	// Env Vars
@@ -67,6 +75,15 @@ func LoadConfig() Config {
 	if val := os.Getenv("RATELORD_TLS_KEY"); val != "" {
 		cfg.TLSKey = val
 	}
+	if val := os.Getenv("RATELORD_MODE"); val != "" {
+		cfg.Mode = val
+	}
+	if val := os.Getenv("RATELORD_LEADER_URL"); val != "" {
+		cfg.LeaderURL = val
+	}
+	if val := os.Getenv("RATELORD_FOLLOWER_ID"); val != "" {
+		cfg.FollowerID = val
+	}
 
 	// Flags (override env vars)
 	flag.StringVar(&cfg.DBPath, "db", cfg.DBPath, "Path to SQLite database")
@@ -75,6 +92,9 @@ func LoadConfig() Config {
 	flag.StringVar(&cfg.WebDir, "web-dir", cfg.WebDir, "Path to web assets directory (overrides embedded)")
 	flag.StringVar(&cfg.TLSCert, "tls-cert", cfg.TLSCert, "Path to TLS certificate file")
 	flag.StringVar(&cfg.TLSKey, "tls-key", cfg.TLSKey, "Path to TLS key file")
+	flag.StringVar(&cfg.Mode, "mode", cfg.Mode, "Operation mode: leader, follower")
+	flag.StringVar(&cfg.LeaderURL, "leader-url", cfg.LeaderURL, "URL of the leader node (for follower mode)")
+	flag.StringVar(&cfg.FollowerID, "follower-id", cfg.FollowerID, "Unique ID for this follower")
 
 	flag.Parse()
 
@@ -166,39 +186,72 @@ func main() {
 	// M6.3: Initialize Polling Orchestrator
 	// Use the new Poller to drive the provider loop
 	poller := engine.NewPoller(st, 10*time.Second, forecaster, policyCfg) // Poll every 10s for demo
-	// Register the mock provider (M6.2)
-	// IMPORTANT: For the demo, we assume the mock provider is available in the 'pkg/provider' package via a factory or similar,
-	// but currently it resides in 'pkg/provider/mock.go' which is in package 'provider'.
-	// So we can instantiate it directly.
-	mockProv := provider.NewMockProvider("mock-provider-1")
-	poller.Register(mockProv)
 
-	// Register GitHub Providers (M14.2)
-	if policyCfg != nil {
-		for _, ghCfg := range policyCfg.Providers.GitHub {
-			token := ""
-			if ghCfg.TokenEnvVar != "" {
-				token = os.Getenv(ghCfg.TokenEnvVar)
-				if token == "" {
-					fmt.Printf(`{"level":"warn","msg":"github_token_env_var_empty","env_var":"%s","provider_id":"%s"}`+"\n", ghCfg.TokenEnvVar, ghCfg.ID)
-				}
+	// Federation: Usage Router
+	var usageRouter *federated.UsageRouter
+
+	if cfg.Mode == "follower" {
+		fmt.Printf(`{"level":"info","msg":"starting_in_follower_mode","leader_url":"%s","follower_id":"%s"}`+"\n", cfg.LeaderURL, cfg.FollowerID)
+
+		usageRouter = federated.NewUsageRouter()
+
+		// Register Federated Mock Provider
+		mockFed := federated.NewFederatedProvider("mock-provider-1", cfg.LeaderURL, cfg.FollowerID)
+		mockFed.RegisterPool("default")
+		poller.Register(mockFed)
+		usageRouter.Register(mockFed)
+
+		// Register Federated GitHub Providers
+		if policyCfg != nil {
+			for _, ghCfg := range policyCfg.Providers.GitHub {
+				ghFed := federated.NewFederatedProvider(ghCfg.ID, cfg.LeaderURL, cfg.FollowerID)
+				poller.Register(ghFed)
+				usageRouter.Register(ghFed)
 			}
-			ghProv := github.NewGitHubProvider(provider.ProviderID(ghCfg.ID), token, ghCfg.EnterpriseURL)
-			poller.Register(ghProv)
-			fmt.Printf(`{"level":"info","msg":"github_provider_registered","id":"%s"}`+"\n", ghCfg.ID)
+			for _, oaCfg := range policyCfg.Providers.OpenAI {
+				oaFed := federated.NewFederatedProvider(oaCfg.ID, cfg.LeaderURL, cfg.FollowerID)
+				poller.Register(oaFed)
+				usageRouter.Register(oaFed)
+			}
 		}
-		// Register OpenAI Providers
-		for _, oaCfg := range policyCfg.Providers.OpenAI {
-			token := ""
-			if oaCfg.TokenEnvVar != "" {
-				token = os.Getenv(oaCfg.TokenEnvVar)
-				if token == "" {
-					fmt.Printf(`{"level":"warn","msg":"openai_token_env_var_empty","env_var":"%s","provider_id":"%s"}`+"\n", oaCfg.TokenEnvVar, oaCfg.ID)
+
+	} else {
+		// Leader / Standalone Mode
+
+		// Register the mock provider (M6.2)
+		// IMPORTANT: For the demo, we assume the mock provider is available in the 'pkg/provider' package via a factory or similar,
+		// but currently it resides in 'pkg/provider/mock.go' which is in package 'provider'.
+		// So we can instantiate it directly.
+		mockProv := provider.NewMockProvider("mock-provider-1")
+		poller.Register(mockProv)
+
+		// Register GitHub Providers (M14.2)
+		if policyCfg != nil {
+			for _, ghCfg := range policyCfg.Providers.GitHub {
+				token := ""
+				if ghCfg.TokenEnvVar != "" {
+					token = os.Getenv(ghCfg.TokenEnvVar)
+					if token == "" {
+						fmt.Printf(`{"level":"warn","msg":"github_token_env_var_empty","env_var":"%s","provider_id":"%s"}`+"\n", ghCfg.TokenEnvVar, ghCfg.ID)
+					}
 				}
+				ghProv := github.NewGitHubProvider(provider.ProviderID(ghCfg.ID), token, ghCfg.EnterpriseURL)
+				poller.Register(ghProv)
+				fmt.Printf(`{"level":"info","msg":"github_provider_registered","id":"%s"}`+"\n", ghCfg.ID)
 			}
-			oaProv := openai.NewOpenAIProvider(provider.ProviderID(oaCfg.ID), token, oaCfg.OrgID, oaCfg.BaseURL)
-			poller.Register(oaProv)
-			fmt.Printf(`{"level":"info","msg":"openai_provider_registered","id":"%s"}`+"\n", oaCfg.ID)
+			// Register OpenAI Providers
+			for _, oaCfg := range policyCfg.Providers.OpenAI {
+				token := ""
+				if oaCfg.TokenEnvVar != "" {
+					token = os.Getenv(oaCfg.TokenEnvVar)
+					if token == "" {
+						fmt.Printf(`{"level":"warn","msg":"openai_token_env_var_empty","env_var":"%s","provider_id":"%s"}`+"\n", oaCfg.TokenEnvVar, oaCfg.ID)
+					}
+				}
+				oaProv := openai.NewOpenAIProvider(provider.ProviderID(oaCfg.ID), token, oaCfg.OrgID, oaCfg.BaseURL)
+				poller.Register(oaProv)
+				fmt.Printf(`{"level":"info","msg":"openai_provider_registered","id":"%s"}`+"\n", oaCfg.ID)
+			}
 		}
 	}
 
@@ -234,6 +287,10 @@ func main() {
 	// Use NewServerWithPoller to enable debug endpoints
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller, addr)
+
+	if usageRouter != nil {
+		srv.SetUsageTracker(usageRouter)
+	}
 
 	// Load and set web assets
 	var webAssets fs.FS

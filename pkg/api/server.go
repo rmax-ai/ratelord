@@ -41,6 +41,14 @@ type Server struct {
 	// TLS Config
 	tlsCertFile string
 	tlsKeyFile  string
+
+	// Federated Usage Tracker
+	tracker UsageTracker
+}
+
+// UsageTracker defines an interface for tracking local usage
+type UsageTracker interface {
+	TrackUsage(providerID, poolID string, amount int64)
 }
 
 // NewServer creates a new API server instance
@@ -110,6 +118,11 @@ func (s *Server) SetStaticFS(fs fs.FS) {
 func (s *Server) SetTLS(certFile, keyFile string) {
 	s.tlsCertFile = certFile
 	s.tlsKeyFile = keyFile
+}
+
+// SetUsageTracker sets the usage tracker for federation
+func (s *Server) SetUsageTracker(t UsageTracker) {
+	s.tracker = t
 }
 
 // Start runs the HTTP server (blocking)
@@ -201,7 +214,13 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		getTraceID(r.Context()), intent.IntentID, result.Decision, result.Reason)
 
 	// Update usage on approval
-	if result.Decision == "approve" {
+	if result.Decision == "approve" || result.Decision == "approve_with_modifications" {
+		// Federation Hook
+		if s.tracker != nil {
+			// TODO: Use correct pool ID from policy evaluation or intent
+			s.tracker.TrackUsage(intent.ProviderID, intent.PoolID, intent.ExpectedCost)
+		}
+
 		poolState, exists := s.usage.GetPoolState("mock-provider-1", "default")
 		if exists {
 			newUsed := poolState.Used + 1

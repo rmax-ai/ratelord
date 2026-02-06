@@ -436,10 +436,10 @@ Focus: Expanding from single-node daemon to distributed fleet governance (`CLUST
     - [x] Define protocol in `API_SPEC.md` and `CLUSTER_FEDERATION.md`.
     - [x] Define `GrantRequest` and `GrantResponse` structs (Implementation).
     - [x] Implement `POST /v1/federation/grant` endpoint on Leader.
-- [ ] **M30.2: Follower Mode**
-    - [ ] Add `--mode=follower` flag to `ratelord-d`.
-    - [ ] Implement `RemoteProvider` that requests grants from Leader instead of direct token bucket.
-    - [ ] Implement local cache for granted tokens.
+- [x] **M30.2: Follower Mode**
+    - [x] Add `--mode=follower` flag to `ratelord-d`.
+    - [x] Implement `RemoteProvider` that requests grants from Leader instead of direct token bucket.
+    - [x] Implement local cache for granted tokens.
 - [ ] **M30.3: Leader State Store**
     - [ ] Abstract `TokenBucket` storage to support Redis (optional) or keep in-memory for Leader.
     - [ ] Implement Leader Election or static config.
