@@ -18,7 +18,9 @@
 
  3. **Phase 10 Preparation**:
      - [x] **Epic 24-26**: Expanded scope in TASKS.md.
-     - [ ] **Next**: Select first Phase 10 epic or finish M20.3.
+     - [x] **Next**: Select first Phase 10 epic or finish M20.3.
+     - [x] **Epic 24**: Adaptive Throttling implemented.
+     - [ ] **Next**: Verify with simulation or move to Epic 25.
 
 ## Reference
 

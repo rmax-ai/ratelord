@@ -39,15 +39,17 @@ type PolicyEvaluationResult struct {
 
 // PolicyEngine is responsible for arbitrating intents
 type PolicyEngine struct {
-	usage    *UsageProjection
-	mu       sync.RWMutex
-	policies *PolicyConfig
+	usage      *UsageProjection
+	mu         sync.RWMutex
+	policies   *PolicyConfig
+	controller *DelayController
 }
 
 // NewPolicyEngine creates a new policy engine instance
 func NewPolicyEngine(usage *UsageProjection) *PolicyEngine {
 	return &PolicyEngine{
-		usage: usage,
+		usage:      usage,
+		controller: NewDelayController(1.0),
 	}
 }
 
@@ -170,14 +172,24 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 
 	case "shape", "delay":
 		var wait float64
-		// If "wait_seconds" is explicitly provided
-		if w, ok := params["wait_seconds"].(float64); ok {
-			wait = w
-		} else if wInt, ok := params["wait_seconds"].(int); ok {
-			wait = float64(wInt)
+		var kp float64
+		// Check for kp parameter
+		if k, ok := params["kp"].(float64); ok {
+			kp = k
+		} else if kInt, ok := params["kp"].(int); ok {
+			kp = float64(kInt)
 		}
-
-		// TODO: Implement algorithms like linear backoff if params["algorithm"] is set
+		// Check if algorithm is "dynamic"
+		if alg, ok := params["algorithm"].(string); ok && alg == "dynamic" {
+			wait = pe.controller.CalculateWait(poolState, time.Now(), kp).Seconds()
+		} else {
+			// If "wait_seconds" is explicitly provided
+			if w, ok := params["wait_seconds"].(float64); ok {
+				wait = w
+			} else if wInt, ok := params["wait_seconds"].(int); ok {
+				wait = float64(wInt)
+			}
+		}
 
 		return PolicyEvaluationResult{
 			Decision: DecisionApproveWithModifications,

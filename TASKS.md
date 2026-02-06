@@ -338,14 +338,14 @@ Focus: Secure the daemon for production usage beyond localhost.
 
 ## Epic 24: Adaptive Throttling
 Focus: Move beyond static limits to dynamic flow control.
-- [ ] **M24.1: Dynamic Delay Controller**
+- [x] **M24.1: Dynamic Delay Controller**
     - Implement a PID or AIMD controller to calculate wait times.
     - Inputs: Current burn rate, remaining budget, time to reset.
     - Outputs: Suggested wait time (duration).
-- [ ] **M24.2: Feedback Loop Integration**
+- [x] **M24.2: Feedback Loop Integration**
     - Feed "actual consumption" back into the delay calculator.
     - Adjust aggression based on "drift" (forecast vs actual).
-- [ ] **M24.3: Configuration & Tuning**
+- [x] **M24.3: Configuration & Tuning**
     - Allow configuration of controller parameters (Kp, Ki, Kd) via policy.
 
 ## Epic 25: Long-term Trends & Aggregation

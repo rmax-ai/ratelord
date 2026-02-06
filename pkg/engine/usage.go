@@ -12,12 +12,13 @@ import (
 
 // PoolState represents the current usage state of a constraint pool
 type PoolState struct {
-	ProviderID  string    `json:"provider_id"`
-	PoolID      string    `json:"pool_id"`
-	Used        int64     `json:"used"`
-	Remaining   int64     `json:"remaining"`
-	ResetAt     time.Time `json:"reset_at"`
-	LastUpdated time.Time `json:"last_updated"`
+	ProviderID     string             `json:"provider_id"`
+	PoolID         string             `json:"pool_id"`
+	Used           int64              `json:"used"`
+	Remaining      int64              `json:"remaining"`
+	ResetAt        time.Time          `json:"reset_at"`
+	LastUpdated    time.Time          `json:"last_updated"`
+	LatestForecast *forecast.Forecast `json:"latest_forecast,omitempty"`
 }
 
 // UsageProjection maintains in-memory usage state per pool
@@ -65,6 +66,21 @@ func (p *UsageProjection) applyForecast(event store.Event) error {
 	}
 
 	RatelordForecastSeconds.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(payload.Forecast.TTE.P99Seconds))
+
+	key := makePoolKey(payload.ProviderID, payload.PoolID)
+	state, exists := p.pools[key]
+	if !exists {
+		state = PoolState{
+			ProviderID: payload.ProviderID,
+			PoolID:     payload.PoolID,
+		}
+	}
+
+	state.LatestForecast = &payload.Forecast
+	state.LastUpdated = event.TsIngest
+
+	p.pools[key] = state
+
 	return nil
 }
 
