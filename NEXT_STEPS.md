@@ -22,7 +22,7 @@
        - [x] **M27.4: Event Pruning**: Policy-based retention.
 
  4. **Epic 28: Advanced Simulation Framework** (In Progress):
-       - [ ] **M28.1: Simulation Engine Upgrade**: Refactor `ratelord-sim` to support configurable scenarios.
+       - [x] **M28.1: Simulation Engine Upgrade**: Refactor `ratelord-sim` to support configurable scenarios.
        - [ ] **M28.2: Scenario Definitions**: Implement S-01 to S-05.
        - [ ] **M28.3: Reporting**: JSON results and assertions.
 

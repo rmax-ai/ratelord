@@ -399,10 +399,10 @@ Focus: Improve startup time and manage disk usage.
 
 ## Epic 28: Advanced Simulation Framework
 Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_SIMULATION.md`).
-- [ ] **M28.1: Simulation Engine Upgrade**
-    - Refactor `ratelord-sim` to support configurable scenarios (JSON/YAML).
-    - Implement deterministic seeding for RNG.
-    - Implement `AgentBehavior` interface (Greedy, Poisson, Periodic).
+- [x] **M28.1: Simulation Engine Upgrade**
+    - [x] Refactor `ratelord-sim` to support configurable scenarios (JSON/YAML).
+    - [x] Implement deterministic seeding for RNG.
+    - [x] Implement `AgentBehavior` interface (Greedy, Poisson, Periodic).
 - [ ] **M28.2: Scenario Definitions**
     - [ ] **S-01**: Implement "Thundering Herd" scenario config.
     - [ ] **S-02**: Implement "Drift & Correction" scenario (requires Drift Saboteur).
@@ -415,23 +415,48 @@ Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_S
 
 ## Epic 29: Financial Governance
 Focus: Elevating "Cost" to a first-class constraint alongside Rate Limits (`FINANCIAL_GOVERNANCE.md`).
-- [ ] **M29.1: Currency Types**: Add Micro-USD support to Usage model.
-- [ ] **M29.2: Pricing Registry**: Configurable cost-per-unit maps for providers.
-- [ ] **M29.3: Cost Policy**: Implement `budget_cap` rules in Policy Engine.
-- [ ] **M29.4: Forecast Cost**: Update forecasting to project spend vs budget.
+- [ ] **M29.1: Currency Types & Usage Extension**
+    - [ ] Create `pkg/engine/currency` package.
+    - [ ] Add `MicroUSD` type (int64).
+    - [ ] Update `Usage` struct to include `Cost MicroUSD`.
+- [ ] **M29.2: Pricing Registry**
+    - [ ] Update `pkg/engine/config.go` to include `Pricing` map.
+    - [ ] Implement lookup logic: `GetCost(provider, model, units)`.
+    - [ ] Update `UsageProjection` to calculate cost on ingestion.
+- [ ] **M29.3: Cost Policy**
+    - [ ] Add `budget_cap` rule type to `pkg/policy`.
+    - [ ] Implement `Evaluate` logic for cost-based rejections.
+    - [ ] Add `cost_efficiency` rule type for provider selection suggestions.
+- [ ] **M29.4: Forecast Cost**
+    - [ ] Update `ForecastModel` to predict `Cost` exhaustion.
+    - [ ] Emit `forecast_cost_computed` events.
 
 ## Epic 30: Cluster Federation
 Focus: Expanding from single-node daemon to distributed fleet governance (`CLUSTER_FEDERATION.md`).
-- [ ] **M30.1: Architecture Design**: Finalize "Grant Protocol" vs "Redis Backend" decision.
-- [ ] **M30.2: Remote State Store**: Abstraction layer for Redis/Etcd.
-- [ ] **M30.3: Leader Election**: Mechanism for designating the Token Authority.
+- [ ] **M30.1: Grant Protocol Definition**
+    - [ ] Define `GrantRequest` and `GrantResponse` structs.
+    - [ ] Implement `POST /v1/federation/grant` endpoint on Leader.
+- [ ] **M30.2: Follower Mode**
+    - [ ] Add `--mode=follower` flag to `ratelord-d`.
+    - [ ] Implement `RemoteProvider` that requests grants from Leader instead of direct token bucket.
+    - [ ] Implement local cache for granted tokens.
+- [ ] **M30.3: Leader State Store**
+    - [ ] Abstract `TokenBucket` storage to support Redis (optional) or keep in-memory for Leader.
+    - [ ] Implement Leader Election or static config.
 
 # Phase 12: Release Engineering
 
 ## Epic 31: Automated Release Pipeline
 Focus: Zero-touch versioning and artifact publication (`RELEASING.md`).
-- [ ] **M31.1: CI Workflows**: GitHub Actions for Test & Build.
-- [ ] **M31.2: Release Script**: Goreleaser or script to handle cross-compilation and signing.
-- [ ] **M31.3: Documentation Generation**: Auto-update `RELEASE_NOTES.md` from commits.
+- [ ] **M31.1: CI Workflows**
+    - [ ] Create `.github/workflows/test.yaml` (Go test, lint).
+    - [ ] Create `.github/workflows/release.yaml` (Trigger on tag).
+- [ ] **M31.2: Release Script / Goreleaser**
+    - [ ] Configure `.goreleaser.yaml`.
+    - [ ] Ensure cross-compilation (Darwin/Linux, AMD64/ARM64).
+    - [ ] Configure Docker build and push.
+- [ ] **M31.3: Documentation & Changelog**
+    - [ ] Configure changelog generation from Conventional Commits.
+    - [ ] Auto-update `RELEASE_NOTES.md` or GitHub Release body.
 
 

@@ -21,4 +21,5 @@
 | Epic 28: Scope Expansion | COMPLETED | Orchestrator | 2026-02-06 |
 | M27.2: Snapshot Worker | COMPLETED | Implement | 2026-02-06 |
 | M27.3: Startup Optimization | COMPLETED | Implement | 2026-02-06 |
+| M28.1: Simulation Engine Upgrade | COMPLETED | Implement | 2026-02-06 |
 
