@@ -100,3 +100,12 @@ const (
 	SentinelGlobal  = "sentinel:global"
 	SentinelUnknown = "sentinel:unknown"
 )
+
+// Snapshot represents a point-in-time capture of the system state.
+type Snapshot struct {
+	SnapshotID    string          `json:"snapshot_id"`
+	SchemaVersion int             `json:"schema_version"`
+	TsSnapshot    time.Time       `json:"ts_snapshot"`
+	LastEventID   EventID         `json:"last_event_id"`
+	Payload       json.RawMessage `json:"payload"`
+}

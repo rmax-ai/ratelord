@@ -143,6 +143,20 @@ func (s *Store) migrate() error {
 		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		active BOOLEAN NOT NULL DEFAULT 1
 	);
+
+	-- Snapshots table for state persistence and faster recovery
+	CREATE TABLE IF NOT EXISTS snapshots (
+		snapshot_id TEXT PRIMARY KEY,
+		schema_version INTEGER NOT NULL DEFAULT 1,
+		ts_snapshot DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		last_event_id TEXT NOT NULL,
+		payload JSON NOT NULL,
+
+		FOREIGN KEY(last_event_id) REFERENCES events(event_id)
+	);
+
+	-- Index to quickly find the most recent snapshot for recovery
+	CREATE INDEX IF NOT EXISTS idx_snapshots_ts ON snapshots(ts_snapshot DESC);
 	`
 
 	if _, err := s.db.Exec(query); err != nil {
@@ -567,4 +581,50 @@ func (s *Store) DeleteWebhook(ctx context.Context, webhookID string) error {
 		return fmt.Errorf("failed to delete webhook: %w", err)
 	}
 	return nil
+}
+
+// SaveSnapshot persists a state snapshot.
+func (s *Store) SaveSnapshot(ctx context.Context, snap *Snapshot) error {
+	query := `
+	INSERT INTO snapshots (snapshot_id, schema_version, ts_snapshot, last_event_id, payload)
+	VALUES (?, ?, ?, ?, ?);
+	`
+	_, err := s.db.ExecContext(ctx, query,
+		snap.SnapshotID,
+		snap.SchemaVersion,
+		snap.TsSnapshot,
+		snap.LastEventID,
+		snap.Payload,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to save snapshot: %w", err)
+	}
+	return nil
+}
+
+// GetLatestSnapshot retrieves the most recent snapshot.
+// Returns nil, nil if no snapshot exists.
+func (s *Store) GetLatestSnapshot(ctx context.Context) (*Snapshot, error) {
+	query := `
+	SELECT snapshot_id, schema_version, ts_snapshot, last_event_id, payload
+	FROM snapshots
+	ORDER BY ts_snapshot DESC
+	LIMIT 1;
+	`
+	row := s.db.QueryRowContext(ctx, query)
+	var snap Snapshot
+	err := row.Scan(
+		&snap.SnapshotID,
+		&snap.SchemaVersion,
+		&snap.TsSnapshot,
+		&snap.LastEventID,
+		&snap.Payload,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get latest snapshot: %w", err)
+	}
+	return &snap, nil
 }

@@ -385,7 +385,7 @@ Focus: Push alerts to external systems.
 
 ## Epic 27: State Snapshots & Compaction
 Focus: Improve startup time and manage disk usage.
-- [ ] **M27.1: Snapshot Schema**
+- [x] **M27.1: Snapshot Schema**
     - Create `snapshots` table (snapshot_id, timestamp, payload blob).
 - [ ] **M27.2: Snapshot Worker**
     - Implement a worker that periodically serializes the `Projection` state (Usage, Limits, etc.) to a snapshot.
