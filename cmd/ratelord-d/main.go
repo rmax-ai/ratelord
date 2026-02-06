@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -25,25 +28,63 @@ var (
 	BuildTime = "unknown"
 )
 
+type Config struct {
+	DBPath     string
+	PolicyPath string
+	Port       int
+	WebDir     string
+}
+
+func LoadConfig() Config {
+	// Defaults
+	cwd, _ := os.Getwd()
+	cfg := Config{
+		DBPath:     filepath.Join(cwd, "ratelord.db"),
+		PolicyPath: filepath.Join(cwd, "policy.json"),
+		Port:       8090,
+	}
+
+	// Env Vars
+	if val := os.Getenv("RATELORD_DB_PATH"); val != "" {
+		cfg.DBPath = val
+	}
+	if val := os.Getenv("RATELORD_POLICY_PATH"); val != "" {
+		cfg.PolicyPath = val
+	}
+	if val := os.Getenv("RATELORD_PORT"); val != "" {
+		if p, err := strconv.Atoi(val); err == nil {
+			cfg.Port = p
+		}
+	}
+	if val := os.Getenv("RATELORD_WEB_DIR"); val != "" {
+		cfg.WebDir = val
+	}
+
+	// Flags (override env vars)
+	flag.StringVar(&cfg.DBPath, "db", cfg.DBPath, "Path to SQLite database")
+	flag.StringVar(&cfg.PolicyPath, "policy", cfg.PolicyPath, "Path to policy file")
+	flag.IntVar(&cfg.Port, "port", cfg.Port, "HTTP server port")
+	flag.StringVar(&cfg.WebDir, "web-dir", cfg.WebDir, "Path to web assets directory (overrides embedded)")
+
+	flag.Parse()
+
+	return cfg
+}
+
 func main() {
+	// M21.1: Load Configuration
+	cfg := LoadConfig()
+
 	// M1.3: Emit system_started log on boot (structured)
 	fmt.Println(`{"level":"info","msg":"system_started","component":"ratelord-d"}`)
 
-	// Configuration (M1.4 placeholder: hardcoded DB path for now)
-	cwd, err := os.Getwd()
-	if err != nil {
-		panic(fmt.Sprintf("failed to get cwd: %v", err))
-	}
-	dbPath := filepath.Join(cwd, "ratelord.db")
-	policyPath := filepath.Join(cwd, "policy.json")
-
 	// M2.1: Initialize SQLite Store
-	st, err := store.NewStore(dbPath)
+	st, err := store.NewStore(cfg.DBPath)
 	if err != nil {
 		fmt.Printf(`{"level":"fatal","msg":"failed_to_init_store","error":"%v"}`+"\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf(`{"level":"info","msg":"store_initialized","path":"%s"}`+"\n", dbPath)
+	fmt.Printf(`{"level":"info","msg":"store_initialized","path":"%s"}`+"\n", cfg.DBPath)
 
 	// M4.2: Initialize Identity Projection
 	identityProj := engine.NewIdentityProjection()
@@ -94,10 +135,10 @@ func main() {
 
 	// M9.3: Initial Policy Load
 	var policyCfg *engine.PolicyConfig
-	if cfg, err := engine.LoadPolicyConfig(policyPath); err == nil {
-		policyCfg = cfg
-		policyEngine.UpdatePolicies(cfg)
-		fmt.Printf(`{"level":"info","msg":"policy_loaded","path":"%s","policies_count":%d}`+"\n", policyPath, len(cfg.Policies))
+	if cfgLoader, err := engine.LoadPolicyConfig(cfg.PolicyPath); err == nil {
+		policyCfg = cfgLoader
+		policyEngine.UpdatePolicies(cfgLoader)
+		fmt.Printf(`{"level":"info","msg":"policy_loaded","path":"%s","policies_count":%d}`+"\n", cfg.PolicyPath, len(cfgLoader.Policies))
 	} else if !os.IsNotExist(err) {
 		// Log error if file exists but failed to load; ignore if missing (default mode)
 		fmt.Printf(`{"level":"error","msg":"failed_to_load_policy","error":"%v"}`+"\n", err)
@@ -153,15 +194,25 @@ func main() {
 
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
-	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller)
+	addr := fmt.Sprintf(":%d", cfg.Port)
+	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller, addr)
 
 	// Load and set web assets
-	webAssets, err := web.Assets()
-	if err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_load_web_assets","error":"%v"}`+"\n", err)
+	var webAssets fs.FS
+	if cfg.WebDir != "" {
+		webAssets = os.DirFS(cfg.WebDir)
+		fmt.Printf(`{"level":"info","msg":"serving_web_assets_from_dir","path":"%s"}`+"\n", cfg.WebDir)
 	} else {
+		webAssets, err = web.Assets()
+		if err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_load_web_assets","error":"%v"}`+"\n", err)
+		} else {
+			fmt.Println(`{"level":"info","msg":"serving_embedded_web_assets"}`)
+		}
+	}
+
+	if webAssets != nil {
 		srv.SetStaticFS(webAssets)
-		fmt.Println(`{"level":"info","msg":"web_assets_loaded"}`)
 	}
 
 	go func() {
@@ -181,9 +232,9 @@ func main() {
 		sig := <-sigs
 		if sig == syscall.SIGHUP {
 			fmt.Println(`{"level":"info","msg":"reload_signal_received"}`)
-			if cfg, err := engine.LoadPolicyConfig(policyPath); err == nil {
-				policyEngine.UpdatePolicies(cfg)
-				fmt.Printf(`{"level":"info","msg":"policy_reloaded","policies_count":%d}`+"\n", len(cfg.Policies))
+			if cfgReloader, err := engine.LoadPolicyConfig(cfg.PolicyPath); err == nil {
+				policyEngine.UpdatePolicies(cfgReloader)
+				fmt.Printf(`{"level":"info","msg":"policy_reloaded","policies_count":%d}`+"\n", len(cfgReloader.Policies))
 			} else {
 				fmt.Printf(`{"level":"error","msg":"failed_to_reload_policy","error":"%v"}`+"\n", err)
 			}

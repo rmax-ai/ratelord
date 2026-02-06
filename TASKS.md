@@ -271,3 +271,36 @@ Focus: Modern, graphical interface for observing system state.
 - [x] **M18.6: Identity Explorer**
     - Implement `/identities` route.
     - Visualize hierarchy of Agents, Scopes, and Pools.
+
+# Phase 9: Ecosystem & Hardening
+
+## Epic 19: Node.js / TypeScript SDK
+Focus: Enable the largest ecosystem of agents (JS/TS) to use Ratelord.
+- [ ] **M19.1: SDK Specification**
+    - Define TypeScript interfaces for Intent, Decision, and Client options.
+- [ ] **M19.2: Core Implementation**
+    - Implement `RatelordClient` class.
+    - Implement `ask(intent)` with retries and fail-closed logic.
+    - Publish as `@ratelord/client` (or local npm package).
+
+## Epic 20: Operational Visibility
+Focus: Export internal metrics to standard observability tools.
+- [ ] **M20.1: Prometheus Exporter**
+    - Expose `/metrics` endpoint.
+    - Export `ratelord_usage`, `ratelord_limit`, `ratelord_forecast_seconds` gauges.
+    - Export `ratelord_intent_total` counters.
+
+## Epic 21: Configuration & CLI Polish
+Focus: Production-grade configuration management.
+- [ ] **M21.1: Robust Config Loader**
+    - Support `RATELORD_DB_PATH`, `RATELORD_POLICY_PATH`, `RATELORD_PORT`.
+    - Support CLI flags to override env vars.
+    - Resolve M1.4 debt.
+
+## Epic 22: Advanced Policy Engine
+Focus: More expressive governance rules.
+- [ ] **M22.1: Soft Limits**
+    - Implement "warn" or "delay" actions for soft limits.
+- [ ] **M22.2: Temporal Rules**
+    - Allow rules based on time-of-day (e.g., "no heavy scraping 9am-5pm").
+

@@ -30,12 +30,12 @@ type Server struct {
 }
 
 // NewServer creates a new API server instance
-func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine) *Server {
-	return NewServerWithPoller(st, identities, usage, policy, nil)
+func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, addr string) *Server {
+	return NewServerWithPoller(st, identities, usage, policy, nil, addr)
 }
 
 // NewServerWithPoller creates a new API server instance with poller access (for debug endpoints)
-func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, poller *engine.Poller) *Server {
+func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, poller *engine.Poller, addr string) *Server {
 	mux := http.NewServeMux()
 
 	// Register routes
@@ -66,8 +66,13 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	// Middleware: Logging & Panic Recovery
 	handler := withLogging(withRecovery(mux))
 
+	// Use default port if addr is empty
+	if addr == "" {
+		addr = ":8090"
+	}
+
 	s.server = &http.Server{
-		Addr:         ":8090",
+		Addr:         addr,
 		Handler:      handler,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

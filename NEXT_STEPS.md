@@ -8,13 +8,11 @@
 
 ## Immediate Actions
 
- 1. **Phase 8: Operations & Expansion**:
-     - **Epic 18: Web UI**:
-       - [x] **M18.1-M18.4: Web UI V1**: Dashboard, Scaffolding, and Embedding are live.
-       - [x] **M18.5: History View**: Deep dive into event log history with filters.
-       - [x] **M18.6: Identity Explorer**: Detailed view of registered identities and their stats.
-
-     *Note: Epic 18 (Web UI) is now complete.*
+ 1. **Phase 9: Ecosystem & Hardening**:
+     - **Epic 21: Configuration & CLI Polish**:
+       - [ ] **M21.1: Robust Config Loader**: Implement Env Var and Flag support for DB path, Policy path, and Port. (Resolves M1.4 debt).
+     - **Epic 19: Node.js SDK**:
+       - [ ] **M19.1: SDK Specification**: Draft TypeScript interfaces.
 
  ## Reference
 
