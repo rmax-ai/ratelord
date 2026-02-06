@@ -3,41 +3,21 @@
 ## Current Context
 - **v1.0.0 Released**: The system has been tagged and released.
 - **Phase 9 Initiated**: Ecosystem expansion (Node.js SDK) and hardening.
-- **Scope Expanded**: Phase 9 tasks have been detailed to include testing and scaffolding.
+- **Scope Expanded**: Phase 10 (Advanced Intelligence) defined; Phase 9 security hardening in progress.
 
 ## Immediate Actions
 
- 1. **Epic 19: Node.js / TypeScript SDK**:
-     - [x] **M19.1: SDK Specification**: Define TypeScript interfaces in `CLIENT_SDK_SPEC.md` or `sdk/js/README.md`.
-     - [x] **M19.2: Project Scaffold**: Initialize `sdk/js` directory and tools.
-     - [x] **M19.3: Core Implementation**: Implement `RatelordClient` and `ask` method.
-     - [x] **M19.4: Integration Verification**: Create a sample script and verify against daemon.
-     - [x] **M19.5: Release Prep**: Configure `package.json` exports/files and document publish process.
+ 1. **Epic 23: Security Hardening** (High Priority):
+     - [x] **M23.2: API Authentication**:
+         - [x] **M23.2.1: Auth Token Management**: Update `identity add` to support tokens (generate/hash).
+         - [x] **M23.2.2: Auth Middleware**: Secure API endpoints.
+     - [ ] **M23.3: Secure Headers**: Hardening HTTP headers.
 
  2. **Epic 20: Operational Visibility**:
-     - [x] **M20.1: Prometheus Exporter**: Expose `/metrics`.
-     - [x] **M20.2: Logging Correlation**: Ensure `trace_id` / `intent_id` is threaded through logs.
      - [ ] **M20.3: Grafana Dashboard**: Create visualization.
 
- 3. **Epic 22: Advanced Policy Engine**:
-     - [x] **M22.1: Soft Limits & Shaping**:
-         - [x] **M22.1.1: Policy Action Types**: Add `warn` and `delay` actions.
-         - [x] **M22.1.2: Evaluator Updates**: Update `Evaluate` logic.
-         - [x] **M22.1.3: API Response**: Ensure warnings/delays are propagated.
-     - [x] **M22.2: Temporal Rules**: Implement time-based matching.
-         - [x] **M22.2.1: TimeWindow Schema**: Add `TimeWindow` struct (Start, End, Days, Location) to Policy config.
-         - [x] **M22.2.2: Time Matcher Logic**: Implement `Matches(t time.Time)` method for windows.
-         - [x] **M22.2.3: Evaluator Integration**: Update `Evaluate` to check time windows before rule application.
-         - [x] **M22.2.4: Unit Tests**: Verify timezone handling and boundary conditions.
-
- 4. **Epic 23: Security Hardening**:
-     - [x] **M23.1: TLS Termination**:
-         - [x] **M23.1.1: Config**: Support `RATELORD_TLS_CERT` and `RATELORD_TLS_KEY` env vars.
-         - [x] **M23.1.2: Implementation**: Update Server to support `ListenAndServeTLS`.
-     - [ ] **M23.2: API Authentication**:
-         - [ ] **M23.2.1: Auth Token Management**: Extend `identity add` to generate/accept an API token (store hashed).
-         - [ ] **M23.2.2: Auth Middleware**: Validate `Authorization: Bearer <token>` against registered identities.
-     - [ ] **M23.3: Secure Headers**: Add HSTS, CSP, and other security headers.
+ 3. **Phase 10 Preparation**:
+     - [ ] **Epic 24-26**: Review and detail specs for Advanced Intelligence.
 
 ## Reference
 

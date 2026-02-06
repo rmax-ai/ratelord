@@ -22,6 +22,7 @@ type IdentityRegistration struct {
 	IdentityID string                 `json:"identity_id"`
 	Kind       string                 `json:"kind"`
 	Metadata   map[string]interface{} `json:"metadata"`
+	Token      string                 `json:"token,omitempty"`
 }
 
 func main() {
@@ -44,12 +45,15 @@ func main() {
 		kind = os.Args[4]
 	}
 
+	token := os.Getenv("RATELORD_NEW_TOKEN")
+
 	payload := IdentityRegistration{
 		IdentityID: name,
 		Kind:       kind,
 		Metadata: map[string]interface{}{
 			"source": "cli",
 		},
+		Token: token,
 	}
 
 	data, err := json.Marshal(payload)
@@ -77,5 +81,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(string(body))
+	var response struct {
+		IdentityID string `json:"identity_id"`
+		Status     string `json:"status"`
+		EventID    string `json:"event_id"`
+		Token      string `json:"token,omitempty"`
+	}
+
+	if err := json.Unmarshal(body, &response); err != nil {
+		fmt.Println(string(body)) // Fallback to raw output
+		return
+	}
+
+	fmt.Printf("Identity Registered: %s\n", response.IdentityID)
+	if response.Token != "" {
+		fmt.Printf("Token: %s\n", response.Token)
+		fmt.Println("WARNING: Save this token! It will not be shown again.")
+	}
 }

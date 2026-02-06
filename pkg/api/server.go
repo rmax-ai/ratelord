@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -63,7 +64,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 		poller:     poller,
 	}
 
-	mux.HandleFunc("/v1/intent", s.handleIntent)
+	mux.HandleFunc("/v1/intent", s.withAuth(s.handleIntent))
 	mux.HandleFunc("/v1/identities", s.handleIdentities)
 	mux.HandleFunc("/v1/events", s.handleEvents)
 
@@ -269,9 +270,22 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 
 	// Construct the event
 	now := time.Now()
+
+	// Handle Token Logic
+	var token, tokenHash string
+	if req.Token != "" {
+		// User provided a token, hash it
+		tokenHash = hashToken(req.Token)
+	} else {
+		// Generate a new token
+		token = generateToken()
+		tokenHash = hashToken(token)
+	}
+
 	payload, _ := json.Marshal(map[string]interface{}{
-		"kind":     req.Kind,
-		"metadata": req.Metadata,
+		"kind":       req.Kind,
+		"metadata":   req.Metadata,
+		"token_hash": tokenHash,
 	})
 
 	evt := store.Event{
@@ -311,10 +325,11 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Response
-	resp := map[string]string{
-		"identity_id": req.IdentityID,
-		"status":      "registered",
-		"event_id":    string(evt.EventID),
+	resp := IdentityResponse{
+		IdentityID: req.IdentityID,
+		Status:     "registered",
+		EventID:    string(evt.EventID),
+		Token:      token, // Will be empty if user provided it
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -456,6 +471,34 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
+// Middleware: Auth
+func (s *Server) withAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, `{"error":"unauthorized","reason":"missing_token"}`, http.StatusUnauthorized)
+			return
+		}
+
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			http.Error(w, `{"error":"unauthorized","reason":"invalid_token_format"}`, http.StatusUnauthorized)
+			return
+		}
+
+		token := parts[1]
+		hash := hashToken(token)
+
+		_, ok := s.identities.GetByTokenHash(hash)
+		if !ok {
+			http.Error(w, `{"error":"unauthorized","reason":"invalid_token"}`, http.StatusUnauthorized)
+			return
+		}
+
+		next(w, r)
+	}
+}
+
 // Middleware: Panic Recovery
 func withRecovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -518,6 +561,19 @@ func getTraceID(ctx context.Context) string {
 type statusWriter struct {
 	http.ResponseWriter
 	status int
+}
+
+func generateToken() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return fmt.Sprintf("%d", time.Now().UnixNano()) // Fallback
+	}
+	return hex.EncodeToString(b)
+}
+
+func hashToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:])
 }
 
 func (w *statusWriter) WriteHeader(status int) {

@@ -27,6 +27,7 @@ type IdentityRegistration struct {
 	IdentityID string                 `json:"identity_id"`
 	Kind       string                 `json:"kind"`
 	Metadata   map[string]interface{} `json:"metadata"`
+	Token      string                 `json:"token,omitempty"` // Optional: If provided, sets the authentication token
 }
 
 // IdentityResponse matches the response for POST /v1/identities
@@ -34,4 +35,5 @@ type IdentityResponse struct {
 	IdentityID string `json:"identity_id"`
 	Status     string `json:"status"`
 	EventID    string `json:"event_id"`
+	Token      string `json:"token,omitempty"` // Returned only if generated
 }

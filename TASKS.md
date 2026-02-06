@@ -328,9 +328,34 @@ Focus: Secure the daemon for production usage beyond localhost.
 - [x] **M23.1: TLS Termination**
     - Support `RATELORD_TLS_CERT` and `RATELORD_TLS_KEY` env vars.
     - Serve HTTPS if configured.
-- [ ] **M23.2: API Authentication**
-    - [ ] **M23.2.1: Auth Token Management**: Extend `identity add` to generate/accept an API token (store hashed).
-    - [ ] **M23.2.2: Auth Middleware**: Validate `Authorization: Bearer <token>` against registered identities.
+- [x] **M23.2: API Authentication**
+    - [x] **M23.2.1: Auth Token Management**: Extend `identity add` to generate/accept an API token (store hashed).
+    - [x] **M23.2.2: Auth Middleware**: Validate `Authorization: Bearer <token>` against registered identities.
 - [ ] **M23.3: Secure Headers**
     - Add HSTS, CSP, and other security headers to HTTP responses.
+
+# Phase 10: Advanced Intelligence & Integration
+
+## Epic 24: Adaptive Throttling
+Focus: Move beyond static limits to dynamic flow control.
+- [ ] **M24.1: Dynamic Delay Calculation**
+    - Implement a controller (e.g., PID or AIMD) to calculate wait times based on burn rate acceleration.
+- [ ] **M24.2: Feedback Loop**
+    - Feed "actual consumption" back into the delay calculator to adjust aggression.
+
+## Epic 25: Long-term Trends & Aggregation
+Focus: Efficient querying for historical data.
+- [ ] **M25.1: Aggregation Tables**
+    - Create `usage_hourly` and `usage_daily` tables.
+- [ ] **M25.2: Rollup Worker**
+    - Background job to aggregate raw events into rollups.
+- [ ] **M25.3: Trend API**
+    - Endpoint to fetch historical trends efficiently.
+
+## Epic 26: Webhooks & Notifications
+Focus: Push alerts to external systems.
+- [ ] **M26.1: Webhook Registry**
+    - Config to register URLs for specific event types (e.g., `exhaustion_forecasted`).
+- [ ] **M26.2: Dispatcher**
+    - Async worker to send HTTP POST payloads to registered webhooks.
 

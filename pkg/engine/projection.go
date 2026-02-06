@@ -10,21 +10,24 @@ import (
 
 // Identity represents the read-model for an identity
 type Identity struct {
-	ID       string                 `json:"id"`
-	Kind     string                 `json:"kind"`
-	Metadata map[string]interface{} `json:"metadata"`
+	ID        string                 `json:"id"`
+	Kind      string                 `json:"kind"`
+	Metadata  map[string]interface{} `json:"metadata"`
+	TokenHash string                 `json:"-"` // Never export token hash in JSON
 }
 
 // IdentityProjection maintains an in-memory list of registered identities
 type IdentityProjection struct {
 	mu         sync.RWMutex
 	identities map[string]Identity
+	tokenMap   map[string]string // hash -> identityID
 }
 
 // NewIdentityProjection creates a new empty projection
 func NewIdentityProjection() *IdentityProjection {
 	return &IdentityProjection{
 		identities: make(map[string]Identity),
+		tokenMap:   make(map[string]string),
 	}
 }
 
@@ -35,8 +38,9 @@ func (p *IdentityProjection) Apply(event store.Event) error {
 	}
 
 	var payload struct {
-		Kind     string                 `json:"kind"`
-		Metadata map[string]interface{} `json:"metadata"`
+		Kind      string                 `json:"kind"`
+		Metadata  map[string]interface{} `json:"metadata"`
+		TokenHash string                 `json:"token_hash"`
 	}
 
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -49,9 +53,14 @@ func (p *IdentityProjection) Apply(event store.Event) error {
 	// Dimensions.IdentityID is the source of truth for the ID
 	id := event.Dimensions.IdentityID
 	p.identities[id] = Identity{
-		ID:       id,
-		Kind:     payload.Kind,
-		Metadata: payload.Metadata,
+		ID:        id,
+		Kind:      payload.Kind,
+		Metadata:  payload.Metadata,
+		TokenHash: payload.TokenHash,
+	}
+
+	if payload.TokenHash != "" {
+		p.tokenMap[payload.TokenHash] = id
 	}
 
 	return nil
@@ -90,4 +99,16 @@ func (p *IdentityProjection) Get(id string) (Identity, bool) {
 
 	identity, ok := p.identities[id]
 	return identity, ok
+}
+
+// GetByTokenHash looks up an identity by its token hash
+func (p *IdentityProjection) GetByTokenHash(hash string) (Identity, bool) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	id, ok := p.tokenMap[hash]
+	if !ok {
+		return Identity{}, false
+	}
+	return p.identities[id], true
 }
