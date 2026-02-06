@@ -8,7 +8,7 @@
 ## Immediate Actions
 
  1. **Epic 26: Webhooks & Notifications** (New):
-     - [ ] **M26.1: Webhook Registry**: Create table and registration endpoint.
+     - [x] **M26.1: Webhook Registry**: Create table and registration endpoint.
      - [ ] **M26.2: Dispatcher**: Async worker for delivery.
      - [ ] **M26.3: Security**: HMAC signing.
 

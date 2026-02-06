@@ -68,6 +68,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	mux.HandleFunc("/v1/identities", s.handleIdentities)
 	mux.HandleFunc("/v1/events", s.handleEvents)
 	mux.HandleFunc("/v1/trends", s.handleTrends)
+	mux.HandleFunc("/v1/webhooks", s.withAuth(s.handleWebhooks))
 
 	// Debug endpoints
 	if poller != nil {

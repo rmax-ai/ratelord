@@ -133,6 +133,16 @@ func (s *Store) migrate() error {
 
 	CREATE INDEX IF NOT EXISTS idx_usage_hourly_time ON usage_hourly(bucket_ts);
 	CREATE INDEX IF NOT EXISTS idx_usage_daily_time ON usage_daily(bucket_ts);
+
+	-- Webhook Configurations
+	CREATE TABLE IF NOT EXISTS webhook_configs (
+		webhook_id TEXT PRIMARY KEY,
+		url TEXT NOT NULL,
+		secret TEXT NOT NULL,
+		events TEXT NOT NULL, -- Stored as JSON array
+		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		active BOOLEAN NOT NULL DEFAULT 1
+	);
 	`
 
 	if _, err := s.db.Exec(query); err != nil {
@@ -498,4 +508,63 @@ func (s *Store) GetUsageStats(ctx context.Context, filter UsageFilter) ([]UsageS
 	}
 
 	return stats, nil
+}
+
+// RegisterWebhook creates a new webhook configuration.
+func (s *Store) RegisterWebhook(ctx context.Context, cfg *WebhookConfig) error {
+	query := `
+	INSERT INTO webhook_configs (webhook_id, url, secret, events, created_at, active)
+	VALUES (?, ?, ?, ?, ?, ?);
+	`
+	eventsJSON, err := json.Marshal(cfg.Events)
+	if err != nil {
+		return fmt.Errorf("failed to marshal events: %w", err)
+	}
+
+	_, err = s.db.ExecContext(ctx, query,
+		cfg.WebhookID,
+		cfg.URL,
+		cfg.Secret,
+		string(eventsJSON),
+		cfg.CreatedAt,
+		cfg.Active,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to register webhook: %w", err)
+	}
+	return nil
+}
+
+// ListWebhooks retrieves all registered webhooks.
+func (s *Store) ListWebhooks(ctx context.Context) ([]*WebhookConfig, error) {
+	query := `SELECT webhook_id, url, secret, events, created_at, active FROM webhook_configs`
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list webhooks: %w", err)
+	}
+	defer rows.Close()
+
+	var webhooks []*WebhookConfig
+	for rows.Next() {
+		var w WebhookConfig
+		var eventsJSON string
+		if err := rows.Scan(&w.WebhookID, &w.URL, &w.Secret, &eventsJSON, &w.CreatedAt, &w.Active); err != nil {
+			return nil, fmt.Errorf("failed to scan webhook: %w", err)
+		}
+		if err := json.Unmarshal([]byte(eventsJSON), &w.Events); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal events: %w", err)
+		}
+		webhooks = append(webhooks, &w)
+	}
+	return webhooks, nil
+}
+
+// DeleteWebhook removes a webhook configuration.
+func (s *Store) DeleteWebhook(ctx context.Context, webhookID string) error {
+	query := `DELETE FROM webhook_configs WHERE webhook_id = ?`
+	_, err := s.db.ExecContext(ctx, query, webhookID)
+	if err != nil {
+		return fmt.Errorf("failed to delete webhook: %w", err)
+	}
+	return nil
 }

@@ -363,17 +363,18 @@ Focus: Efficient querying for historical data.
     - [x] Add `GetTrends` method to `Store` (query with filters).
     - [x] Implement `GET /v1/trends` handler in `pkg/api`.
     - [x] Add query param parsing and validation.
-- [x] **M25.4: Integration Test**
-    - [x] Generate synthetic usage events.
-    - [x] Force a rollup cycle.
-    - [x] Verify `GET /v1/trends` returns expected aggregates.
+	- [x] **M25.4: Integration Test**
+	    - [x] Generate synthetic usage events.
+	    - [x] Force a rollup cycle.
+	    - [x] Verify `GET /v1/trends` returns expected aggregates.
 
 ## Epic 26: Webhooks & Notifications
 Focus: Push alerts to external systems.
-- [ ] **M26.1: Webhook Registry**
-    - Create `webhook_configs` table.
-    - Implement `POST /v1/webhooks` to register URLs.
+- [x] **M26.1: Webhook Registry**
+    - [x] Create `webhook_configs` table.
+    - [x] Implement `POST /v1/webhooks` to register URLs.
 - [ ] **M26.2: Dispatcher**
+
     - Async worker to send HTTP POST payloads to registered webhooks.
     - Handle retries and backoff.
 - [ ] **M26.3: Security (HMAC)**

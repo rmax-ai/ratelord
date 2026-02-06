@@ -84,6 +84,16 @@ type UsageFilter struct {
 	ScopeID    string
 }
 
+// WebhookConfig represents a registered webhook endpoint for event notifications.
+type WebhookConfig struct {
+	WebhookID string    `json:"webhook_id"`
+	URL       string    `json:"url"`
+	Secret    string    `json:"secret"` // Shared secret for HMAC signature verification
+	Events    []string  `json:"events"` // List of event types to subscribe to
+	CreatedAt time.Time `json:"created_at"`
+	Active    bool      `json:"active"`
+}
+
 // Sentinel constants for unknown/global dimensions.
 const (
 	SentinelSystem  = "sentinel:system"
