@@ -36,3 +36,5 @@
 | M32.1: Usage Store Interface | COMPLETED | Implement | 2026-02-06 |
 | Phase 14: Scope Expansion (Arch & Advanced) | COMPLETED | Orchestrator | 2026-02-07 |
 | M31.2: Release Script | COMPLETED | Implement | 2026-02-07 |
+| Epics 33-35 Scope Expansion | COMPLETED | Docs | 2026-02-07 |
+| M32.2: Redis Implementation | COMPLETED | Implement | 2026-02-07 |

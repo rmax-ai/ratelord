@@ -71,10 +71,15 @@ type UsageProjection struct {
 	lastIngestTime time.Time
 }
 
-// NewUsageProjection creates a new empty projection
+// NewUsageProjection creates a new empty projection with in-memory storage
 func NewUsageProjection() *UsageProjection {
+	return NewUsageProjectionWithStore(NewMemoryUsageStore())
+}
+
+// NewUsageProjectionWithStore creates a new projection with a specific backing store
+func NewUsageProjectionWithStore(store UsageStore) *UsageProjection {
 	return &UsageProjection{
-		store: NewMemoryUsageStore(),
+		store: store,
 	}
 }
 

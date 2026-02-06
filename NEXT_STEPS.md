@@ -14,7 +14,7 @@
         - [x] **M31.2: Release Script**: Goreleaser.
 
  2. **Epic 32: External State Stores** (`TASKS.md`):
-       - [ ] **M32.2: Redis Implementation**: Implement RedisUsageStore.
+       - [x] **M32.2: Redis Implementation**: Implement RedisUsageStore.
        - [ ] **M32.3: Atomic Operations**: Ensure safety.
 
 ## Phase History

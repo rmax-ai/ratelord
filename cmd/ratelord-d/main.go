@@ -20,6 +20,7 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/provider/github"
 	"github.com/rmax-ai/ratelord/pkg/provider/openai"
 	"github.com/rmax-ai/ratelord/pkg/store"
+	"github.com/rmax-ai/ratelord/pkg/store/redis"
 	"github.com/rmax-ai/ratelord/web"
 )
 
@@ -39,6 +40,7 @@ type Config struct {
 	Mode       string
 	LeaderURL  string
 	FollowerID string
+	RedisURL   string
 }
 
 func LoadConfig() Config {
@@ -84,6 +86,9 @@ func LoadConfig() Config {
 	if val := os.Getenv("RATELORD_FOLLOWER_ID"); val != "" {
 		cfg.FollowerID = val
 	}
+	if val := os.Getenv("RATELORD_REDIS_URL"); val != "" {
+		cfg.RedisURL = val
+	}
 
 	// Flags (override env vars)
 	flag.StringVar(&cfg.DBPath, "db", cfg.DBPath, "Path to SQLite database")
@@ -95,6 +100,7 @@ func LoadConfig() Config {
 	flag.StringVar(&cfg.Mode, "mode", cfg.Mode, "Operation mode: leader, follower")
 	flag.StringVar(&cfg.LeaderURL, "leader-url", cfg.LeaderURL, "URL of the leader node (for follower mode)")
 	flag.StringVar(&cfg.FollowerID, "follower-id", cfg.FollowerID, "Unique ID for this follower")
+	flag.StringVar(&cfg.RedisURL, "redis-url", cfg.RedisURL, "Redis URL for usage storage")
 
 	flag.Parse()
 
@@ -120,7 +126,15 @@ func main() {
 	identityProj := engine.NewIdentityProjection()
 
 	// M5.1: Initialize Usage Projection
-	usageProj := engine.NewUsageProjection()
+	var usageStore engine.UsageStore
+	if cfg.RedisURL != "" {
+		usageStore = redis.NewRedisUsageStore(cfg.RedisURL)
+		fmt.Printf(`{"level":"info","msg":"using_redis_usage_store","url":"%s"}`+"\n", cfg.RedisURL)
+	} else {
+		usageStore = engine.NewMemoryUsageStore()
+		fmt.Println(`{"level":"info","msg":"using_memory_usage_store"}`)
+	}
+	usageProj := engine.NewUsageProjectionWithStore(usageStore)
 
 	// Initialize Provider Projection
 	providerProj := engine.NewProviderProjection()

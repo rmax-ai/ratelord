@@ -466,7 +466,7 @@ Focus: Allow the Leader to persist state in shared storage (Redis/Etcd) for stat
 - [x] **M32.1: Usage Store Interface**
     - [x] Refactor `UsageProjection` to use `UsageStore` interface.
     - [x] Implement `MemoryUsageStore` (default).
-- [ ] **M32.2: Redis Implementation**
+- [x] **M32.2: Redis Implementation**
     - [ ] Implement `RedisUsageStore` using `go-redis`.
     - [ ] Add `RATELORD_REDIS_URL` config.
 - [ ] **M32.3: Atomic Operations**
@@ -475,27 +475,33 @@ Focus: Allow the Leader to persist state in shared storage (Redis/Etcd) for stat
 ## Epic 33: High Availability
 Focus: Automatic Leader Election for failover.
 - [ ] **M33.1: Leader Election**
-    - [ ] Implement simple lease-based election using the Storage Backend (Redis/SQL).
+    - [ ] Define `Lease` struct (HolderID, Expiry).
+    - [ ] Implement `AcquireLease(ctx, id)` in Store.
+    - [ ] Implement `RenewLease(ctx, id)` background loop.
 - [ ] **M33.2: Standby Mode**
-    - [ ] Daemons start in "Standby" and promote to "Leader" if lease acquired.
+    - [ ] Implement `StandbyLoop` (Polls lease, if free -> Acquire).
+    - [ ] Handle `OnPromote` (Load state, start Policy Engine).
+    - [ ] Handle `OnDemote` (Stop Policy Engine, flush state).
 
 ## Epic 34: Federation UI
 Focus: Visualize the entire cluster.
 - [ ] **M34.1: Cluster View**
-    - [ ] Add `/cluster` route to Web UI.
-    - [ ] Show connected Followers and their Grant status.
+    - [ ] Update `API_SPEC.md` with `GET /v1/cluster/nodes`.
+    - [ ] Implement `ClusterTopology` projection (tracks heartbeat from peers).
+    - [ ] Web UI: Add "Cluster" tab (Network graph or Table).
 
 # Phase 14: Architecture Convergence & Advanced Platform
 
 ## Epic 35: Canonical Constraint Graph
 Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
-- [ ] **M35.1: Graph Schema Definition**
+- [ ] **M35.1: Graph Schema**
+    - [ ] Nodes: Agent, Identity, Resource; Edges: Owns, Uses, Limits.
     - [ ] Define canonical Node and Edge types in `pkg/graph`.
+- [ ] **M35.2: In-Memory Graph**
+    - [ ] Implement graph structure (gonum/graph or custom adjacency list).
     - [ ] Implement `GraphProjection` to materialize the graph from events.
-- [ ] **M35.2: Graph Visualization**
-    - [ ] Add `/graph` endpoint to API.
-    - [ ] Implement Force-Directed Graph view in Web UI.
-- [ ] **M35.3: Graph-Based Policy**
+- [ ] **M35.3: Policy Matcher**
+    - [ ] Traverse graph to find applicable policies for a given Identity/Resource.
     - [ ] Allow policies to target Graph patterns (e.g., "All constraints in Scope X").
 
 ## Epic 36: Advanced Retention & Compaction
