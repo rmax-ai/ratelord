@@ -29,9 +29,10 @@ func NewForecaster(store *store.Store, projection *ForecastProjection, model Mod
 // OnUsageObserved is called when a usage_observed event occurs
 func (f *Forecaster) OnUsageObserved(ctx context.Context, event *store.Event) {
 	var payload struct {
-		PoolID    string `json:"pool_id"`
-		Remaining int64  `json:"remaining"`
-		Used      int64  `json:"used"`
+		ProviderID string `json:"provider_id"`
+		PoolID     string `json:"pool_id"`
+		Remaining  int64  `json:"remaining"`
+		Used       int64  `json:"used"`
 	}
 
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -60,10 +61,10 @@ func (f *Forecaster) OnUsageObserved(ctx context.Context, event *store.Event) {
 	}
 
 	// Emit forecast_computed event
-	f.emitForecastComputed(ctx, payload.PoolID, forecast, event)
+	f.emitForecastComputed(ctx, payload.ProviderID, payload.PoolID, forecast, event)
 }
 
-func (f *Forecaster) emitForecastComputed(ctx context.Context, poolID string, forecast Forecast, causationEvent *store.Event) {
+func (f *Forecaster) emitForecastComputed(ctx context.Context, providerID, poolID string, forecast Forecast, causationEvent *store.Event) {
 	now := time.Now().UTC()
 	correlationID := fmt.Sprintf("forecast_%s_%d", poolID, now.Unix())
 
@@ -91,8 +92,9 @@ func (f *Forecaster) emitForecastComputed(ctx context.Context, poolID string, fo
 	}
 
 	payload := map[string]interface{}{
-		"pool_id":  poolID,
-		"forecast": forecast,
+		"provider_id": providerID,
+		"pool_id":     poolID,
+		"forecast":    forecast,
 	}
 	payloadBytes, _ := json.Marshal(payload)
 	event.Payload = payloadBytes

@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -46,7 +47,24 @@ func (p *UsageProjection) Apply(event store.Event) error {
 		return p.applyUsage(event)
 	case store.EventTypeResetObserved:
 		return p.applyReset(event)
+	case store.EventTypeForecastComputed:
+		return p.applyForecast(event)
 	}
+	return nil
+}
+
+func (p *UsageProjection) applyForecast(event store.Event) error {
+	var payload struct {
+		ProviderID string            `json:"provider_id"`
+		PoolID     string            `json:"pool_id"`
+		Forecast   forecast.Forecast `json:"forecast"`
+	}
+
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal forecast payload: %w", err)
+	}
+
+	RatelordForecastSeconds.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(payload.Forecast.TTE.P99Seconds))
 	return nil
 }
 
@@ -79,6 +97,11 @@ func (p *UsageProjection) applyUsage(event store.Event) error {
 	state.LastUpdated = event.TsIngest
 
 	p.pools[key] = state
+
+	// Update metrics
+	RatelordUsage.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(payload.Used))
+	RatelordLimit.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(payload.Remaining))
+
 	return nil
 }
 

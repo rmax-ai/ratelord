@@ -289,18 +289,18 @@ Focus: Enable the largest ecosystem of agents (JS/TS) to use Ratelord.
 - [x] **M19.4: Integration Verification**
     - Create a sample script `sdk/js/examples/basic.ts`.
     - Verify against running `ratelord-d`.
-- [ ] **M19.5: Release Prep**
+- [x] **M19.5: Release Prep**
     - Configure `package.json` exports/files.
     - Create `sdk/js/npmignore`.
     - Document publish process.
 
 ## Epic 20: Operational Visibility
 Focus: Export internal metrics to standard observability tools.
-- [ ] **M20.1: Prometheus Exporter**
+- [x] **M20.1: Prometheus Exporter**
     - Expose `/metrics` endpoint.
     - Export `ratelord_usage`, `ratelord_limit`, `ratelord_forecast_seconds` gauges.
     - Export `ratelord_intent_total` counters.
-- [ ] **M20.2: Logging Correlation**
+- [x] **M20.2: Logging Correlation**
     - Ensure `trace_id` / `intent_id` is threaded through all logs for a request.
 - [ ] **M20.3: Grafana Dashboard**
     - Create `deploy/grafana/dashboard.json`.

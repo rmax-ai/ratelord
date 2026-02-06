@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,10 +13,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
+
+// Context keys
+type contextKey string
+
+const traceIDKey contextKey = "trace_id"
 
 // API Request/Response Structs
 
@@ -40,6 +49,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 
 	// Register routes
 	mux.HandleFunc("/v1/health", handleHealth)
+	mux.Handle("/metrics", promhttp.Handler())
 
 	s := &Server{
 		store:      st,
@@ -142,6 +152,9 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 	// Evaluate
 	result := s.policy.Evaluate(intent)
 
+	// Update metrics
+	engine.RatelordIntentTotal.WithLabelValues(intent.IdentityID, string(result.Decision)).Inc()
+
 	// Persist the decision
 	// TODO: Write intent_submitted and intent_decided events to store.
 	// For M5.2, we just return the result.
@@ -157,8 +170,12 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_encode_response","error":"%v"}`+"\n", err)
+		fmt.Printf(`{"level":"error","msg":"failed_to_encode_response","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 	}
+
+	// Log decision
+	fmt.Printf(`{"level":"info","msg":"intent_decided","trace_id":"%s","intent_id":"%s","decision":"%s","reason":"%s"}`+"\n",
+		getTraceID(r.Context()), intent.IntentID, result.Decision, result.Reason)
 
 	// Update usage on approval
 	if result.Decision == "approve" {
@@ -211,7 +228,7 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 		identities := s.identities.GetAll()
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(identities); err != nil {
-			fmt.Printf(`{"level":"error","msg":"failed_to_encode_identities","error":"%v"}`+"\n", err)
+			fmt.Printf(`{"level":"error","msg":"failed_to_encode_identities","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 		}
 		return
 	}
@@ -264,14 +281,14 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.store.AppendEvent(r.Context(), &evt); err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_append_identity_event","error":"%v"}`+"\n", err)
+		fmt.Printf(`{"level":"error","msg":"failed_to_append_identity_event","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 		http.Error(w, `{"error":"internal_server_error"}`, http.StatusInternalServerError)
 		return
 	}
 
 	// Update projection
 	if err := s.identities.Apply(evt); err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_update_projection","error":"%v"}`+"\n", err)
+		fmt.Printf(`{"level":"error","msg":"failed_to_update_projection","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 		// We don't fail the request, but we log the inconsistency
 	}
 
@@ -285,7 +302,7 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_encode_response","error":"%v"}`+"\n", err)
+		fmt.Printf(`{"level":"error","msg":"failed_to_encode_response","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 	}
 }
 
@@ -307,7 +324,7 @@ func (s *Server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	// Query store
 	events, err := s.store.ReadRecentEvents(r.Context(), limit)
 	if err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_read_events","error":"%v"}`+"\n", err)
+		fmt.Printf(`{"level":"error","msg":"failed_to_read_events","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 		http.Error(w, `{"error":"internal_server_error"}`, http.StatusInternalServerError)
 		return
 	}
@@ -316,7 +333,7 @@ func (s *Server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(events); err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_encode_events","error":"%v"}`+"\n", err)
+		fmt.Printf(`{"level":"error","msg":"failed_to_encode_events","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 	}
 }
 
@@ -439,15 +456,44 @@ func withLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
+		// 1. Extract or Generate Trace ID
+		traceID := r.Header.Get("X-Trace-ID")
+		if traceID == "" {
+			traceID = generateTraceID()
+		}
+
+		// 2. Inject into Context
+		ctx := context.WithValue(r.Context(), traceIDKey, traceID)
+		r = r.WithContext(ctx)
+
 		// Wrap writer to capture status code
 		ww := &statusWriter{ResponseWriter: w, status: http.StatusOK}
+
+		// 3. Set response header
+		w.Header().Set("X-Trace-ID", traceID)
 
 		next.ServeHTTP(ww, r)
 
 		duration := time.Since(start)
-		fmt.Printf(`{"level":"info","msg":"http_request","method":"%s","path":"%s","status":%d,"duration_ms":%d}`+"\n",
-			r.Method, r.URL.Path, ww.status, duration.Milliseconds())
+		fmt.Printf(`{"level":"info","msg":"http_request","trace_id":"%s","method":"%s","path":"%s","status":%d,"duration_ms":%d}`+"\n",
+			traceID, r.Method, r.URL.Path, ww.status, duration.Milliseconds())
 	})
+}
+
+func generateTraceID() string {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback if random fails (unlikely)
+		return fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(b)
+}
+
+func getTraceID(ctx context.Context) string {
+	if v, ok := ctx.Value(traceIDKey).(string); ok {
+		return v
+	}
+	return ""
 }
 
 // statusWriter captures HTTP status code

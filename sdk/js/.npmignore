@@ -1,0 +1,6 @@
+src/
+tsconfig.json
+jest.config.js
+.eslintrc.js
+__tests__/
+examples/

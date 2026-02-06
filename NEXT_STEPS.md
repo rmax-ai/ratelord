@@ -12,10 +12,21 @@
      - [x] **M19.2: Project Scaffold**: Initialize `sdk/js` directory and tools.
      - [x] **M19.3: Core Implementation**: Implement `RatelordClient` and `ask` method.
      - [x] **M19.4: Integration Verification**: Create a sample script and verify against daemon.
-     - [ ] **M19.5: Release Prep**: Configure `package.json` exports/files and document publish process.
+     - [x] **M19.5: Release Prep**: Configure `package.json` exports/files and document publish process.
 
  2. **Epic 20: Operational Visibility**:
-     - [ ] **M20.1: Prometheus Exporter**: Expose `/metrics`.
+     - [x] **M20.1: Prometheus Exporter**: Expose `/metrics`.
+     - [x] **M20.2: Logging Correlation**: Ensure `trace_id` / `intent_id` is threaded through logs.
+     - [ ] **M20.3: Grafana Dashboard**: Create visualization.
+
+ 3. **Epic 22: Advanced Policy Engine**:
+     - [ ] **M22.1: Soft Limits**: Implement "warn" or "delay" actions.
+     - [ ] **M22.2: Temporal Rules**: Implement time-based policy matching.
+
+ 4. **Epic 23: Security Hardening**:
+     - [ ] **M23.1: TLS Termination**: Support HTTPS.
+     - [ ] **M23.2: API Authentication**: Implement Bearer/mTLS auth.
+     - [ ] **M23.3: Secure Headers**: Add security headers.
 
 ## Reference
 
