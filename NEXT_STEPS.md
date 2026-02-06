@@ -9,11 +9,17 @@
 
 ## Immediate Actions
 
- 1. **Epic 38: Architecture Convergence** (`TASKS.md`):
-       - [ ] **M38.1: Unified Store Audit**: Verify Redis/SQLite parity.
-       - [ ] **M38.2: Constraint Graph Integration**: Refactor Policy Engine to use Graph.
+ 1. **Epic 35: Canonical Constraint Graph** (`TASKS.md`):
+       - [x] **M35.1: Graph Schema Definition**: Define Nodes and Edges in `pkg/graph`.
+       - [x] **M35.2: Graph Projection**: Implement in-memory graph builder from events.
+       - [ ] **M35.3: Policy Matcher**: Use graph for policy lookups.
+       - [ ] **M35.4: Visualization**: API and UI.
 
- 2. **Epic 34: Federation UI** (`TASKS.md`):
+ 2. **Epic 38: Architecture Convergence** (`TASKS.md`):
+       - [ ] **M38.1: Unified Store Audit**: Verify Redis/SQLite parity.
+       - [ ] **M38.2: Constraint Graph Integration**: Refactor Policy Engine to use Graph (After Epic 35).
+
+ 3. **Epic 34: Federation UI** (`TASKS.md`):
        - [ ] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
 
 ## Phase History

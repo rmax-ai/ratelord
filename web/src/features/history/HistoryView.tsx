@@ -5,7 +5,6 @@ import { EventTimeline } from './components/EventTimeline';
 import { EventList } from './components/EventList';
 import { EventDetailPanel } from './components/EventDetailPanel';
 import { useHistoryEvents } from './hooks/useHistoryEvents';
-import { Event } from '../../lib/api';
 
 export default function HistoryView() {
   const [searchParams, setSearchParams] = useSearchParams();

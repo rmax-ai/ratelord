@@ -504,13 +504,14 @@ Focus: Visualize the entire cluster.
 
 ## Epic 35: Canonical Constraint Graph
 Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
-- [ ] **M35.1: Graph Schema Definition**
-    - [ ] Define Node Types: `Agent`, `Identity`, `Workload`, `Resource`, `Pool`.
-    - [ ] Define Edge Types: `Owns`, `Triggers`, `Limits`, `Depletes`.
-    - [ ] Define canonical struct in `pkg/graph`.
-- [ ] **M35.2: In-Memory Graph Projection**
-    - [ ] Implement graph structure (using `gonum/graph` or similar).
-    - [ ] Materialize graph from `IdentityRegistered` and `Policy` events.
+- [x] **M35.1: Graph Schema Definition**
+    - [x] **M35.1.1: Node Types**: Define `Agent`, `Identity`, `Workload`, `Resource`, `Pool`, `Constraint` structs in `pkg/graph`.
+    - [x] **M35.1.2: Edge Types**: Define `Owns`, `Triggers`, `Limits`, `Depletes`, `AppliesTo`, `Bounds` edge definitions.
+    - [x] **M35.1.3: Graph Interface**: Define the `Graph` interface for adding nodes/edges and traversing.
+- [x] **M35.2: In-Memory Graph Projection**
+    - [x] **M35.2.1: Projection Struct**: Implement `GraphProjection` that holds the graph state.
+    - [x] **M35.2.2: Event Handlers**: Implement handlers for `IdentityRegistered` (PolicyUpdated pending).
+    - [x] **M35.2.3: Replay Integration**: Hook `GraphProjection` into the main `Loader` replay loop.
 - [ ] **M35.3: Policy Matcher on Graph**
     - [ ] Traverse graph to find applicable policies (e.g., "Find all limits affecting Agent X").
 - [ ] **M35.4: Graph Visualization**

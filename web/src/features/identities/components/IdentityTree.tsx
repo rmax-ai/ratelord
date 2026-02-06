@@ -1,6 +1,5 @@
 // web/src/features/identities/components/IdentityTree.tsx
 
-import React from 'react';
 import { IdentityNode } from '../utils';
 
 interface IdentityTreeProps {

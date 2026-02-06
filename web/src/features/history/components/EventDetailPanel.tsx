@@ -1,5 +1,4 @@
 import { X, Copy, Check } from 'lucide-react';
-import { cn } from '../../../lib/utils';
 import { Event } from '../../../lib/api';
 import { useState } from 'react';
 

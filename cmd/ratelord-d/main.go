@@ -16,6 +16,7 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/api"
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 	"github.com/rmax-ai/ratelord/pkg/provider/federated"
 	"github.com/rmax-ai/ratelord/pkg/provider/github"
@@ -216,6 +217,9 @@ func main() {
 	// M34.1: Initialize Cluster Topology Projection
 	clusterProj := engine.NewClusterTopology()
 
+	// M35.2: Initialize Graph Projection
+	graphProj := graph.NewProjection()
+
 	// M7.3: Initialize Forecast Projection and Forecaster
 	forecastProj := forecast.NewForecastProjection(20) // Window size of 20 points
 	linearModel := &forecast.LinearModel{}
@@ -252,6 +256,12 @@ func main() {
 		// Replay cluster events
 		clusterProj.Replay(events)
 		fmt.Printf(`{"level":"info","msg":"cluster_projection_replayed"}` + "\n")
+		// Replay graph events
+		if err := graphProj.Replay(events); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_replay_graph_events","error":"%v"}`+"\n", err)
+		} else {
+			fmt.Printf(`{"level":"info","msg":"graph_projection_replayed"}` + "\n")
+		}
 		// Replay forecast projection
 		for _, event := range events {
 			if event.EventType == store.EventTypeUsageObserved {
