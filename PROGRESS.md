@@ -8,3 +8,7 @@
 | M24.1: Dynamic Delay Controller | COMPLETED | Implement | 2026-02-06 |
 | M24.2: Feedback Loop Integration | COMPLETED | Implement | 2026-02-06 |
 | M24.3: Configuration & Tuning | COMPLETED | Implement | 2026-02-06 |
+| M25.1: Aggregation Schema | COMPLETED | Implement | 2026-02-06 |
+| M25.2: Rollup Worker Core | COMPLETED | Implement | 2026-02-06 |
+| M25.3: Trend API | COMPLETED | Implement | 2026-02-06 |
+| M25.4: Integration Test | COMPLETED | Implement | 2026-02-06 |

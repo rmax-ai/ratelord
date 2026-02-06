@@ -350,14 +350,23 @@ Focus: Move beyond static limits to dynamic flow control.
 
 ## Epic 25: Long-term Trends & Aggregation
 Focus: Efficient querying for historical data.
-- [ ] **M25.1: Aggregation Schema**
-    - Create `usage_hourly` and `usage_daily` tables in SQLite.
-- [ ] **M25.2: Rollup Worker**
-    - Background job to aggregate raw events into rollups.
-    - Run every hour/day.
-- [ ] **M25.3: Trend API**
-    - Implement `GET /v1/trends` endpoint.
-    - Support filtering by identity, scope, and time range.
+- [x] **M25.1: Aggregation Schema**
+    - [x] Update `pkg/store/sqlite.go` `migrate()` to include `usage_hourly`, `usage_daily`, and `system_state`.
+    - [x] Add `GetSystemState(key)` and `SetSystemState(key, val)` methods to `Store`.
+    - [x] Add `UpsertUsageStats(batch)` method to `Store`.
+- [x] **M25.2: Rollup Worker Core**
+    - [x] Create `pkg/engine/rollup.go`.
+    - [x] Implement `RollupWorker` struct with `Run(ctx)` loop.
+    - [x] Implement aggregation logic (bucketing and delta calculation).
+    - [x] Integrate worker into `cmd/ratelord-d/main.go` startup.
+- [x] **M25.3: Trend API**
+    - [x] Add `GetTrends` method to `Store` (query with filters).
+    - [x] Implement `GET /v1/trends` handler in `pkg/api`.
+    - [x] Add query param parsing and validation.
+- [x] **M25.4: Integration Test**
+    - [x] Generate synthetic usage events.
+    - [x] Force a rollup cycle.
+    - [x] Verify `GET /v1/trends` returns expected aggregates.
 
 ## Epic 26: Webhooks & Notifications
 Focus: Push alerts to external systems.

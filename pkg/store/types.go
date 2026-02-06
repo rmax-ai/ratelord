@@ -60,6 +60,30 @@ type EventCorrelation struct {
 	CausationID   string `json:"causation_id"`
 }
 
+// UsageStat represents aggregated usage statistics for a time bucket.
+type UsageStat struct {
+	BucketTs   time.Time `json:"bucket_ts"`
+	ProviderID string    `json:"provider_id"`
+	PoolID     string    `json:"pool_id"`
+	IdentityID string    `json:"identity_id"`
+	ScopeID    string    `json:"scope_id"`
+	TotalUsage int       `json:"total_usage"`
+	MinUsage   int       `json:"min_usage"`
+	MaxUsage   int       `json:"max_usage"`
+	EventCount int       `json:"event_count"`
+}
+
+// UsageFilter defines filters for querying usage statistics.
+type UsageFilter struct {
+	From       time.Time
+	To         time.Time
+	Bucket     string // "hour" or "day"
+	ProviderID string
+	PoolID     string
+	IdentityID string
+	ScopeID    string
+}
+
 // Sentinel constants for unknown/global dimensions.
 const (
 	SentinelSystem  = "sentinel:system"

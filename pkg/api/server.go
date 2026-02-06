@@ -67,6 +67,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	mux.HandleFunc("/v1/intent", s.withAuth(s.handleIntent))
 	mux.HandleFunc("/v1/identities", s.handleIdentities)
 	mux.HandleFunc("/v1/events", s.handleEvents)
+	mux.HandleFunc("/v1/trends", s.handleTrends)
 
 	// Debug endpoints
 	if poller != nil {
@@ -367,6 +368,68 @@ func (s *Server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(events); err != nil {
 		fmt.Printf(`{"level":"error","msg":"failed_to_encode_events","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+	}
+}
+
+// handleTrends returns aggregated usage statistics.
+func (s *Server) handleTrends(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `{"error":"method_not_allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse query parameters
+	fromStr := r.URL.Query().Get("from")
+	toStr := r.URL.Query().Get("to")
+	bucket := r.URL.Query().Get("bucket")
+	if bucket == "" {
+		bucket = "hour" // default
+	}
+	if bucket != "hour" && bucket != "day" {
+		http.Error(w, `{"error":"invalid_bucket","valid":["hour","day"]}`, http.StatusBadRequest)
+		return
+	}
+
+	from, err := time.Parse(time.RFC3339, fromStr)
+	if err != nil {
+		http.Error(w, `{"error":"invalid_from","format":"RFC3339"}`, http.StatusBadRequest)
+		return
+	}
+
+	to, err := time.Parse(time.RFC3339, toStr)
+	if err != nil {
+		http.Error(w, `{"error":"invalid_to","format":"RFC3339"}`, http.StatusBadRequest)
+		return
+	}
+
+	if to.Before(from) {
+		http.Error(w, `{"error":"to_before_from"}`, http.StatusBadRequest)
+		return
+	}
+
+	filter := store.UsageFilter{
+		From:       from,
+		To:         to,
+		Bucket:     bucket,
+		ProviderID: r.URL.Query().Get("provider_id"),
+		PoolID:     r.URL.Query().Get("pool_id"),
+		IdentityID: r.URL.Query().Get("identity_id"),
+		ScopeID:    r.URL.Query().Get("scope_id"),
+	}
+
+	// Query store
+	stats, err := s.store.GetUsageStats(r.Context(), filter)
+	if err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_get_usage_stats","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+		http.Error(w, `{"error":"internal_server_error"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Return JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(stats); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_encode_trends","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 	}
 }
 

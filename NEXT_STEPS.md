@@ -2,25 +2,23 @@
 
 ## Current Context
 - **v1.0.0 Released**: The system has been tagged and released.
-- **Phase 9 Initiated**: Ecosystem expansion (Node.js SDK) and hardening.
-- **Scope Expanded**: Phase 10 (Advanced Intelligence) defined; Phase 9 security hardening in progress.
+- **Phase 10 In-Flight**: Advanced Intelligence and Integration.
+- **Completed**: Adaptive Throttling (Epic 24), Trends & Aggregation (Epic 25).
 
 ## Immediate Actions
 
- 1. **Epic 23: Security Hardening** (High Priority):
-     - [x] **M23.2: API Authentication**:
-         - [x] **M23.2.1: Auth Token Management**: Update `identity add` to support tokens (generate/hash).
-         - [x] **M23.2.2: Auth Middleware**: Secure API endpoints.
-     - [x] **M23.3: Secure Headers**: Hardening HTTP headers.
+ 1. **Epic 26: Webhooks & Notifications** (New):
+     - [ ] **M26.1: Webhook Registry**: Create table and registration endpoint.
+     - [ ] **M26.2: Dispatcher**: Async worker for delivery.
+     - [ ] **M26.3: Security**: HMAC signing.
 
- 2. **Epic 20: Operational Visibility**:
+ 2. **Epic 20: Operational Visibility** (Cleanup):
      - [ ] **M20.3: Grafana Dashboard**: Create visualization.
 
- 3. **Phase 10 Preparation**:
-     - [x] **Epic 24-26**: Expanded scope in TASKS.md.
-     - [x] **Next**: Select first Phase 10 epic or finish M20.3.
+ 3. **Phase 10 Continuation**:
      - [x] **Epic 24**: Adaptive Throttling implemented.
-     - [ ] **Next**: Verify with simulation or move to Epic 25.
+     - [x] **Epic 25**: Long-term Trends & Aggregation implemented (Schema, Worker, API, Tests).
+     - [ ] **Next**: Move to Epic 26.
 
 ## Reference
 

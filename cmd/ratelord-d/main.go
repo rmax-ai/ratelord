@@ -202,6 +202,12 @@ func main() {
 	defer pollerCancel()
 	go poller.Start(pollerCtx)
 
+	// M25.2: Initialize and start Rollup Worker
+	rollup := engine.NewRollupWorker(st)
+	rollupCtx, rollupCancel := context.WithCancel(context.Background())
+	defer rollupCancel()
+	go rollup.Run(rollupCtx)
+
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
 	addr := fmt.Sprintf(":%d", cfg.Port)
