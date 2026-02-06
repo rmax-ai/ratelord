@@ -157,6 +157,14 @@ func (s *Store) migrate() error {
 
 	-- Index to quickly find the most recent snapshot for recovery
 	CREATE INDEX IF NOT EXISTS idx_snapshots_ts ON snapshots(ts_snapshot DESC);
+
+	-- Leases table for distributed locking (Leader Election)
+	CREATE TABLE IF NOT EXISTS leases (
+		name TEXT PRIMARY KEY,
+		holder_id TEXT NOT NULL,
+		expires_at DATETIME NOT NULL,
+		version INTEGER NOT NULL DEFAULT 1
+	);
 	`
 
 	if _, err := s.db.Exec(query); err != nil {

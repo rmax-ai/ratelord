@@ -469,17 +469,21 @@ Focus: Allow the Leader to persist state in shared storage (Redis/Etcd) for stat
 - [x] **M32.2: Redis Implementation**
     - [x] Implement `RedisUsageStore` using `go-redis`.
     - [x] Add `RATELORD_REDIS_URL` config.
-- [ ] **M32.3: Atomic Operations**
-    - [ ] Refactor `PoolState` storage to Redis Hash (`HSET`) to support partial updates.
-    - [ ] Implement `IncrementUsed` with Lua scripts for atomicity.
+- [x] **M32.3: Atomic Operations**
+    - [x] Refactor `PoolState` storage to Redis Hash (`HSET`) to support partial updates.
+    - [x] Implement `IncrementUsed` with Lua scripts for atomicity.
 
 ## Epic 33: High Availability
 Focus: Automatic Leader Election for failover.
 - [ ] **M33.1: Leader Election**
+    - [ ] Define `LeaseStore` interface.
     - [ ] Define `Lease` struct (HolderID, Expiry).
+    - [ ] Implement `RedisLeaseStore`.
+    - [ ] Implement `SqliteLeaseStore` (as fallback).
     - [ ] Implement `AcquireLease(ctx, id)` in Store.
     - [ ] Implement `RenewLease(ctx, id)` background loop.
 - [ ] **M33.2: Standby Mode**
+    - [ ] Implement `ElectionManager` struct.
     - [ ] Implement `StandbyLoop` (Polls lease, if free -> Acquire).
     - [ ] Handle `OnPromote` (Load state, start Policy Engine).
     - [ ] Handle `OnDemote` (Stop Policy Engine, flush state).

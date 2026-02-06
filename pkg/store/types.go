@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 )
@@ -21,6 +22,31 @@ const (
 	EventTypeThrottleAdvised      EventType = "throttle_advised"
 	EventTypeIdentityRegistered   EventType = "identity_registered"
 )
+
+// Lease represents a distributed lock or leadership claim.
+type Lease struct {
+	Name      string    `json:"name"`
+	HolderID  string    `json:"holder_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Version   int64     `json:"version"` // For CAS (Compare-And-Swap) logic
+}
+
+// LeaseStore defines the interface for acquiring and renewing leases.
+type LeaseStore interface {
+	// Acquire tries to acquire the lease. Returns true if successful.
+	// If the lease is already held by holderID, it renews it.
+	Acquire(ctx context.Context, name, holderID string, ttl time.Duration) (bool, error)
+
+	// Renew updates the expiry of an existing lease held by holderID.
+	// Returns error if the lease is lost or stolen.
+	Renew(ctx context.Context, name, holderID string, ttl time.Duration) error
+
+	// Release releases the lease if held by holderID.
+	Release(ctx context.Context, name, holderID string) error
+
+	// Get returns the current lease state.
+	Get(ctx context.Context, name string) (*Lease, error)
+}
 
 // EventID is a unique identifier for an event.
 type EventID string
