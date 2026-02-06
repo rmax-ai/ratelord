@@ -33,6 +33,8 @@ type Config struct {
 	PolicyPath string
 	Port       int
 	WebDir     string
+	TLSCert    string
+	TLSKey     string
 }
 
 func LoadConfig() Config {
@@ -59,12 +61,20 @@ func LoadConfig() Config {
 	if val := os.Getenv("RATELORD_WEB_DIR"); val != "" {
 		cfg.WebDir = val
 	}
+	if val := os.Getenv("RATELORD_TLS_CERT"); val != "" {
+		cfg.TLSCert = val
+	}
+	if val := os.Getenv("RATELORD_TLS_KEY"); val != "" {
+		cfg.TLSKey = val
+	}
 
 	// Flags (override env vars)
 	flag.StringVar(&cfg.DBPath, "db", cfg.DBPath, "Path to SQLite database")
 	flag.StringVar(&cfg.PolicyPath, "policy", cfg.PolicyPath, "Path to policy file")
 	flag.IntVar(&cfg.Port, "port", cfg.Port, "HTTP server port")
 	flag.StringVar(&cfg.WebDir, "web-dir", cfg.WebDir, "Path to web assets directory (overrides embedded)")
+	flag.StringVar(&cfg.TLSCert, "tls-cert", cfg.TLSCert, "Path to TLS certificate file")
+	flag.StringVar(&cfg.TLSKey, "tls-key", cfg.TLSKey, "Path to TLS key file")
 
 	flag.Parse()
 
@@ -213,6 +223,11 @@ func main() {
 
 	if webAssets != nil {
 		srv.SetStaticFS(webAssets)
+	}
+
+	// M23.1: Configure TLS if provided
+	if cfg.TLSCert != "" && cfg.TLSKey != "" {
+		srv.SetTLS(cfg.TLSCert, cfg.TLSKey)
 	}
 
 	go func() {

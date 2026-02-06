@@ -325,7 +325,7 @@ Focus: More expressive governance rules.
 
 ## Epic 23: Security Hardening
 Focus: Secure the daemon for production usage beyond localhost.
-- [ ] **M23.1: TLS Termination**
+- [x] **M23.1: TLS Termination**
     - Support `RATELORD_TLS_CERT` and `RATELORD_TLS_KEY` env vars.
     - Serve HTTPS if configured.
 - [ ] **M23.2: API Authentication**

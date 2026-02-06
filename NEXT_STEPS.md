@@ -31,9 +31,13 @@
          - [x] **M22.2.4: Unit Tests**: Verify timezone handling and boundary conditions.
 
  4. **Epic 23: Security Hardening**:
-     - [ ] **M23.1: TLS Termination**: Support HTTPS.
-     - [ ] **M23.2: API Authentication**: Implement Bearer auth (Token Mgmt + Middleware).
-     - [ ] **M23.3: Secure Headers**: Add security headers.
+     - [x] **M23.1: TLS Termination**:
+         - [x] **M23.1.1: Config**: Support `RATELORD_TLS_CERT` and `RATELORD_TLS_KEY` env vars.
+         - [x] **M23.1.2: Implementation**: Update Server to support `ListenAndServeTLS`.
+     - [ ] **M23.2: API Authentication**:
+         - [ ] **M23.2.1: Auth Token Management**: Extend `identity add` to generate/accept an API token (store hashed).
+         - [ ] **M23.2.2: Auth Middleware**: Validate `Authorization: Bearer <token>` against registered identities.
+     - [ ] **M23.3: Secure Headers**: Add HSTS, CSP, and other security headers.
 
 ## Reference
 

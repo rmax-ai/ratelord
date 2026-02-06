@@ -36,6 +36,10 @@ type Server struct {
 	policy     *engine.PolicyEngine
 	poller     *engine.Poller
 	staticFS   fs.FS
+
+	// TLS Config
+	tlsCertFile string
+	tlsKeyFile  string
 }
 
 // NewServer creates a new API server instance
@@ -97,11 +101,24 @@ func (s *Server) SetStaticFS(fs fs.FS) {
 	s.staticFS = fs
 }
 
+// SetTLS configures the server to use TLS
+func (s *Server) SetTLS(certFile, keyFile string) {
+	s.tlsCertFile = certFile
+	s.tlsKeyFile = keyFile
+}
+
 // Start runs the HTTP server (blocking)
 func (s *Server) Start() error {
-	fmt.Printf(`{"level":"info","msg":"server_starting","addr":"%s"}`+"\n", s.server.Addr)
-	if err := s.server.ListenAndServe(); err != http.ErrServerClosed {
-		return err
+	if s.tlsCertFile != "" && s.tlsKeyFile != "" {
+		fmt.Printf(`{"level":"info","msg":"server_starting_tls","addr":"%s"}`+"\n", s.server.Addr)
+		if err := s.server.ListenAndServeTLS(s.tlsCertFile, s.tlsKeyFile); err != http.ErrServerClosed {
+			return err
+		}
+	} else {
+		fmt.Printf(`{"level":"info","msg":"server_starting","addr":"%s"}`+"\n", s.server.Addr)
+		if err := s.server.ListenAndServe(); err != http.ErrServerClosed {
+			return err
+		}
 	}
 	return nil
 }
