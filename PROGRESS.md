@@ -35,4 +35,4 @@
 | M30.3: Leader State Store | COMPLETED | Implement | 2026-02-06 |
 | M32.1: Usage Store Interface | COMPLETED | Implement | 2026-02-06 |
 | Phase 14: Scope Expansion (Arch & Advanced) | COMPLETED | Orchestrator | 2026-02-07 |
-| M31.1: CI Workflows | COMPLETED | Implement | 2026-02-07 |
+| M31.2: Release Script | COMPLETED | Implement | 2026-02-07 |

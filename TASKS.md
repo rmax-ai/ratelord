@@ -451,10 +451,10 @@ Focus: Zero-touch versioning and artifact publication (`RELEASING.md`).
 - [ ] **M31.1: CI Workflows**
     - [x] Create `.github/workflows/test.yaml` (Go test, lint).
     - [x] Create `.github/workflows/release.yaml` (Trigger on tag).
-- [ ] **M31.2: Release Script / Goreleaser**
-    - [ ] Configure `.goreleaser.yaml`.
-    - [ ] Ensure cross-compilation (Darwin/Linux, AMD64/ARM64).
-    - [ ] Configure Docker build and push.
+- [x] **M31.2: Release Script / Goreleaser**
+    - [x] Configure `.goreleaser.yaml`.
+    - [x] Ensure cross-compilation (Darwin/Linux, AMD64/ARM64).
+    - [x] Configure Docker build and push.
 - [ ] **M31.3: Documentation & Changelog**
     - [ ] Configure changelog generation from Conventional Commits.
     - [ ] Auto-update `RELEASE_NOTES.md` or GitHub Release body.

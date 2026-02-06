@@ -1,0 +1,28 @@
+project_name: ratelord
+
+builds:
+  - main: ./cmd/ratelord-d
+    binary: ratelord-d
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+dockers:
+  - dockerfile: Dockerfile
+    image_templates:
+      - "rmax/ratelord-d:{{ .Tag }}"
+      - "rmax/ratelord-d:latest"
+    build_flag_templates:
+      - "--platform=linux/amd64"

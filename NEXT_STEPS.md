@@ -11,7 +11,7 @@
 
  1. **Epic 31: Release Automation** (`RELEASING.md`):
        - [x] **M31.1: CI Workflows**: GitHub Actions.
-       - [ ] **M31.2: Release Script**: Goreleaser.
+        - [x] **M31.2: Release Script**: Goreleaser.
 
  2. **Epic 32: External State Stores** (`TASKS.md`):
        - [ ] **M32.2: Redis Implementation**: Implement RedisUsageStore.
