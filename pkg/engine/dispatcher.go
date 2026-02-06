@@ -3,6 +3,9 @@ package engine
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -168,8 +171,11 @@ func (d *Dispatcher) send(ctx context.Context, wh *store.WebhookConfig, evt *sto
 		req.Header.Set("X-Ratelord-Event-ID", string(evt.EventID))
 		req.Header.Set("X-Ratelord-Event-Type", string(evt.EventType))
 
-		// TODO: Add HMAC signature (M26.3)
-		// req.Header.Set("X-Ratelord-Signature", signature)
+		// Calculate HMAC signature
+		mac := hmac.New(sha256.New, []byte(wh.Secret))
+		mac.Write(payload)
+		signature := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+		req.Header.Set("X-Ratelord-Signature", signature)
 
 		resp, err := d.client.Do(req)
 		if err != nil {

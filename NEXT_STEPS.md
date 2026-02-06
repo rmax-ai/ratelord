@@ -7,18 +7,27 @@
 
 ## Immediate Actions
 
- 1. **Epic 26: Webhooks & Notifications** (New):
-      - [x] **M26.1: Webhook Registry**: Create table and registration endpoint.
-      - [x] **M26.2: Dispatcher**: Async worker for delivery.
-      - [ ] **M26.3: Security**: HMAC signing.
+ 1. **Epic 26: Webhooks & Notifications** (Completed):
+       - [x] **M26.1: Webhook Registry**: Create table and registration endpoint.
+       - [x] **M26.2: Dispatcher**: Async worker for delivery.
+       - [x] **M26.3: Security**: HMAC signing.
 
- 2. **Epic 20: Operational Visibility** (Cleanup):
-     - [ ] **M20.3: Grafana Dashboard**: Create visualization.
+ 2. **Epic 20: Operational Visibility** (Completed):
+     - [x] **M20.3: Grafana Dashboard**: Create visualization.
 
- 3. **Phase 10 Continuation**:
+ 3. **Epic 27: State Snapshots & Compaction** (New):
+     - [ ] **M27.1: Snapshot Schema**: Create snapshots table.
+     - [ ] **M27.2: Snapshot Worker**: Periodic state persistence.
+     - [ ] **M27.3: Startup Optimization**: Load from snapshot + delta replay.
+     - [ ] **M27.4: Event Pruning**: Policy-based retention.
+
+ 4. **Phase 10 Continuation**:
      - [x] **Epic 24**: Adaptive Throttling implemented.
-     - [x] **Epic 25**: Long-term Trends & Aggregation implemented (Schema, Worker, API, Tests).
-     - [ ] **Next**: Move to Epic 26.
+     - [x] **Epic 25**: Long-term Trends & Aggregation implemented.
+     - [x] **Epic 26**: Webhooks implemented.
+     - [x] **Epic 20**: Cleanup (Grafana) done.
+     - [ ] **Next**: Begin Phase 11 (Epic 27).
+
 
 ## Reference
 

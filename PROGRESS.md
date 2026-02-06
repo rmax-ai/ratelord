@@ -14,3 +14,5 @@
 | M25.4: Integration Test | COMPLETED | Implement | 2026-02-06 |
 | M26.1: Webhook Registry | COMPLETED | Implement | 2026-02-06 |
 | M26.2: Dispatcher | COMPLETED | Implement | 2026-02-06 |
+| M26.3: Security (HMAC) | COMPLETED | Orchestrator | 2026-02-06 |
+| M20.3: Grafana Dashboard | COMPLETED | Orchestrator | 2026-02-06 |

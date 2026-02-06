@@ -2,6 +2,9 @@ package engine
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -41,6 +44,22 @@ func TestDispatcher_DispatchEvent(t *testing.T) {
 			t.Errorf("failed to read request body: %v", err)
 			return
 		}
+
+		// Verify signature
+		signature := r.Header.Get("X-Ratelord-Signature")
+		if signature == "" {
+			t.Errorf("missing X-Ratelord-Signature header")
+		}
+
+		// Reconstruct signature
+		mac := hmac.New(sha256.New, []byte("test_secret"))
+		mac.Write(body)
+		expectedSignature := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+
+		if signature != expectedSignature {
+			t.Errorf("expected signature %s, got %s", expectedSignature, signature)
+		}
+
 		receivedPayload <- body
 		w.WriteHeader(http.StatusOK)
 	}))

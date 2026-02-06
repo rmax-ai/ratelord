@@ -301,10 +301,11 @@ Focus: Export internal metrics to standard observability tools.
     - Export `ratelord_usage`, `ratelord_limit`, `ratelord_forecast_seconds` gauges.
     - Export `ratelord_intent_total` counters.
 - [x] **M20.2: Logging Correlation**
-    - Ensure `trace_id` / `intent_id` is threaded through all logs for a request.
-- [ ] **M20.3: Grafana Dashboard**
-    - Create `deploy/grafana/dashboard.json`.
-    - Visualize `ratelord_usage` and `ratelord_limit` per pool.
+    - [x] Ensure `trace_id` / `intent_id` is threaded through all logs for a request.
+- [x] **M20.3: Grafana Dashboard**
+    - [x] Create `deploy/grafana/dashboard.json`.
+    - [x] Visualize `ratelord_usage` and `ratelord_limit` per pool.
+
 
 ## Epic 21: Configuration & CLI Polish
 Focus: Production-grade configuration management.
@@ -376,7 +377,22 @@ Focus: Push alerts to external systems.
 - [x] **M26.2: Dispatcher**
     - [x] Async worker to send HTTP POST payloads to registered webhooks.
     - [x] Handle retries and backoff.
-- [ ] **M26.3: Security (HMAC)**
-    - Sign webhook payloads with a shared secret.
-    - Include `X-Ratelord-Signature` header.
+- [x] **M26.3: Security (HMAC)**
+    - [x] Sign webhook payloads with a shared secret.
+    - [x] Include `X-Ratelord-Signature` header.
+
+# Phase 11: Scalability & Maintenance
+
+## Epic 27: State Snapshots & Compaction
+Focus: Improve startup time and manage disk usage.
+- [ ] **M27.1: Snapshot Schema**
+    - Create `snapshots` table (snapshot_id, timestamp, payload blob).
+- [ ] **M27.2: Snapshot Worker**
+    - Implement a worker that periodically serializes the `Projection` state (Usage, Limits, etc.) to a snapshot.
+- [ ] **M27.3: Startup Optimization**
+    - Update `Loader` to load the latest snapshot first.
+    - Replay events only *after* the snapshot timestamp.
+    - *Acceptance*: Startup time is O(1) + O(recent_events) instead of O(all_events).
+- [ ] **M27.4: Event Pruning**
+    - Implement a command or worker to delete events older than retention policy (if they are snapshotted).
 
