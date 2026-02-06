@@ -17,10 +17,12 @@ type UsageStore interface {
 	Set(state PoolState)
 	GetAll() []PoolState
 	Clear()
+	Increment(providerID, poolID string, usedDelta, remainingDelta int64, costDelta currency.MicroUSD)
 }
 
 // MemoryUsageStore implements UsageStore using an in-memory map
 type MemoryUsageStore struct {
+	mu    sync.RWMutex
 	pools map[string]PoolState
 }
 
@@ -31,15 +33,21 @@ func NewMemoryUsageStore() *MemoryUsageStore {
 }
 
 func (s *MemoryUsageStore) Get(providerID, poolID string) (PoolState, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	state, ok := s.pools[makePoolKey(providerID, poolID)]
 	return state, ok
 }
 
 func (s *MemoryUsageStore) Set(state PoolState) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.pools[makePoolKey(state.ProviderID, state.PoolID)] = state
 }
 
 func (s *MemoryUsageStore) GetAll() []PoolState {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	list := make([]PoolState, 0, len(s.pools))
 	for _, pool := range s.pools {
 		list = append(list, pool)
@@ -48,7 +56,27 @@ func (s *MemoryUsageStore) GetAll() []PoolState {
 }
 
 func (s *MemoryUsageStore) Clear() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.pools = make(map[string]PoolState)
+}
+
+func (s *MemoryUsageStore) Increment(providerID, poolID string, usedDelta, remainingDelta int64, costDelta currency.MicroUSD) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	key := makePoolKey(providerID, poolID)
+	state, exists := s.pools[key]
+	if !exists {
+		state = PoolState{
+			ProviderID: providerID,
+			PoolID:     poolID,
+		}
+	}
+	state.Used += usedDelta
+	state.Remaining += remainingDelta
+	state.Cost += costDelta
+	state.LastUpdated = time.Now()
+	s.pools[key] = state
 }
 
 // PoolState represents the current usage state of a constraint pool
