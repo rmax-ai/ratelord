@@ -24,4 +24,8 @@
 | M28.1: Simulation Engine Upgrade | COMPLETED | Implement | 2026-02-06 |
 | M28.2: Scenario Definitions | COMPLETED | Implement | 2026-02-06 |
 | M28.3: Reporting & Verification | COMPLETED | Implement | 2026-02-06 |
-
+| M29.1: Currency Types & Usage Extension | COMPLETED | Implement | 2026-02-06 |
+| M29.2: Pricing Registry | COMPLETED | Implement | 2026-02-06 |
+| M29.3: Cost Policy | COMPLETED | Implement | 2026-02-06 |
+| M29.4: Forecast Cost | COMPLETED | Implement | 2026-02-06 |
+| Epic 29: Financial Governance | COMPLETED | Orchestrator | 2026-02-06 |

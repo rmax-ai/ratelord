@@ -2,8 +2,23 @@ package engine
 
 // PolicyConfig represents the top-level structure of policy.json
 type PolicyConfig struct {
-	Policies  []PolicyDefinition `json:"policies"`
-	Providers ProvidersConfig    `json:"providers,omitempty"`
+	Policies  []PolicyDefinition          `json:"policies"`
+	Providers ProvidersConfig             `json:"providers,omitempty"`
+	Pricing   map[string]map[string]int64 `json:"pricing,omitempty"`
+}
+
+// GetCost looks up the cost per unit for a given provider and pool.
+// Returns 0 if not found.
+func (c *PolicyConfig) GetCost(providerID, poolID string) int64 {
+	if c.Pricing == nil {
+		return 0
+	}
+	if pools, ok := c.Pricing[providerID]; ok {
+		if cost, ok := pools[poolID]; ok {
+			return cost
+		}
+	}
+	return 0
 }
 
 // ProvidersConfig holds configuration for various providers

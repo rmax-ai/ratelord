@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rmax-ai/ratelord/pkg/engine/currency"
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
@@ -16,6 +17,7 @@ type PoolState struct {
 	PoolID         string             `json:"pool_id"`
 	Used           int64              `json:"used"`
 	Remaining      int64              `json:"remaining"`
+	Cost           currency.MicroUSD  `json:"cost,omitempty"`
 	ResetAt        time.Time          `json:"reset_at"`
 	LastUpdated    time.Time          `json:"last_updated"`
 	LatestForecast *forecast.Forecast `json:"latest_forecast,omitempty"`
@@ -92,10 +94,11 @@ func (p *UsageProjection) applyForecast(event store.Event) error {
 
 func (p *UsageProjection) applyUsage(event store.Event) error {
 	var payload struct {
-		ProviderID string `json:"provider_id"`
-		PoolID     string `json:"pool_id"`
-		Used       int64  `json:"used"`
-		Remaining  int64  `json:"remaining"`
+		ProviderID string            `json:"provider_id"`
+		PoolID     string            `json:"pool_id"`
+		Used       int64             `json:"used"`
+		Remaining  int64             `json:"remaining"`
+		Cost       currency.MicroUSD `json:"cost"`
 	}
 
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -116,6 +119,7 @@ func (p *UsageProjection) applyUsage(event store.Event) error {
 	// For now, assume absolute values if provided.
 	state.Used = payload.Used
 	state.Remaining = payload.Remaining
+	state.Cost = payload.Cost
 	state.LastUpdated = event.TsIngest
 
 	p.pools[key] = state

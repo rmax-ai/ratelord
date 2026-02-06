@@ -15,32 +15,30 @@ func (m *LinearModel) Predict(history []UsagePoint, currentRemaining int64, rese
 		return Forecast{}, errors.New("insufficient history for prediction")
 	}
 
-	// Perform linear regression: Used = a + b * time
-	// Time in seconds since first point
 	startTime := history[0].Timestamp.Unix()
-	var sumX, sumY, sumXY, sumXX float64
-	n := float64(len(history))
 
-	for _, point := range history {
-		x := float64(point.Timestamp.Unix() - startTime)
-		y := float64(point.Used)
-		sumX += x
-		sumY += y
-		sumXY += x * y
-		sumXX += x * x
+	// Calculate Usage Burn Rate
+	usageSlope, usageVariance, _, err := calculateSlope(history, startTime, func(p UsagePoint) float64 {
+		return float64(p.Used)
+	})
+	if err != nil {
+		return Forecast{}, err
 	}
 
-	// Slope b = (n*sumXY - sumX*sumY) / (n*sumXX - sumX*sumX)
-	denom := n*sumXX - sumX*sumX
-	if denom == 0 {
-		// No variation in time, can't fit line
-		return Forecast{}, errors.New("no time variation in history")
+	// Calculate Cost Burn Rate
+	costSlope, costVariance, _, err := calculateSlope(history, startTime, func(p UsagePoint) float64 {
+		return float64(p.Cost)
+	})
+	if err != nil {
+		// If cost calculation fails (e.g., constant cost), we can still proceed but maybe with 0 burn rate?
+		// For now, let's treat it as an error if we can't calculate slope,
+		// but actually constant cost implies 0 slope which is fine.
+		// The helper returns error if no time variation, which is checked once.
+		// But if we have valid time variation, we should be fine.
+		return Forecast{}, err
 	}
-	b := (n*sumXY - sumX*sumY) / denom
-	a := (sumY - b*sumX) / n
 
-	// Burn rate is slope b (per second)
-	meanBurnRate := b
+	meanBurnRate := usageSlope
 	if meanBurnRate <= 0 {
 		// If not burning, infinite TTE
 		return Forecast{
@@ -59,20 +57,15 @@ func (m *LinearModel) Predict(history []UsagePoint, currentRemaining int64, rese
 				Variance: 0,
 				Unit:     "per second",
 			},
+			CostBurnRate: BurnRate{
+				Mean:     costSlope,
+				Variance: costVariance,
+				Unit:     "MicroUSD/sec",
+			},
 		}, nil
 	}
 
-	// Calculate residuals for variance
-	var sumResidualsSq float64
-	for _, point := range history {
-		x := float64(point.Timestamp.Unix() - startTime)
-		predicted := a + b*x
-		residual := float64(point.Used) - predicted
-		sumResidualsSq += residual * residual
-	}
-	variance := sumResidualsSq / (n - 2) // degrees of freedom
-
-	stdDev := math.Sqrt(variance)
+	stdDev := math.Sqrt(usageVariance)
 
 	// TTE calculations
 	p50Rate := meanBurnRate
@@ -105,8 +98,55 @@ func (m *LinearModel) Predict(history []UsagePoint, currentRemaining int64, rese
 		},
 		BurnRate: BurnRate{
 			Mean:     meanBurnRate,
-			Variance: variance,
+			Variance: usageVariance,
 			Unit:     "per second",
 		},
+		CostBurnRate: BurnRate{
+			Mean:     costSlope,
+			Variance: costVariance,
+			Unit:     "MicroUSD/sec",
+		},
 	}, nil
+}
+
+// calculateSlope performs linear regression y = a + bx
+func calculateSlope(history []UsagePoint, startTime int64, valueExtractor func(p UsagePoint) float64) (slope float64, variance float64, intercept float64, err error) {
+	var sumX, sumY, sumXY, sumXX float64
+	n := float64(len(history))
+
+	for _, point := range history {
+		x := float64(point.Timestamp.Unix() - startTime)
+		y := valueExtractor(point)
+		sumX += x
+		sumY += y
+		sumXY += x * y
+		sumXX += x * x
+	}
+
+	// Slope b = (n*sumXY - sumX*sumY) / (n*sumXX - sumX*sumX)
+	denom := n*sumXX - sumX*sumX
+	if denom == 0 {
+		// No variation in time, can't fit line
+		return 0, 0, 0, errors.New("no time variation in history")
+	}
+	b := (n*sumXY - sumX*sumY) / denom
+	a := (sumY - b*sumX) / n
+
+	// Calculate residuals for variance
+	var sumResidualsSq float64
+	for _, point := range history {
+		x := float64(point.Timestamp.Unix() - startTime)
+		y := valueExtractor(point)
+		predicted := a + b*x
+		residual := y - predicted
+		sumResidualsSq += residual * residual
+	}
+	// degrees of freedom = n - 2
+	if n > 2 {
+		variance = sumResidualsSq / (n - 2)
+	} else {
+		variance = 0 // Not enough points for variance
+	}
+
+	return b, variance, a, nil
 }

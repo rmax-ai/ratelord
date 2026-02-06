@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/rmax-ai/ratelord/pkg/engine/currency"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -26,9 +27,10 @@ func NewForecastProjection(windowSize int) *ForecastProjection {
 // OnUsageObserved updates the history for a pool with a new usage observation
 func (fp *ForecastProjection) OnUsageObserved(event *store.Event) {
 	var payload struct {
-		PoolID    string `json:"pool_id"`
-		Remaining int64  `json:"remaining"`
-		Used      int64  `json:"used"`
+		PoolID    string            `json:"pool_id"`
+		Remaining int64             `json:"remaining"`
+		Used      int64             `json:"used"`
+		Cost      currency.MicroUSD `json:"cost"`
 	}
 
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -40,6 +42,7 @@ func (fp *ForecastProjection) OnUsageObserved(event *store.Event) {
 		Timestamp: event.TsEvent,
 		Used:      payload.Used,
 		Remaining: payload.Remaining,
+		Cost:      payload.Cost,
 	}
 
 	fp.mu.Lock()

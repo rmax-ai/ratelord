@@ -27,7 +27,7 @@
         - [x] **M28.3: Reporting**: JSON results and assertions.
 
  5. **New Initiatives (Phase 11 & 12)**:
-       - [ ] **Epic 29**: Financial Governance (`FINANCIAL_GOVERNANCE.md`).
+       - [x] **Epic 29**: Financial Governance (`FINANCIAL_GOVERNANCE.md`).
        - [ ] **Epic 30**: Cluster Federation (`CLUSTER_FEDERATION.md`).
        - [ ] **Epic 31**: Release Automation (`RELEASING.md`).
 
@@ -38,7 +38,8 @@
        - [x] **Epic 26**: Webhooks.
        - [x] **Epic 27**: Snapshots.
        - [x] **Epic 28**: Advanced Simulation.
-       - [ ] **Next**: Execute Epic 29.
+       - [x] **Epic 29**: Financial Governance.
+       - [ ] **Next**: Execute Epic 30.
 
       - [ ] **Epic 28**: Advanced Simulation Framework (`ADVANCED_SIMULATION.md`).
       - [ ] **Epic 29**: Financial Governance (`FINANCIAL_GOVERNANCE.md`).

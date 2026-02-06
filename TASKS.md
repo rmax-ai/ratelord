@@ -306,7 +306,6 @@ Focus: Export internal metrics to standard observability tools.
     - [x] Create `deploy/grafana/dashboard.json`.
     - [x] Visualize `ratelord_usage` and `ratelord_limit` per pool.
 
-
 ## Epic 21: Configuration & CLI Polish
 Focus: Production-grade configuration management.
 - [x] **M21.1: Robust Config Loader**
@@ -415,21 +414,21 @@ Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_S
 
 ## Epic 29: Financial Governance
 Focus: Elevating "Cost" to a first-class constraint alongside Rate Limits (`FINANCIAL_GOVERNANCE.md`).
-- [ ] **M29.1: Currency Types & Usage Extension**
-    - [ ] Create `pkg/engine/currency` package.
-    - [ ] Add `MicroUSD` type (int64).
-    - [ ] Update `Usage` struct to include `Cost MicroUSD`.
-- [ ] **M29.2: Pricing Registry**
-    - [ ] Update `pkg/engine/config.go` to include `Pricing` map.
-    - [ ] Implement lookup logic: `GetCost(provider, model, units)`.
-    - [ ] Update `UsageProjection` to calculate cost on ingestion.
-- [ ] **M29.3: Cost Policy**
-    - [ ] Add `budget_cap` rule type to `pkg/policy`.
-    - [ ] Implement `Evaluate` logic for cost-based rejections.
-    - [ ] Add `cost_efficiency` rule type for provider selection suggestions.
-- [ ] **M29.4: Forecast Cost**
-    - [ ] Update `ForecastModel` to predict `Cost` exhaustion.
-    - [ ] Emit `forecast_cost_computed` events.
+- [x] **M29.1: Currency Types & Usage Extension**
+    - [x] Create `pkg/engine/currency` package.
+    - [x] Add `MicroUSD` type (int64).
+    - [x] Update `Usage` struct to include `Cost MicroUSD`.
+- [x] **M29.2: Pricing Registry**
+    - [x] Update `pkg/engine/config.go` to include `Pricing` map.
+    - [x] Implement lookup logic: `GetCost(provider, model, units)`.
+    - [x] Update `UsageProjection` to calculate cost on ingestion.
+- [x] **M29.3: Cost Policy**
+    - [x] Add `budget_cap` rule type to `pkg/policy`.
+    - [x] Implement `Evaluate` logic for cost-based rejections.
+    - [x] Add `cost_efficiency` rule type for provider selection suggestions.
+- [x] **M29.4: Forecast Cost**
+    - [x] Update `ForecastModel` to predict `Cost` exhaustion.
+    - [x] Emit `forecast_cost_computed` events.
 
 ## Epic 30: Cluster Federation
 Focus: Expanding from single-node daemon to distributed fleet governance (`CLUSTER_FEDERATION.md`).
@@ -458,5 +457,3 @@ Focus: Zero-touch versioning and artifact publication (`RELEASING.md`).
 - [ ] **M31.3: Documentation & Changelog**
     - [ ] Configure changelog generation from Conventional Commits.
     - [ ] Auto-update `RELEASE_NOTES.md` or GitHub Release body.
-
-

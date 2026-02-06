@@ -2,13 +2,16 @@ package forecast
 
 import (
 	"time"
+
+	"github.com/rmax-ai/ratelord/pkg/engine/currency"
 )
 
 // UsagePoint represents a point in time usage observation
 type UsagePoint struct {
-	Timestamp time.Time `json:"timestamp"`
-	Used      int64     `json:"used"`
-	Remaining int64     `json:"remaining"`
+	Timestamp time.Time         `json:"timestamp"`
+	Used      int64             `json:"used"`
+	Remaining int64             `json:"remaining"`
+	Cost      currency.MicroUSD `json:"cost"`
 }
 
 // TimeToExhaustion represents the probabilistic time-to-exhaustion estimates
@@ -34,9 +37,10 @@ type Risk struct {
 
 // Forecast represents the complete forecast output
 type Forecast struct {
-	TTE      TimeToExhaustion `json:"tte"`
-	Risk     Risk             `json:"risk"`
-	BurnRate BurnRate         `json:"burn_rate"`
+	TTE          TimeToExhaustion `json:"tte"`
+	Risk         Risk             `json:"risk"`
+	BurnRate     BurnRate         `json:"burn_rate"`
+	CostBurnRate BurnRate         `json:"cost_burn_rate"`
 }
 
 // Model defines the interface for prediction models

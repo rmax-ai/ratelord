@@ -19,17 +19,26 @@ type Poller struct {
 	providers  []provider.Provider
 	interval   time.Duration
 	forecaster *forecast.Forecaster
+	policyCfg  *PolicyConfig
 	mu         sync.RWMutex
 }
 
 // NewPoller creates a new poller instance
-func NewPoller(store *store.Store, interval time.Duration, forecaster *forecast.Forecaster) *Poller {
+func NewPoller(store *store.Store, interval time.Duration, forecaster *forecast.Forecaster, policyCfg *PolicyConfig) *Poller {
 	return &Poller{
 		store:      store,
 		providers:  make([]provider.Provider, 0),
 		interval:   interval,
 		forecaster: forecaster,
+		policyCfg:  policyCfg,
 	}
+}
+
+// UpdateConfig updates the policy configuration for pricing lookup
+func (p *Poller) UpdateConfig(cfg *PolicyConfig) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.policyCfg = cfg
 }
 
 // GetProvider returns a registered provider by ID (helper for testing/debugging)
@@ -185,6 +194,17 @@ func (p *Poller) poll(ctx context.Context, prov provider.Provider) {
 			"remaining":   obs.Remaining,
 			"used":        obs.Used,
 		}
+
+		// Calculate cost if pricing is available
+		p.mu.RLock()
+		if p.policyCfg != nil {
+			costPerUnit := p.policyCfg.GetCost(string(result.ProviderID), obs.PoolID)
+			if costPerUnit > 0 {
+				usagePayload["cost"] = obs.Used * costPerUnit
+			}
+		}
+		p.mu.RUnlock()
+
 		payloadBytes, _ := json.Marshal(usagePayload)
 		usageEvent.Payload = payloadBytes
 

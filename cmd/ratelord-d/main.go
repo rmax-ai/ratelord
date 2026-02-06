@@ -165,7 +165,7 @@ func main() {
 
 	// M6.3: Initialize Polling Orchestrator
 	// Use the new Poller to drive the provider loop
-	poller := engine.NewPoller(st, 10*time.Second, forecaster) // Poll every 10s for demo
+	poller := engine.NewPoller(st, 10*time.Second, forecaster, policyCfg) // Poll every 10s for demo
 	// Register the mock provider (M6.2)
 	// IMPORTANT: For the demo, we assume the mock provider is available in the 'pkg/provider' package via a factory or similar,
 	// but currently it resides in 'pkg/provider/mock.go' which is in package 'provider'.
@@ -277,6 +277,7 @@ func main() {
 			fmt.Println(`{"level":"info","msg":"reload_signal_received"}`)
 			if cfgReloader, err := engine.LoadPolicyConfig(cfg.PolicyPath); err == nil {
 				policyEngine.UpdatePolicies(cfgReloader)
+				poller.UpdateConfig(cfgReloader)
 				fmt.Printf(`{"level":"info","msg":"policy_reloaded","policies_count":%d}`+"\n", len(cfgReloader.Policies))
 			} else {
 				fmt.Printf(`{"level":"error","msg":"failed_to_reload_policy","error":"%v"}`+"\n", err)

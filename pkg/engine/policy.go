@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rmax-ai/ratelord/pkg/engine/currency"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -116,8 +117,22 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) Pol
 }
 
 func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, poolState PoolState, exists bool) bool {
-	// Very basic DSL parser for M9.3
-	// Supported: "remaining < X"
+	// Very basic DSL parser for M9.3 & M29.3
+	// Supported:
+	// - "remaining < X"
+	// - "cost > X"
+	// - "forecast_tte < X"
+	// - "provider_id == X"
+
+	// 1. Check provider_id (independent of pool state)
+	var pid string
+	if n, err := fmt.Sscanf(cond, "provider_id == %q", &pid); err == nil && n == 1 {
+		return intent.ProviderID == pid
+	}
+	// Also try without quotes just in case
+	if n, err := fmt.Sscanf(cond, "provider_id == %s", &pid); err == nil && n == 1 {
+		return intent.ProviderID == pid
+	}
 
 	if intent.ProviderID == "" || intent.PoolID == "" {
 		return false
@@ -138,6 +153,21 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, 
 	// Try to parse "remaining < 100"
 	if n, err := fmt.Sscanf(cond, "remaining < %d", &threshold); err == nil && n == 1 {
 		return remaining < threshold
+	}
+
+	// Try to parse "cost > 5000000" (MicroUSD)
+	var costThreshold int64
+	if n, err := fmt.Sscanf(cond, "cost > %d", &costThreshold); err == nil && n == 1 {
+		return poolState.Cost > currency.MicroUSD(costThreshold)
+	}
+
+	// Try to parse "forecast_tte < 3600" (seconds)
+	var tteThreshold float64
+	if n, err := fmt.Sscanf(cond, "forecast_tte < %f", &tteThreshold); err == nil && n == 1 {
+		if poolState.LatestForecast != nil {
+			return float64(poolState.LatestForecast.TTE.P99Seconds) < tteThreshold
+		}
+		return false
 	}
 
 	return false
