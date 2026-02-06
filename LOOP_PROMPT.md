@@ -8,6 +8,10 @@ Maintain the **implementation and maintenance** process for **ratelord** followi
     - Update `PROGRESS.md`, `TASKS.md`, `PHASE_LEDGER.md`, and `NEXT_STEPS.md` immediately as sub-steps are completed.
     - **Commit often**: Use the terminal to commit small, coherent changes to track progress.
 - **Mandatory Final Action**: At the end of EVERY iteration, before signaling completion, you MUST use the terminal agent to commit all tracked and untracked changes (excluding ignored files) with a descriptive commit message following the conventions in `AGENTS.md`. Maintain `.gitignore` to ensure unwanted files (logs, binaries, local state) are never committed.
+- **Test Verification Loop**:
+    - **Run Tests**: After any code implementation, run relevant tests (e.g., `go test ./...`).
+    - **Handle Failures**: If tests fail, **immediately** add a high-priority task to `NEXT_STEPS.md` to fix the specific broken tests. Do not mark the implementation task as "done" until tests pass.
+    - **Coverage**: Ensure new code has adequate test coverage.
 - **Resilience & Resumability**:
     - Assume work may be halted at any point.
     - Every iteration should start by reading `NEXT_STEPS.md` to pick up exactly where the last one left off.
