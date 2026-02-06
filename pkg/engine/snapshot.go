@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // SnapshotPayload defines the structure of the JSON blob stored in snapshots
 type SnapshotPayload struct {
-	Identities []Identity  `json:"identities"`
-	Pools      []PoolState `json:"pools"`
+	Identities        []Identity                       `json:"identities"`
+	Pools             []PoolState                      `json:"pools"`
+	ProviderStates    map[string][]byte                `json:"provider_states"`
+	ForecastHistories map[string][]forecast.UsagePoint `json:"forecast_histories"`
 }
 
 // SnapshotWorker periodically persists the state of projections to the store
@@ -20,11 +23,13 @@ type SnapshotWorker struct {
 	store      *store.Store
 	identities *IdentityProjection
 	usage      *UsageProjection
+	providers  *ProviderProjection
+	forecasts  *forecast.ForecastProjection
 	interval   time.Duration
 }
 
 // NewSnapshotWorker creates a new worker
-func NewSnapshotWorker(st *store.Store, id *IdentityProjection, usage *UsageProjection, interval time.Duration) *SnapshotWorker {
+func NewSnapshotWorker(st *store.Store, id *IdentityProjection, usage *UsageProjection, prov *ProviderProjection, fore *forecast.ForecastProjection, interval time.Duration) *SnapshotWorker {
 	if interval == 0 {
 		interval = 5 * time.Minute
 	}
@@ -32,6 +37,8 @@ func NewSnapshotWorker(st *store.Store, id *IdentityProjection, usage *UsageProj
 		store:      st,
 		identities: id,
 		usage:      usage,
+		providers:  prov,
+		forecasts:  fore,
 		interval:   interval,
 	}
 }
@@ -62,32 +69,20 @@ func (w *SnapshotWorker) Run(ctx context.Context) {
 func (w *SnapshotWorker) TakeSnapshot(ctx context.Context) error {
 	idEventID, idTime, identities := w.identities.GetState()
 	usageEventID, usageTime, pools := w.usage.GetState()
+	// Providers and Forecasts don't track "LastEventID" explicitly in the same way,
+	// relying on event stream integrity. We assume they are up to date with the stream processed by ID/Usage projections.
+	// Since all projections are updated in the same replay loop or stream processing,
+	// taking the Minimum of (idTime, usageTime) is safe enough as the checkpoint.
+
+	providerStates := w.providers.GetAllStates()
+	forecastHistories := w.forecasts.GetAllHistories()
 
 	// Determine the "safe" checkpoint.
-	// We must choose the EventID that corresponds to the OLDER timestamp,
-	// because the snapshot guarantees that state is valid AT LEAST up to that point.
-	// If we chose the newer one, we might claim to have processed events that one projection hasn't seen yet.
-	// Replay logic will start AFTER this EventID.
-	// If we restart, we replay events > safeEventID.
-	// Since both projections have applied safeEventID (because it's the older one, or equal),
-	// replaying events > safeEventID is correct (idempotency handles re-applying if needed, but append-only log replay usually assumes exactly-once delivery from a point).
-	// Note: Our projections are idempotent-ish (Apply overwrites state), so replaying a few extra events is fine.
-	// Replaying FEWER events is bad (missing data).
-	// So we need to pick the EventID corresponding to the OLDER timestamp.
-
 	var safeEventID string
-	// If either is empty (start of time), we can't really snapshot safely unless we assume empty state.
-	// But if one is empty and other isn't, we should probably skip snapshot or use the empty one?
-	// If idEventID is empty, it means no identities registered. safeEventID = usageEventID?
-	// No, if idEventID is empty, we haven't processed any identity events.
-	// If we use usageEventID (which is > 0), and replay from there, we skip identity events < usageEventID?
-	// Yes, potentially. So if one is empty, we probably shouldn't snapshot, or we use the empty one (if the store allows it).
-	// The store requires `last_event_id` NOT NULL.
-	// So we need at least one event to have been processed by BOTH?
-	// Or we just take the one with older timestamp. empty time is time.Time{}.
-
 	if idEventID == "" || usageEventID == "" {
-		// Not enough state to snapshot
+		// If mostly empty, maybe check if we have other data?
+		// For now, strict check on core projections.
+		// If system is fresh, we might skip snapshotting until some activity.
 		return fmt.Errorf("cannot snapshot: not all projections have processed events (id=%s, usage=%s)", idEventID, usageEventID)
 	}
 
@@ -98,8 +93,10 @@ func (w *SnapshotWorker) TakeSnapshot(ctx context.Context) error {
 	}
 
 	payload := SnapshotPayload{
-		Identities: identities,
-		Pools:      pools,
+		Identities:        identities,
+		Pools:             pools,
+		ProviderStates:    providerStates,
+		ForecastHistories: forecastHistories,
 	}
 
 	payloadJSON, err := json.Marshal(payload)
@@ -120,4 +117,44 @@ func (w *SnapshotWorker) TakeSnapshot(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// LoadLatestSnapshot attempts to load the latest snapshot from the store.
+// If successful, it restores the projections and returns the ingestion time of the last processed event.
+// If no snapshot exists, it returns a zero time (indicating full replay is needed).
+func LoadLatestSnapshot(ctx context.Context, st *store.Store, idProj *IdentityProjection, usageProj *UsageProjection, provProj *ProviderProjection, foreProj *forecast.ForecastProjection) (time.Time, error) {
+	snap, err := st.GetLatestSnapshot(ctx)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to get latest snapshot: %w", err)
+	}
+	if snap == nil {
+		return time.Time{}, nil // No snapshot, full replay
+	}
+
+	// Fetch the checkpoint event to get the accurate ingest timestamp
+	checkpointEvent, err := st.GetEvent(ctx, snap.LastEventID)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to get checkpoint event %s: %w", snap.LastEventID, err)
+	}
+	if checkpointEvent == nil {
+		return time.Time{}, fmt.Errorf("checkpoint event %s not found (inconsistent state)", snap.LastEventID)
+	}
+
+	var payload SnapshotPayload
+	if err := json.Unmarshal(snap.Payload, &payload); err != nil {
+		return time.Time{}, fmt.Errorf("failed to unmarshal snapshot payload: %w", err)
+	}
+
+	// Restore Projections
+	idProj.LoadState(string(snap.LastEventID), checkpointEvent.TsIngest, payload.Identities)
+	usageProj.LoadState(string(snap.LastEventID), checkpointEvent.TsIngest, payload.Pools)
+
+	if payload.ProviderStates != nil {
+		provProj.LoadState(payload.ProviderStates)
+	}
+	if payload.ForecastHistories != nil {
+		foreProj.LoadHistories(payload.ForecastHistories)
+	}
+
+	return checkpointEvent.TsIngest, nil
 }

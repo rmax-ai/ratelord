@@ -48,3 +48,22 @@ func (p *ProviderProjection) GetState(providerID provider.ProviderID) []byte {
 	defer p.mu.RUnlock()
 	return p.states[string(providerID)]
 }
+
+func (p *ProviderProjection) GetAllStates() map[string][]byte {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	copyMap := make(map[string][]byte)
+	for k, v := range p.states {
+		clone := make([]byte, len(v))
+		clone = append(clone[:0], v...)
+		copyMap[k] = clone
+	}
+	return copyMap
+}
+
+func (p *ProviderProjection) LoadState(states map[string][]byte) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.states = states
+}

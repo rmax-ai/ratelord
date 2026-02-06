@@ -381,7 +381,7 @@ Focus: Push alerts to external systems.
     - [x] Sign webhook payloads with a shared secret.
     - [x] Include `X-Ratelord-Signature` header.
 
-# Phase 11: Scalability & Maintenance
+# Phase 11: Advanced Capabilities
 
 ## Epic 27: State Snapshots & Compaction
 Focus: Improve startup time and manage disk usage.
@@ -389,7 +389,7 @@ Focus: Improve startup time and manage disk usage.
     - Create `snapshots` table (snapshot_id, timestamp, payload blob).
 - [x] **M27.2: Snapshot Worker**
     - Implement a worker that periodically serializes the `Projection` state (Usage, Limits, etc.) to a snapshot.
-- [ ] **M27.3: Startup Optimization**
+- [x] **M27.3: Startup Optimization**
     - Update `Loader` to load the latest snapshot first.
     - Replay events only *after* the snapshot timestamp.
     - *Acceptance*: Startup time is O(1) + O(recent_events) instead of O(all_events).
@@ -411,5 +411,26 @@ Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_S
 - [ ] **M28.3: Reporting & Verification**
     - Output structured JSON results (latency histograms, approval rates).
     - Add assertions to verify scenario success criteria.
+
+## Epic 29: Financial Governance
+Focus: Elevating "Cost" to a first-class constraint alongside Rate Limits (`FINANCIAL_GOVERNANCE.md`).
+- [ ] **M29.1: Currency Types**: Add Micro-USD support to Usage model.
+- [ ] **M29.2: Pricing Registry**: Configurable cost-per-unit maps for providers.
+- [ ] **M29.3: Cost Policy**: Implement `budget_cap` rules in Policy Engine.
+- [ ] **M29.4: Forecast Cost**: Update forecasting to project spend vs budget.
+
+## Epic 30: Cluster Federation
+Focus: Expanding from single-node daemon to distributed fleet governance (`CLUSTER_FEDERATION.md`).
+- [ ] **M30.1: Architecture Design**: Finalize "Grant Protocol" vs "Redis Backend" decision.
+- [ ] **M30.2: Remote State Store**: Abstraction layer for Redis/Etcd.
+- [ ] **M30.3: Leader Election**: Mechanism for designating the Token Authority.
+
+# Phase 12: Release Engineering
+
+## Epic 31: Automated Release Pipeline
+Focus: Zero-touch versioning and artifact publication (`RELEASING.md`).
+- [ ] **M31.1: CI Workflows**: GitHub Actions for Test & Build.
+- [ ] **M31.2: Release Script**: Goreleaser or script to handle cross-compilation and signing.
+- [ ] **M31.3: Documentation Generation**: Auto-update `RELEASE_NOTES.md` from commits.
 
 

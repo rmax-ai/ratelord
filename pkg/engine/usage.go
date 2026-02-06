@@ -167,6 +167,22 @@ func (p *UsageProjection) Replay(events []*store.Event) error {
 	return nil
 }
 
+// LoadState restores the projection state from a snapshot
+func (p *UsageProjection) LoadState(lastEventID string, lastIngestTime time.Time, pools []PoolState) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.lastEventID = lastEventID
+	p.lastIngestTime = lastIngestTime
+
+	p.pools = make(map[string]PoolState)
+
+	for _, pool := range pools {
+		key := makePoolKey(pool.ProviderID, pool.PoolID)
+		p.pools[key] = pool
+	}
+}
+
 // GetPoolState returns the state for a specific pool
 func (p *UsageProjection) GetPoolState(providerID, poolID string) (PoolState, bool) {
 	p.mu.RLock()

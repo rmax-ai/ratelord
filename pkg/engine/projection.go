@@ -122,6 +122,26 @@ func (p *IdentityProjection) GetByTokenHash(hash string) (Identity, bool) {
 	return p.identities[id], true
 }
 
+// LoadState restores the projection state from a snapshot
+func (p *IdentityProjection) LoadState(lastEventID string, lastIngestTime time.Time, identities []Identity) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.lastEventID = lastEventID
+	p.lastIngestTime = lastIngestTime
+
+	// Clear existing state? Or merge? Snapshots are usually full state.
+	p.identities = make(map[string]Identity)
+	p.tokenMap = make(map[string]string)
+
+	for _, id := range identities {
+		p.identities[id.ID] = id
+		if id.TokenHash != "" {
+			p.tokenMap[id.TokenHash] = id.ID
+		}
+	}
+}
+
 // GetState returns the current state and the last applied event ID/Timestamp
 func (p *IdentityProjection) GetState() (string, time.Time, []Identity) {
 	p.mu.RLock()

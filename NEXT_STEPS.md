@@ -15,23 +15,24 @@
  2. **Epic 20: Operational Visibility** (Completed):
      - [x] **M20.3: Grafana Dashboard**: Create visualization.
 
- 3. **Epic 27: State Snapshots & Compaction** (New):
+ 3. **Epic 27: State Snapshots & Compaction** (In Progress):
       - [x] **M27.1: Snapshot Schema**: Create snapshots table.
       - [x] **M27.2: Snapshot Worker**: Periodic state persistence.
-
-      - [ ] **M27.3: Startup Optimization**: Load from snapshot + delta replay.
+      - [x] **M27.3: Startup Optimization**: Load from snapshot + delta replay.
       - [ ] **M27.4: Event Pruning**: Policy-based retention.
 
-
  4. **Phase 10 Continuation**:
-     - [x] **Epic 24**: Adaptive Throttling implemented.
-     - [x] **Epic 25**: Long-term Trends & Aggregation implemented.
-     - [x] **Epic 26**: Webhooks implemented.
-     - [x] **Epic 20**: Cleanup (Grafana) done.
-     - [ ] **Next**: Begin Phase 11 (Epic 27).
+      - [x] **Epic 24**: Adaptive Throttling implemented.
+      - [x] **Epic 25**: Long-term Trends & Aggregation implemented.
+      - [x] **Epic 26**: Webhooks implemented.
+      - [x] **Epic 20**: Cleanup (Grafana) done.
+      - [ ] **Next**: Complete Epic 27 (M27.4).
 
- 5. **New Initiative**:
-     - [ ] **Epic 28**: Advanced Simulation Framework (see `ADVANCED_SIMULATION.md`).
+ 5. **New Initiatives (Phase 11 & 12)**:
+      - [ ] **Epic 28**: Advanced Simulation Framework (`ADVANCED_SIMULATION.md`).
+      - [ ] **Epic 29**: Financial Governance (`FINANCIAL_GOVERNANCE.md`).
+      - [ ] **Epic 30**: Cluster Federation (`CLUSTER_FEDERATION.md`).
+      - [ ] **Epic 31**: Release Automation (`RELEASING.md`).
 
 ## Reference
 

@@ -112,7 +112,16 @@ func main() {
 
 	// Replay events to build projection
 	// NOTE: This blocks startup, but safe for small event logs
-	events, err := st.ReadEvents(context.Background(), time.Time{}, 10000) // arbitrary large limit, from beginning
+	var since time.Time
+	// Try loading from snapshot
+	if checkpoint, err := engine.LoadLatestSnapshot(context.Background(), st, identityProj, usageProj, providerProj, forecastProj); err != nil {
+		fmt.Printf(`{"level":"warn","msg":"failed_to_load_snapshot","error":"%v"}`+"\n", err)
+	} else if !checkpoint.IsZero() {
+		since = checkpoint
+		fmt.Printf(`{"level":"info","msg":"snapshot_loaded","checkpoint_ts":"%s"}`+"\n", checkpoint)
+	}
+
+	events, err := st.ReadEvents(context.Background(), since, 10000) // arbitrary large limit, from beginning or snapshot
 	if err == nil {
 		// Replay identity events
 		if err := identityProj.Replay(events); err != nil {
@@ -216,7 +225,7 @@ func main() {
 
 	// M27.2: Initialize and start Snapshot Worker
 	// Run every 5 minutes by default
-	snapshotWorker := engine.NewSnapshotWorker(st, identityProj, usageProj, 5*time.Minute)
+	snapshotWorker := engine.NewSnapshotWorker(st, identityProj, usageProj, providerProj, forecastProj, 5*time.Minute)
 	snapshotCtx, snapshotCancel := context.WithCancel(context.Background())
 	defer snapshotCancel()
 	go snapshotWorker.Run(snapshotCtx)

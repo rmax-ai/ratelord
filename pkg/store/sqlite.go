@@ -628,3 +628,58 @@ func (s *Store) GetLatestSnapshot(ctx context.Context) (*Snapshot, error) {
 	}
 	return &snap, nil
 }
+
+// GetEvent retrieves a single event by ID.
+func (s *Store) GetEvent(ctx context.Context, eventID EventID) (*Event, error) {
+	query := `
+	SELECT
+		event_id,
+		event_type,
+		schema_version,
+		ts_event,
+		ts_ingest,
+		origin_kind,
+		origin_id,
+		writer_id,
+		agent_id,
+		identity_id,
+		workload_id,
+		scope_id,
+		correlation_id,
+		causation_id,
+		payload
+	FROM events
+	WHERE event_id = ?;
+	`
+
+	row := s.db.QueryRowContext(ctx, query, eventID)
+	var evt Event
+	var payload []byte
+
+	err := row.Scan(
+		&evt.EventID,
+		&evt.EventType,
+		&evt.SchemaVersion,
+		&evt.TsEvent,
+		&evt.TsIngest,
+		&evt.Source.OriginKind,
+		&evt.Source.OriginID,
+		&evt.Source.WriterID,
+		&evt.Dimensions.AgentID,
+		&evt.Dimensions.IdentityID,
+		&evt.Dimensions.WorkloadID,
+		&evt.Dimensions.ScopeID,
+		&evt.Correlation.CorrelationID,
+		&evt.Correlation.CausationID,
+		&payload,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get event %s: %w", eventID, err)
+	}
+
+	evt.Payload = json.RawMessage(payload)
+	return &evt, nil
+}

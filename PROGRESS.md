@@ -20,4 +20,5 @@
 | ADVANCED_SIMULATION.md | DRAFTED | Orchestrator | 2026-02-06 |
 | Epic 28: Scope Expansion | COMPLETED | Orchestrator | 2026-02-06 |
 | M27.2: Snapshot Worker | COMPLETED | Implement | 2026-02-06 |
+| M27.3: Startup Optimization | COMPLETED | Implement | 2026-02-06 |
 

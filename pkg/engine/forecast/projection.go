@@ -68,7 +68,14 @@ func (fp *ForecastProjection) GetHistory(poolID string) []UsagePoint {
 
 	var history []UsagePoint
 	// Collect from the ring in order: start from the oldest point
+	// Fix bug: include all elements
+	// r is the next write position (oldest or empty)
 	start := r
+	if start.Value != nil {
+		if point, ok := start.Value.(UsagePoint); ok {
+			history = append(history, point)
+		}
+	}
 	for p := start.Next(); p != start; p = p.Next() {
 		if p.Value != nil {
 			if point, ok := p.Value.(UsagePoint); ok {
@@ -78,4 +85,53 @@ func (fp *ForecastProjection) GetHistory(poolID string) []UsagePoint {
 	}
 
 	return history
+}
+
+// GetAllHistories returns the usage history for all pools
+func (fp *ForecastProjection) GetAllHistories() map[string][]UsagePoint {
+	fp.mu.RLock()
+	defer fp.mu.RUnlock()
+
+	result := make(map[string][]UsagePoint)
+	for poolID, r := range fp.histories {
+		if r == nil {
+			continue
+		}
+		var history []UsagePoint
+		r.Do(func(v interface{}) {
+			if v != nil {
+				if point, ok := v.(UsagePoint); ok {
+					history = append(history, point)
+				}
+			}
+		})
+		result[poolID] = history
+	}
+	return result
+}
+
+// LoadHistories restores the usage history for all pools
+func (fp *ForecastProjection) LoadHistories(histories map[string][]UsagePoint) {
+	fp.mu.Lock()
+	defer fp.mu.Unlock()
+
+	fp.histories = make(map[string]*ring.Ring)
+	for poolID, points := range histories {
+		if len(points) == 0 {
+			continue
+		}
+		// Create a new ring
+		r := ring.New(fp.windowSize)
+
+		startIdx := 0
+		if len(points) > fp.windowSize {
+			startIdx = len(points) - fp.windowSize
+		}
+
+		for i := startIdx; i < len(points); i++ {
+			r.Value = points[i]
+			r = r.Next()
+		}
+		fp.histories[poolID] = r
+	}
 }
