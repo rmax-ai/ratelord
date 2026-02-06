@@ -282,11 +282,11 @@ Focus: Enable the largest ecosystem of agents (JS/TS) to use Ratelord.
 - [x] **M19.2: Project Scaffold**
     - Initialize `sdk/js` with `package.json`, `tsconfig.json`.
     - Setup Jest/Vitest for testing.
-- [ ] **M19.3: Core Implementation**
+- [x] **M19.3: Core Implementation**
     - Implement `RatelordClient` class.
     - Implement `ask(intent)` with retries and fail-closed logic.
     - *Acceptance*: Unit tests pass.
-- [ ] **M19.4: Integration Verification**
+- [x] **M19.4: Integration Verification**
     - Create a sample script `sdk/js/examples/basic.ts`.
     - Verify against running `ratelord-d`.
 - [ ] **M19.5: Release Prep**
@@ -321,4 +321,15 @@ Focus: More expressive governance rules.
 - [ ] **M22.2: Temporal Rules**
     - Allow rules based on time-of-day (e.g., "no heavy scraping 9am-5pm").
     - Implement `TimeWindow` matcher in policy engine.
+
+## Epic 23: Security Hardening
+Focus: Secure the daemon for production usage beyond localhost.
+- [ ] **M23.1: TLS Termination**
+    - Support `RATELORD_TLS_CERT` and `RATELORD_TLS_KEY` env vars.
+    - Serve HTTPS if configured.
+- [ ] **M23.2: API Authentication**
+    - Implement Bearer Token auth for Agents.
+    - Support `RATELORD_AUTH_TOKEN` (shared secret) or mTLS.
+- [ ] **M23.3: Secure Headers**
+    - Add HSTS, CSP, and other security headers to HTTP responses.
 

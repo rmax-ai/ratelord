@@ -60,12 +60,12 @@ export class RatelordClient {
       const rawDecision = await response.json();
       
       // Map API (snake_case) to TS (camelCase)
-      // The API returns fields like 'status', 'intent_id', 'modifications'
+      // The API returns fields like 'decision', 'intent_id', 'modifications'
       
       const decision: RatelordDecision = {
-        allowed: rawDecision.allowed,
+        allowed: rawDecision.decision === 'approve' || rawDecision.decision === 'approve_with_modifications',
         intentId: rawDecision.intent_id,
-        status: rawDecision.status,
+        status: rawDecision.decision,
         reason: rawDecision.reason,
         modifications: rawDecision.modifications ? {
           waitSeconds: rawDecision.modifications.wait_seconds,
