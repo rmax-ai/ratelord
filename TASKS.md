@@ -278,10 +278,17 @@ Focus: Modern, graphical interface for observing system state.
 Focus: Enable the largest ecosystem of agents (JS/TS) to use Ratelord.
 - [ ] **M19.1: SDK Specification**
     - Define TypeScript interfaces for Intent, Decision, and Client options.
-- [ ] **M19.2: Core Implementation**
+    - Create `sdk/js/SPEC.md` or update `CLIENT_SDK_SPEC.md`.
+- [ ] **M19.2: Project Scaffold**
+    - Initialize `sdk/js` with `package.json`, `tsconfig.json`.
+    - Setup Jest/Vitest for testing.
+- [ ] **M19.3: Core Implementation**
     - Implement `RatelordClient` class.
     - Implement `ask(intent)` with retries and fail-closed logic.
-    - Publish as `@ratelord/client` (or local npm package).
+    - *Acceptance*: Unit tests pass.
+- [ ] **M19.4: Integration Verification**
+    - Create a sample script `sdk/js/examples/basic.ts`.
+    - Verify against running `ratelord-d`.
 
 ## Epic 20: Operational Visibility
 Focus: Export internal metrics to standard observability tools.
@@ -289,6 +296,8 @@ Focus: Export internal metrics to standard observability tools.
     - Expose `/metrics` endpoint.
     - Export `ratelord_usage`, `ratelord_limit`, `ratelord_forecast_seconds` gauges.
     - Export `ratelord_intent_total` counters.
+- [ ] **M20.2: Logging Correlation**
+    - Ensure `trace_id` / `intent_id` is threaded through all logs for a request.
 
 ## Epic 21: Configuration & CLI Polish
 Focus: Production-grade configuration management.
@@ -301,6 +310,8 @@ Focus: Production-grade configuration management.
 Focus: More expressive governance rules.
 - [ ] **M22.1: Soft Limits**
     - Implement "warn" or "delay" actions for soft limits.
+    - Update `Evaluate` logic to support non-binary decisions.
 - [ ] **M22.2: Temporal Rules**
     - Allow rules based on time-of-day (e.g., "no heavy scraping 9am-5pm").
+    - Implement `TimeWindow` matcher in policy engine.
 

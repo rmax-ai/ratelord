@@ -159,10 +159,76 @@ func main() {
 *   **Idioms**: Type hints (`TypedDict` or `Pydantic` models), context managers optional but nice.
 *   **Status**: Planned for Phase 2 (Data Science / ML usage).
 
-### 6.3 TypeScript / Node (Tertiary)
-*   **Package**: `@ratelord/sdk` (npm).
+### 6.3 TypeScript / Node (Phase 9)
+*   **Package**: `@ratelord/client` (or local).
 *   **Idioms**: Promises/Async-Await, discriminated unions for Decision types.
-*   **Status**: Planned for Phase 2 (Web Agents).
+
+#### Interfaces
+
+```typescript
+export interface RatelordIntent {
+  agentId: string;
+  identityId: string;
+  workloadId: string;
+  scopeId: string;
+  urgency?: 'high' | 'normal' | 'background';
+  expectedCost?: number;
+  durationHint?: number;
+  clientContext?: Record<string, unknown>;
+}
+
+export interface RatelordDecision {
+  allowed: boolean;
+  intentId: string;
+  status: 'approve' | 'approve_with_modifications' | 'deny_with_reason';
+  modifications?: {
+    waitSeconds?: number;
+    identitySwitch?: string;
+  };
+  reason?: string;
+}
+
+export interface RatelordClientOptions {
+  endpoint?: string; // default: http://127.0.0.1:8090
+  timeout?: number;  // default: 1000ms
+}
+
+export class RatelordClient {
+  constructor(options?: RatelordClientOptions);
+
+  /**
+   * Negotiate intent with the daemon.
+   * - Blocks (awaits) if the daemon requests a wait.
+   * - Returns allowed=false if daemon is unreachable (fail-closed).
+   */
+  async ask(intent: RatelordIntent): Promise<RatelordDecision>;
+}
+```
+
+#### Usage Example
+
+```typescript
+import { RatelordClient } from '@ratelord/client';
+
+const client = new RatelordClient({ endpoint: 'http://localhost:8090' });
+
+async function main() {
+  const decision = await client.ask({
+    agentId: 'scraper-01',
+    identityId: 'pat:bot-user',
+    workloadId: 'crawl',
+    scopeId: 'repo:acme/backend',
+  });
+
+  if (!decision.allowed) {
+    console.error(`Blocked: ${decision.reason}`);
+    return;
+  }
+
+  console.log('Action approved!');
+  // ... perform action ...
+}
+```
 
 ## 7. Error Handling Specification
 

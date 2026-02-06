@@ -14,7 +14,7 @@
 | POLICY_ENGINE.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | AGENT_CONTRACT.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | API_SPEC.md | COMPLETED | Sub-Agent | 2026-01-25 |
-| CLIENT_SDK_SPEC.md | COMPLETED | Docs | 2026-01-26 |
+| CLIENT_SDK_SPEC.md | UPDATED | Orchestrator | 2026-02-06 |
 | TUI_SPEC.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | WEB_UI_SPEC.md | COMPLETED | Sub-Agent | 2026-01-25 |
 | WORKFLOWS.md | COMPLETED | Sub-Agent | 2026-01-25 |
@@ -75,3 +75,4 @@
 | cmd/ratelord-d/assets.go | CREATED | Implement | 2026-01-26 |
 | Makefile | UPDATED | Implement | 2026-01-26 |
 | WEB_UI_SPEC.md | REFINED/IMPLEMENTED | Sub-Agent | 2026-01-26 |
+| M19.1: SDK Specification | COMPLETED | Orchestrator | 2026-02-06 |
