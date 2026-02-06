@@ -387,7 +387,7 @@ Focus: Push alerts to external systems.
 Focus: Improve startup time and manage disk usage.
 - [x] **M27.1: Snapshot Schema**
     - Create `snapshots` table (snapshot_id, timestamp, payload blob).
-- [ ] **M27.2: Snapshot Worker**
+- [x] **M27.2: Snapshot Worker**
     - Implement a worker that periodically serializes the `Projection` state (Usage, Limits, etc.) to a snapshot.
 - [ ] **M27.3: Startup Optimization**
     - Update `Loader` to load the latest snapshot first.

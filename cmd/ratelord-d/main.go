@@ -214,6 +214,13 @@ func main() {
 	defer dispatcherCancel()
 	go dispatcher.Start(dispatcherCtx)
 
+	// M27.2: Initialize and start Snapshot Worker
+	// Run every 5 minutes by default
+	snapshotWorker := engine.NewSnapshotWorker(st, identityProj, usageProj, 5*time.Minute)
+	snapshotCtx, snapshotCancel := context.WithCancel(context.Background())
+	defer snapshotCancel()
+	go snapshotWorker.Run(snapshotCtx)
+
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
 	addr := fmt.Sprintf(":%d", cfg.Port)

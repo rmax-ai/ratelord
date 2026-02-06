@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
@@ -18,9 +19,11 @@ type Identity struct {
 
 // IdentityProjection maintains an in-memory list of registered identities
 type IdentityProjection struct {
-	mu         sync.RWMutex
-	identities map[string]Identity
-	tokenMap   map[string]string // hash -> identityID
+	mu             sync.RWMutex
+	identities     map[string]Identity
+	tokenMap       map[string]string // hash -> identityID
+	lastEventID    string
+	lastIngestTime time.Time
 }
 
 // NewIdentityProjection creates a new empty projection
@@ -33,6 +36,12 @@ func NewIdentityProjection() *IdentityProjection {
 
 // Apply updates the projection with a single event
 func (p *IdentityProjection) Apply(event store.Event) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.lastEventID = string(event.EventID)
+	p.lastIngestTime = event.TsIngest
+
 	if event.EventType != store.EventTypeIdentityRegistered {
 		return nil // Ignore irrelevant events
 	}
@@ -111,4 +120,16 @@ func (p *IdentityProjection) GetByTokenHash(hash string) (Identity, bool) {
 		return Identity{}, false
 	}
 	return p.identities[id], true
+}
+
+// GetState returns the current state and the last applied event ID/Timestamp
+func (p *IdentityProjection) GetState() (string, time.Time, []Identity) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	list := make([]Identity, 0, len(p.identities))
+	for _, id := range p.identities {
+		list = append(list, id)
+	}
+	return p.lastEventID, p.lastIngestTime, list
 }

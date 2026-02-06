@@ -23,8 +23,10 @@ type PoolState struct {
 
 // UsageProjection maintains in-memory usage state per pool
 type UsageProjection struct {
-	mu    sync.RWMutex
-	pools map[string]PoolState // Key: provider_id:pool_id
+	mu             sync.RWMutex
+	pools          map[string]PoolState // Key: provider_id:pool_id
+	lastEventID    string
+	lastIngestTime time.Time
 }
 
 // NewUsageProjection creates a new empty projection
@@ -34,6 +36,7 @@ func NewUsageProjection() *UsageProjection {
 	}
 }
 
+// makePoolKey generates a unique key for a pool
 func makePoolKey(providerID, poolID string) string {
 	return fmt.Sprintf("%s:%s", providerID, poolID)
 }
@@ -42,6 +45,9 @@ func makePoolKey(providerID, poolID string) string {
 func (p *UsageProjection) Apply(event store.Event) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
+	p.lastEventID = string(event.EventID)
+	p.lastIngestTime = event.TsIngest
 
 	switch event.EventType {
 	case store.EventTypeUsageObserved:
@@ -168,6 +174,18 @@ func (p *UsageProjection) GetPoolState(providerID, poolID string) (PoolState, bo
 
 	state, ok := p.pools[makePoolKey(providerID, poolID)]
 	return state, ok
+}
+
+// GetState returns the current state and the last applied event ID/Timestamp
+func (p *UsageProjection) GetState() (string, time.Time, []PoolState) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	list := make([]PoolState, 0, len(p.pools))
+	for _, pool := range p.pools {
+		list = append(list, pool)
+	}
+	return p.lastEventID, p.lastIngestTime, list
 }
 
 // CalculateWaitTime returns the seconds until reset for a pool

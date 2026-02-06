@@ -18,4 +18,6 @@
 | M26.3: Security (HMAC) | COMPLETED | Orchestrator | 2026-02-06 |
 | M20.3: Grafana Dashboard | COMPLETED | Orchestrator | 2026-02-06 |
 | ADVANCED_SIMULATION.md | DRAFTED | Orchestrator | 2026-02-06 |
+| Epic 28: Scope Expansion | COMPLETED | Orchestrator | 2026-02-06 |
+| M27.2: Snapshot Worker | COMPLETED | Implement | 2026-02-06 |
 

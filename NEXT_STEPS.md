@@ -17,10 +17,11 @@
 
  3. **Epic 27: State Snapshots & Compaction** (New):
       - [x] **M27.1: Snapshot Schema**: Create snapshots table.
+      - [x] **M27.2: Snapshot Worker**: Periodic state persistence.
 
-     - [ ] **M27.2: Snapshot Worker**: Periodic state persistence.
-     - [ ] **M27.3: Startup Optimization**: Load from snapshot + delta replay.
-     - [ ] **M27.4: Event Pruning**: Policy-based retention.
+      - [ ] **M27.3: Startup Optimization**: Load from snapshot + delta replay.
+      - [ ] **M27.4: Event Pruning**: Policy-based retention.
+
 
  4. **Phase 10 Continuation**:
      - [x] **Epic 24**: Adaptive Throttling implemented.
