@@ -497,7 +497,7 @@ Focus: Automatic Leader Election for failover.
 Focus: Visualize the entire cluster.
 - [ ] **M34.1: Cluster View**
     - [x] **M34.1.1: API**: Implement `GET /v1/cluster/nodes` and `ClusterTopology` projection.
-    - [ ] **M34.1.2: UI**: Add "Cluster" tab (Node Table) in Web UI.
+    - [x] **M34.1.2: UI**: Add "Cluster" tab (Node Table) in Web UI.
 - [ ] **M34.2: Node Diagnostics**
     - [ ] Visualize Replication Lag per node.
     - [ ] Show Election Status (Leader/Follower).

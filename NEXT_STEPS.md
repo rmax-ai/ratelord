@@ -9,15 +9,17 @@
 
 ## Immediate Actions
 
- 1. **Epic 34: Federation UI** (`TASKS.md`):
-       - [x] **M34.1a: Cluster View API**: Implement `GET /v1/cluster/nodes`.
-       - [ ] **M34.1b: Cluster View UI**: Implement Web UI Node Table.
-
- 2. **Epic 38: Architecture Convergence** (`TASKS.md`):
+ 1. **Epic 38: Architecture Convergence** (`TASKS.md`):
        - [ ] **M38.1: Unified Store Audit**: Verify Redis/SQLite parity.
+       - [ ] **M38.2: Constraint Graph Integration**: Refactor Policy Engine to use Graph.
+
+ 2. **Epic 34: Federation UI** (`TASKS.md`):
+       - [ ] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
 
 ## Phase History
+- [x] **M34.1**: Cluster View UI & API.
 - [x] **Phase 10**: Epics 24-27 Complete.
+
 - [x] **Epic 24**: Adaptive Throttling.
 - [x] **Epic 25**: Trends.
 - [x] **Epic 26**: Webhooks.

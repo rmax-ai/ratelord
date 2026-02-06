@@ -44,3 +44,4 @@
 | M33.3: Client Routing (Redirect to Leader) | COMPLETED | Implement | 2026-02-07 |
 | Epics Expansion (Phase 14) | COMPLETED | Plan | 2026-02-07 |
 | M34.1a: Cluster View API | COMPLETED | Implement | 2026-02-07 |
+| M34.1b: Cluster View UI | COMPLETED | Implement | 2026-02-07 |

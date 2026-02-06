@@ -30,6 +30,19 @@ export interface Identity {
   labels: Record<string, string>;
 }
 
+export interface ClusterNode {
+  id: string;
+  addr: string;
+  last_seen: string; // RFC3339
+  state: string;
+  labels: Record<string, string>;
+}
+
+export interface ClusterTopology {
+  leader_id: string;
+  nodes: ClusterNode[];
+}
+
 export interface Status {
   total_events: number;
   // Add more status fields as needed
@@ -59,6 +72,12 @@ export const api = {
   async fetchIdentities(): Promise<Identity[]> {
     const response = await fetch(`${API_BASE}/identities`);
     if (!response.ok) throw new Error('Failed to fetch identities');
+    return response.json();
+  },
+
+  async fetchClusterNodes(): Promise<ClusterTopology> {
+    const response = await fetch(`${API_BASE}/cluster/nodes`);
+    if (!response.ok) throw new Error('Failed to fetch cluster nodes');
     return response.json();
   },
 };

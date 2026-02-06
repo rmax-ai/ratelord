@@ -12,10 +12,7 @@ const mockChartData = [
 ];
 
 const Dashboard = () => {
-  const { data: events, isLoading, error } = useQuery({
-    queryKey: ['events'],
-    queryFn: api.fetchEvents,
-  });
+  const { data: events, isLoading, error } = useQuery(['events'], () => api.fetchEvents());
 
   const totalEvents = events?.length || 0;
 

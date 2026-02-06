@@ -4,8 +4,7 @@ import AppShell from './layouts/AppShell';
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import IdentitiesPage from './pages/Identities';
-
-// Import your pages/components here
+import Cluster from './pages/Cluster';
 
 function App() {
   const queryClient = new QueryClient();
@@ -18,6 +17,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="history" element={<History />} />
             <Route path="identities" element={<IdentitiesPage />} />
+            <Route path="cluster" element={<Cluster />} />
             {/* Add other routes here */}
           </Route>
         </Routes>

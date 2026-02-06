@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom';
-import { Home, History, Users, Play } from 'lucide-react';
+import { Home, History, Users, Play, Server } from 'lucide-react';
 
 const AppShell = () => {
   return (
@@ -31,13 +31,20 @@ const AppShell = () => {
             <Users className="mr-2 h-5 w-5" />
             Identities
           </Link>
-          <Link
-            to="/simulate"
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200"
-          >
-            <Play className="mr-2 h-5 w-5" />
-            Simulate
-          </Link>
+           <Link
+             to="/simulate"
+             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200"
+           >
+             <Play className="mr-2 h-5 w-5" />
+             Simulate
+           </Link>
+           <Link
+             to="/cluster"
+             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200"
+           >
+             <Server className="mr-2 h-5 w-5" />
+             Cluster
+           </Link>
         </nav>
       </div>
       {/* Content Area */}
