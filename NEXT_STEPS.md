@@ -9,10 +9,10 @@
 ## Immediate Actions
 
  1. **Phase 9: Ecosystem & Hardening**:
-     - **Epic 21: Configuration & CLI Polish**:
-       - [ ] **M21.1: Robust Config Loader**: Implement Env Var and Flag support for DB path, Policy path, and Port. (Resolves M1.4 debt).
      - **Epic 19: Node.js SDK**:
        - [ ] **M19.1: SDK Specification**: Draft TypeScript interfaces.
+     - **Epic 20: Operational Visibility**:
+       - [ ] **M20.1: Prometheus Exporter**: Expose `/metrics`.
 
  ## Reference
 

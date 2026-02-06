@@ -37,7 +37,7 @@ Focus: Getting the process to run, manage its lifecycle, and handle signals corr
 - [x] **M1.3: Logging & Observability**
     - Setup structured logging (stdout/stderr).
     - Emit `system_started` log on boot.
-- [ ] **M1.4: Configuration**
+- [x] **M1.4: Configuration**
     - Implement configuration loader (env vars, defaults).
     - *Note*: Split from M1.1 to ensure atomic commits.
 
@@ -292,7 +292,7 @@ Focus: Export internal metrics to standard observability tools.
 
 ## Epic 21: Configuration & CLI Polish
 Focus: Production-grade configuration management.
-- [ ] **M21.1: Robust Config Loader**
+- [x] **M21.1: Robust Config Loader**
     - Support `RATELORD_DB_PATH`, `RATELORD_POLICY_PATH`, `RATELORD_PORT`.
     - Support CLI flags to override env vars.
     - Resolve M1.4 debt.
