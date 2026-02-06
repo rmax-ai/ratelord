@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/engine/currency"
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -44,21 +45,40 @@ type PolicyEngine struct {
 	mu         sync.RWMutex
 	policies   *PolicyConfig
 	controller *DelayController
+	graph      *graph.Projection
 }
 
 // NewPolicyEngine creates a new policy engine instance
-func NewPolicyEngine(usage *UsageProjection) *PolicyEngine {
+func NewPolicyEngine(usage *UsageProjection, graphProj *graph.Projection) *PolicyEngine {
 	return &PolicyEngine{
 		usage:      usage,
 		controller: NewDelayController(1.0),
+		graph:      graphProj,
 	}
 }
 
 // UpdatePolicies safely hot-swaps the current policies
 func (pe *PolicyEngine) UpdatePolicies(newConfig *PolicyConfig) {
 	pe.mu.Lock()
-	defer pe.mu.Unlock()
 	pe.policies = newConfig
+	pe.mu.Unlock()
+
+	// Sync with graph outside the lock to avoid potential deadlocks if graph methods lock
+	// Although here pe.graph is concurrent safe.
+	pe.syncGraph(newConfig)
+}
+
+func (pe *PolicyEngine) syncGraph(config *PolicyConfig) {
+	if pe.graph == nil {
+		return
+	}
+	for _, policy := range config.Policies {
+		props := make(map[string]string)
+		props["type"] = policy.Type
+		props["limit"] = fmt.Sprintf("%d", policy.Limit)
+		// Use policy ID as Constraint ID
+		pe.graph.AddConstraint(policy.ID, policy.Scope, props)
+	}
 }
 
 // Evaluate checks an intent against current policies and usage

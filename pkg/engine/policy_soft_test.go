@@ -8,7 +8,7 @@ import (
 
 func TestPolicyWarn(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	config := &PolicyConfig{
 		Policies: []PolicyDefinition{
@@ -65,7 +65,7 @@ func TestPolicyWarn(t *testing.T) {
 
 func TestPolicyDelay(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	config := &PolicyConfig{
 		Policies: []PolicyDefinition{

@@ -47,3 +47,5 @@
 | M34.1b: Cluster View UI | COMPLETED | Implement | 2026-02-07 |
 | M35.1: Graph Schema Definition | COMPLETED | Implement | 2026-02-07 |
 | M35.2: In-Memory Graph Projection | COMPLETED | Implement | 2026-02-07 |
+| M35.2.4: Policy Graph Population | COMPLETED | Implement | 2026-02-07 |
+| M35.3.1: Traversal Logic (Partial) | COMPLETED | Implement | 2026-02-07 |

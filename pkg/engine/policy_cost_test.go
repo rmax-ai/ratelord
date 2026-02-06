@@ -13,7 +13,7 @@ import (
 func TestPolicyCostCondition(t *testing.T) {
 	// Setup usage projection
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	// Create policy config with cost rule
 	config := &PolicyConfig{
@@ -80,7 +80,7 @@ func TestPolicyCostCondition(t *testing.T) {
 func TestPolicyForecastTTECondition(t *testing.T) {
 	// Setup usage projection
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	// Create policy config with TTE rule
 	config := &PolicyConfig{
@@ -148,7 +148,7 @@ func TestPolicyForecastTTECondition(t *testing.T) {
 func TestPolicyProviderIDCondition(t *testing.T) {
 	// Setup usage projection
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	// Create policy config with provider check
 	config := &PolicyConfig{

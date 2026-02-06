@@ -11,8 +11,10 @@
 
  1. **Epic 35: Canonical Constraint Graph** (`TASKS.md`):
        - [x] **M35.1: Graph Schema Definition**: Define Nodes and Edges in `pkg/graph`.
-       - [x] **M35.2: Graph Projection**: Implement in-memory graph builder from events.
+       - [x] **M35.2: Graph Projection**: Implement in-memory graph builder from events (and Policies).
        - [ ] **M35.3: Policy Matcher**: Use graph for policy lookups.
+           - [x] M35.3.1: Traversal Logic (FindConstraintsForScope).
+           - [ ] M35.3.2: Engine Integration.
        - [ ] **M35.4: Visualization**: API and UI.
 
  2. **Epic 38: Architecture Convergence** (`TASKS.md`):

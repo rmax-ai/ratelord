@@ -274,7 +274,7 @@ func main() {
 	}
 
 	// M5.2: Initialize Policy Engine
-	policyEngine := engine.NewPolicyEngine(usageProj)
+	policyEngine := engine.NewPolicyEngine(usageProj, graphProj)
 
 	// M9.3: Initial Policy Load
 	var policyCfg *engine.PolicyConfig

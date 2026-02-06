@@ -14,7 +14,7 @@ func TestPolicyWithLimit(t *testing.T) {
 	// So we need to set poolState.Used = 95
 
 	// Create engine
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	// Create policy config
 	config := &PolicyConfig{
@@ -88,7 +88,7 @@ func TestPolicyWithLimit(t *testing.T) {
 func TestMalformedCondition(t *testing.T) {
 	// Setup usage projection
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	// Create policy config with malformed condition
 	config := &PolicyConfig{

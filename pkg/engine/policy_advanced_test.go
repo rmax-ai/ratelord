@@ -10,7 +10,7 @@ import (
 
 func TestPolicyShape(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	// Define policy with shape action
 	config := &PolicyConfig{
@@ -65,7 +65,7 @@ func TestPolicyShape(t *testing.T) {
 
 func TestPolicyDefer(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage)
+	engine := NewPolicyEngine(usage, nil)
 
 	// Define policy with defer action
 	config := &PolicyConfig{

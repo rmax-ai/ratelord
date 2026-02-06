@@ -67,6 +67,55 @@ func (p *Projection) handleIdentityRegistered(event store.Event) error {
 	return nil
 }
 
+// EnsureNode adds a node if it doesn't exist.
+func (p *Projection) EnsureNode(id string, nodeType NodeType) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if _, exists := p.graph.Nodes[id]; !exists {
+		p.graph.Nodes[id] = &Node{
+			ID:         id,
+			Type:       nodeType,
+			Label:      id,
+			Properties: make(map[string]string),
+		}
+	}
+}
+
+// AddConstraint adds a constraint node and links it to a scope.
+func (p *Projection) AddConstraint(id, scope string, props map[string]string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	// Add Constraint Node
+	cNode := &Node{
+		ID:         id,
+		Type:       NodeConstraint,
+		Label:      id,
+		Properties: props,
+	}
+	p.graph.Nodes[id] = cNode
+
+	// Ensure Scope Node exists
+	if _, exists := p.graph.Nodes[scope]; !exists {
+		p.graph.Nodes[scope] = &Node{
+			ID:    scope,
+			Type:  NodeScope,
+			Label: scope,
+		}
+	}
+
+	// Link Constraint -> AppliesTo -> Scope
+	// Check if edge exists? For now just append, maybe dedupe later or allow multiples
+	// Ideally we check uniqueness.
+	edge := &Edge{
+		FromID: id,
+		ToID:   scope,
+		Type:   EdgeAppliesTo,
+	}
+	p.graph.Edges = append(p.graph.Edges, edge)
+}
+
 // Replay rebuilds the projection from a slice of events.
 func (p *Projection) Replay(events []*store.Event) error {
 	for _, event := range events {
@@ -78,6 +127,28 @@ func (p *Projection) Replay(events []*store.Event) error {
 		}
 	}
 	return nil
+}
+
+// FindConstraintsForScope returns all constraint nodes that apply to the given scope.
+func (p *Projection) FindConstraintsForScope(scopeID string) ([]*Node, error) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	var constraints []*Node
+
+	// Scan edges (O(E) - inefficient, but okay for in-memory graph MVP)
+	// TODO: Add adjacency list index for O(1) lookup
+	for _, edge := range p.graph.Edges {
+		if edge.ToID == scopeID && edge.Type == EdgeAppliesTo {
+			if node, exists := p.graph.Nodes[edge.FromID]; exists {
+				if node.Type == NodeConstraint {
+					constraints = append(constraints, node)
+				}
+			}
+		}
+	}
+
+	return constraints, nil
 }
 
 // GetGraph returns a snapshot of the current graph.
