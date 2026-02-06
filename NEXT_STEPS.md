@@ -20,12 +20,15 @@
      - [ ] **M20.3: Grafana Dashboard**: Create visualization.
 
  3. **Epic 22: Advanced Policy Engine**:
-     - [ ] **M22.1: Soft Limits**: Implement "warn" or "delay" actions.
-     - [ ] **M22.2: Temporal Rules**: Implement time-based policy matching.
+     - [x] **M22.1: Soft Limits & Shaping**:
+         - [x] **M22.1.1: Policy Action Types**: Add `warn` and `delay` actions.
+         - [x] **M22.1.2: Evaluator Updates**: Update `Evaluate` logic.
+         - [x] **M22.1.3: API Response**: Ensure warnings/delays are propagated.
+     - [ ] **M22.2: Temporal Rules**: Implement time-based matching.
 
  4. **Epic 23: Security Hardening**:
      - [ ] **M23.1: TLS Termination**: Support HTTPS.
-     - [ ] **M23.2: API Authentication**: Implement Bearer/mTLS auth.
+     - [ ] **M23.2: API Authentication**: Implement Bearer auth (Token Mgmt + Middleware).
      - [ ] **M23.3: Secure Headers**: Add security headers.
 
 ## Reference

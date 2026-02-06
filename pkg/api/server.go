@@ -165,6 +165,7 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		Reason:        result.Reason,
 		ValidUntil:    time.Now().Add(5 * time.Minute).Format(time.RFC3339),
 		Modifications: result.Modifications,
+		Warnings:      result.Warnings,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

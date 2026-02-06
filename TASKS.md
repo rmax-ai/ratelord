@@ -315,12 +315,13 @@ Focus: Production-grade configuration management.
 
 ## Epic 22: Advanced Policy Engine
 Focus: More expressive governance rules.
-- [ ] **M22.1: Soft Limits**
-    - Implement "warn" or "delay" actions for soft limits.
-    - Update `Evaluate` logic to support non-binary decisions.
+- [x] **M22.1: Soft Limits & Shaping**
+    - [x] **M22.1.1: Policy Action Types**: Add `warn` and `delay` to Policy Action definition.
+    - [x] **M22.1.2: Evaluator Updates**: Update `Evaluate` to handle soft limits (return `Approve` with warning, or `ApproveWithModifications` with wait).
+    - [x] **M22.1.3: API Response Update**: Ensure `v1/intent` response captures warnings and wait instructions.
 - [ ] **M22.2: Temporal Rules**
-    - Allow rules based on time-of-day (e.g., "no heavy scraping 9am-5pm").
-    - Implement `TimeWindow` matcher in policy engine.
+    - [ ] **M22.2.1: TimeWindow Matcher**: Add `time_window` (start_time, end_time, days_of_week) to Policy Rule.
+    - [ ] **M22.2.2: Evaluator Time Check**: Implement time checking in `Evaluate`.
 
 ## Epic 23: Security Hardening
 Focus: Secure the daemon for production usage beyond localhost.
@@ -328,8 +329,8 @@ Focus: Secure the daemon for production usage beyond localhost.
     - Support `RATELORD_TLS_CERT` and `RATELORD_TLS_KEY` env vars.
     - Serve HTTPS if configured.
 - [ ] **M23.2: API Authentication**
-    - Implement Bearer Token auth for Agents.
-    - Support `RATELORD_AUTH_TOKEN` (shared secret) or mTLS.
+    - [ ] **M23.2.1: Auth Token Management**: Extend `identity add` to generate/accept an API token (store hashed).
+    - [ ] **M23.2.2: Auth Middleware**: Validate `Authorization: Bearer <token>` against registered identities.
 - [ ] **M23.3: Secure Headers**
     - Add HSTS, CSP, and other security headers to HTTP responses.
 

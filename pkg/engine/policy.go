@@ -33,6 +33,7 @@ type PolicyEvaluationResult struct {
 	Decision      Decision               `json:"decision"`
 	Reason        string                 `json:"reason"`
 	Modifications map[string]interface{} `json:"modifications,omitempty"`
+	Warnings      []string               `json:"warnings,omitempty"`
 }
 
 // PolicyEngine is responsible for arbitrating intents
@@ -143,7 +144,18 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 			Reason:   reason,
 		}
 
-	case "shape":
+	case "warn":
+		msg := "policy:warning"
+		if m, ok := params["message"].(string); ok {
+			msg = m
+		}
+		return PolicyEvaluationResult{
+			Decision: DecisionApprove,
+			Reason:   "policy:rule_passed_with_warning",
+			Warnings: []string{msg},
+		}
+
+	case "shape", "delay":
 		var wait float64
 		// If "wait_seconds" is explicitly provided
 		if w, ok := params["wait_seconds"].(float64); ok {

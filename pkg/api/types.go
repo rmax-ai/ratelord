@@ -17,6 +17,7 @@ type DecisionResponse struct {
 	Decision      string                 `json:"decision"` // approve, deny, modify
 	Reason        string                 `json:"reason,omitempty"`
 	Modifications map[string]interface{} `json:"modifications,omitempty"`
+	Warnings      []string               `json:"warnings,omitempty"`
 	ModifiedBy    string                 `json:"modified_by,omitempty"` // if decision=modify
 	ValidUntil    string                 `json:"valid_until,omitempty"` // ISO8601
 }
