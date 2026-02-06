@@ -396,3 +396,16 @@ Focus: Improve startup time and manage disk usage.
 - [ ] **M27.4: Event Pruning**
     - Implement a command or worker to delete events older than retention policy (if they are snapshotted).
 
+## Epic 28: Advanced Simulation Framework
+Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_SIMULATION.md`).
+- [ ] **M28.1: Simulation Engine Upgrade**
+    - Refactor `ratelord-sim` to support configurable scenarios (JSON/YAML).
+    - Implement deterministic seeding for RNG.
+- [ ] **M28.2: Scenario Definitions**
+    - Implement "Thundering Herd" scenario config.
+    - Implement "Drift & Correction" scenario (requires Drift Saboteur).
+- [ ] **M28.3: Reporting & Verification**
+    - Output structured JSON results (latency histograms, approval rates).
+    - Add assertions to verify scenario success criteria.
+
+

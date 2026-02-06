@@ -1,12 +1,12 @@
 # ADVANCED_SIMULATION: Scenarios & Framework Specs
 
-**Status**: DRAFT  
-**Owner**: Orchestrator  
+**Status**: DRAFT
+**Owner**: Orchestrator
 **Related**: `TEST_STRATEGY.md`, `ACCEPTANCE.md`
 
 ## 1. Overview
 
-To validate `ratelord` as a resilient constraint control plane, simple load testing is insufficient. We must model complex, adversarial, and high-entropy scenarios that reflect real-world distributed systems. 
+To validate `ratelord` as a resilient constraint control plane, simple load testing is insufficient. We must model complex, adversarial, and high-entropy scenarios that reflect real-world distributed systems.
 
 This document defines the **Advanced Simulation Framework**, extending `ratelord-sim` to support deterministic, multi-agent scenarios with configurable topologies, policies, and failure modes.
 

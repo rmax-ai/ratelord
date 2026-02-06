@@ -28,6 +28,8 @@
      - [x] **Epic 20**: Cleanup (Grafana) done.
      - [ ] **Next**: Begin Phase 11 (Epic 27).
 
+ 5. **New Initiative**:
+     - [ ] **Epic 28**: Advanced Simulation Framework (see `ADVANCED_SIMULATION.md`).
 
 ## Reference
 
