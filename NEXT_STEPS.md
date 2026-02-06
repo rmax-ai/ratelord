@@ -5,11 +5,12 @@
 - **Phase 11 In-Flight**: Advanced Capabilities (Simulation, Finance, Federation).
 - **Completed**: Phase 10 (Epics 24-27) + Epic 28 + Epic 29 + Epic 30.
 - **Phase 12**: Release Engineering (Next).
+- **Future**: Phase 13 (Scale) & Phase 14 (Architecture Convergence).
 
 ## Immediate Actions
 
  1. **Epic 31: Release Automation** (`RELEASING.md`):
-       - [ ] **M31.1: CI Workflows**: GitHub Actions.
+       - [x] **M31.1: CI Workflows**: GitHub Actions.
        - [ ] **M31.2: Release Script**: Goreleaser.
 
  2. **Epic 32: External State Stores** (`TASKS.md`):

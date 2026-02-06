@@ -449,8 +449,8 @@ Focus: Expanding from single-node daemon to distributed fleet governance (`CLUST
 ## Epic 31: Automated Release Pipeline
 Focus: Zero-touch versioning and artifact publication (`RELEASING.md`).
 - [ ] **M31.1: CI Workflows**
-    - [ ] Create `.github/workflows/test.yaml` (Go test, lint).
-    - [ ] Create `.github/workflows/release.yaml` (Trigger on tag).
+    - [x] Create `.github/workflows/test.yaml` (Go test, lint).
+    - [x] Create `.github/workflows/release.yaml` (Trigger on tag).
 - [ ] **M31.2: Release Script / Goreleaser**
     - [ ] Configure `.goreleaser.yaml`.
     - [ ] Ensure cross-compilation (Darwin/Linux, AMD64/ARM64).
@@ -484,3 +484,34 @@ Focus: Visualize the entire cluster.
 - [ ] **M34.1: Cluster View**
     - [ ] Add `/cluster` route to Web UI.
     - [ ] Show connected Followers and their Grant status.
+
+# Phase 14: Architecture Convergence & Advanced Platform
+
+## Epic 35: Canonical Constraint Graph
+Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
+- [ ] **M35.1: Graph Schema Definition**
+    - [ ] Define canonical Node and Edge types in `pkg/graph`.
+    - [ ] Implement `GraphProjection` to materialize the graph from events.
+- [ ] **M35.2: Graph Visualization**
+    - [ ] Add `/graph` endpoint to API.
+    - [ ] Implement Force-Directed Graph view in Web UI.
+- [ ] **M35.3: Graph-Based Policy**
+    - [ ] Allow policies to target Graph patterns (e.g., "All constraints in Scope X").
+
+## Epic 36: Advanced Retention & Compaction
+Focus: Managing long-term storage and compliance.
+- [ ] **M36.1: Retention Policy Engine**
+    - [ ] Allow configuring TTL per Event Type.
+    - [ ] Implement `PruneWorker` (Refinement of M27.4).
+- [ ] **M36.2: Cold Storage Offload**
+    - [ ] Implement S3/GCS adapter for archiving old events/snapshots.
+    - [ ] Implement "Hydrate from Archive" for historical analysis.
+
+## Epic 37: Explainability & Audit
+Focus: Answering "Why?" for every decision.
+- [ ] **M37.1: Decision Explainability**
+    - [ ] Enhance `Decision` event to include full trace of Policy Rules evaluated.
+    - [ ] Add `/v1/intent/{id}/explain` endpoint.
+- [ ] **M37.2: Compliance Reports**
+    - [ ] Generate PDF/CSV reports of Usage vs Limits over time.
+    - [ ] Generate "Access Log" of all Intents.
