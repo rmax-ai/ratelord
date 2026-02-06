@@ -496,9 +496,8 @@ Focus: Automatic Leader Election for failover.
 ## Epic 34: Federation UI
 Focus: Visualize the entire cluster.
 - [ ] **M34.1: Cluster View**
-    - [ ] Update `API_SPEC.md` with `GET /v1/cluster/nodes`.
-    - [ ] Implement `ClusterTopology` projection (tracks heartbeat from peers).
-    - [ ] Web UI: Add "Cluster" tab (Network graph or Table).
+    - [x] **M34.1.1: API**: Implement `GET /v1/cluster/nodes` and `ClusterTopology` projection.
+    - [ ] **M34.1.2: UI**: Add "Cluster" tab (Node Table) in Web UI.
 - [ ] **M34.2: Node Diagnostics**
     - [ ] Visualize Replication Lag per node.
     - [ ] Show Election Status (Leader/Follower).
@@ -541,3 +540,18 @@ Focus: Answering "Why?" for every decision.
 - [ ] **M37.3: Policy Debugging**
     - [ ] Implement "Trace Mode" for Policy Engine (logs every rule result).
     - [ ] Web UI: Visualize Policy Evaluation Tree.
+
+# Phase 14: Architecture Convergence
+
+## Epic 38: System Unification & Optimization
+Focus: Ensuring all subsystems (Graph, Policy, Federation) work seamlessly together as a single cohesive unit, validating the "Constraint Graph" as the core source of truth.
+- [ ] **M38.1: Constraint Graph Integration**
+    - [ ] Refactor Policy Engine to strictly use the `ConstraintGraph` (Epic 35) for topology lookups.
+    - [ ] Ensure Federation (Epic 30) respects Graph boundaries (e.g. Org-level limits sync across clusters).
+- [ ] **M38.2: Unified Storage Audit**
+    - [ ] Verify feature parity across SQLite (Local) and Redis (Distributed) stores.
+    - [ ] Optimize "Hot Path" (Intent Evaluation) to minimize locking/latency.
+- [ ] **M38.3: Performance Benchmarking**
+    - [ ] Create standard benchmark suite (Intents/sec, Event Ingestion rate).
+    - [ ] Profile and optimize critical paths to meet `A-02` (Latency) under load.
+

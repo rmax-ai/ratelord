@@ -21,6 +21,7 @@ const (
 	EventTypePolicyTriggered      EventType = "policy_triggered"
 	EventTypeThrottleAdvised      EventType = "throttle_advised"
 	EventTypeIdentityRegistered   EventType = "identity_registered"
+	EventTypeGrantIssued          EventType = "grant_issued"
 )
 
 // Lease represents a distributed lock or leadership claim.

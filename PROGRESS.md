@@ -42,3 +42,5 @@
 | M33.1: Leader Election Stores (Redis/SQLite) | COMPLETED | Implement | 2026-02-07 |
 | M33.2: Standby Mode & Election Manager | COMPLETED | Implement | 2026-02-07 |
 | M33.3: Client Routing (Redirect to Leader) | COMPLETED | Implement | 2026-02-07 |
+| Epics Expansion (Phase 14) | COMPLETED | Plan | 2026-02-07 |
+| M34.1a: Cluster View API | COMPLETED | Implement | 2026-02-07 |

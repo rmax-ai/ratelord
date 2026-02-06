@@ -213,6 +213,9 @@ func main() {
 	// Initialize Provider Projection
 	providerProj := engine.NewProviderProjection()
 
+	// M34.1: Initialize Cluster Topology Projection
+	clusterProj := engine.NewClusterTopology()
+
 	// M7.3: Initialize Forecast Projection and Forecaster
 	forecastProj := forecast.NewForecastProjection(20) // Window size of 20 points
 	linearModel := &forecast.LinearModel{}
@@ -246,6 +249,9 @@ func main() {
 		// Replay provider events
 		providerProj.Replay(events)
 		fmt.Printf(`{"level":"info","msg":"provider_projection_replayed","events_count":%d}`+"\n", len(events))
+		// Replay cluster events
+		clusterProj.Replay(events)
+		fmt.Printf(`{"level":"info","msg":"cluster_projection_replayed"}` + "\n")
 		// Replay forecast projection
 		for _, event := range events {
 			if event.EventType == store.EventTypeUsageObserved {
@@ -387,7 +393,7 @@ func main() {
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
 	addr := fmt.Sprintf(":%d", cfg.Port)
-	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller, addr)
+	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, clusterProj, poller, addr)
 
 	if em != nil {
 		srv.SetElectionManager(em)

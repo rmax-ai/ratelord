@@ -36,6 +36,7 @@ type Server struct {
 	usage      *engine.UsageProjection
 	policy     *engine.PolicyEngine
 	poller     *engine.Poller
+	cluster    *engine.ClusterTopology
 	staticFS   fs.FS
 
 	// TLS Config
@@ -55,12 +56,12 @@ type UsageTracker interface {
 }
 
 // NewServer creates a new API server instance
-func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, addr string) *Server {
-	return NewServerWithPoller(st, identities, usage, policy, nil, addr)
+func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, addr string) *Server {
+	return NewServerWithPoller(st, identities, usage, policy, cluster, nil, addr)
 }
 
 // NewServerWithPoller creates a new API server instance with poller access (for debug endpoints)
-func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, poller *engine.Poller, addr string) *Server {
+func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, poller *engine.Poller, addr string) *Server {
 	mux := http.NewServeMux()
 
 	// Register routes
@@ -72,6 +73,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 		identities: identities,
 		usage:      usage,
 		policy:     policy,
+		cluster:    cluster,
 		poller:     poller,
 	}
 
@@ -81,6 +83,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	mux.HandleFunc("/v1/trends", s.handleTrends)
 	mux.HandleFunc("/v1/webhooks", s.withLeaderCheck(s.withAuth(s.handleWebhooks)))
 	mux.HandleFunc("/v1/federation/grant", s.withLeaderCheck(s.handleGrant))
+	mux.HandleFunc("/v1/cluster/nodes", s.handleClusterNodes)
 	mux.HandleFunc("/v1/admin/prune", s.withLeaderCheck(s.withAuth(s.handlePrune)))
 
 	// Debug endpoints

@@ -181,7 +181,7 @@ func TestTrendsIntegration(t *testing.T) {
 
 	// Verification (API): Initialize server and test HTTP endpoint
 	// For simplicity, since handleTrends only uses store, we can pass nil for others
-	server := api.NewServer(st, nil, nil, nil, ":0") // :0 for auto port
+	server := api.NewServer(st, nil, nil, nil, nil, ":0") // :0 for auto port
 
 	// Start server in goroutine
 	go func() {
@@ -206,7 +206,7 @@ func TestTrendsIntegration(t *testing.T) {
 
 	// Recreate server with fixed port
 	server.Stop(ctx) // stop the previous
-	server = api.NewServer(st, nil, nil, nil, ":8099")
+	server = api.NewServer(st, nil, nil, nil, nil, ":8099")
 
 	go func() {
 		if err := server.Start(); err != nil {

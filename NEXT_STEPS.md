@@ -9,13 +9,12 @@
 
 ## Immediate Actions
 
- 1. **Epic 33: High Availability** (`TASKS.md`):
-       - [x] **M33.1: Lease Stores**: Implement Redis and SQLite lease backends.
-       - [x] **M33.2: Election Manager**: Implement background election loop.
-       - [x] **M33.3: Client Routing**: Implement Proxy or Redirect for Follower->Leader.
+ 1. **Epic 34: Federation UI** (`TASKS.md`):
+       - [x] **M34.1a: Cluster View API**: Implement `GET /v1/cluster/nodes`.
+       - [ ] **M34.1b: Cluster View UI**: Implement Web UI Node Table.
 
- 2. **Epic 34: Federation UI** (`TASKS.md`):
-       - [ ] **M34.1: Cluster View**: Implement API and UI to visualize cluster topology.
+ 2. **Epic 38: Architecture Convergence** (`TASKS.md`):
+       - [ ] **M38.1: Unified Store Audit**: Verify Redis/SQLite parity.
 
 ## Phase History
 - [x] **Phase 10**: Epics 24-27 Complete.

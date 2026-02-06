@@ -65,6 +65,7 @@ The URL is the source of truth for navigation state to enable deep-linking.
 | `/` | **Dashboard** | High-level metrics, health summary, and recent alerts. |
 | `/history` | **History** | Event log explorer with time-range filtering. |
 | `/identities` | **Explorer** | Hierarchical view of Agents, Scopes, and Pools. |
+| `/cluster` | **Cluster** | Federation topology and node status. |
 | `/simulate` | **Scenario Lab** | "What-if" analysis sandbox. |
 | `/settings` | **Settings** | Local UI preferences (theme, refresh rate). |
 
@@ -109,6 +110,18 @@ The URL is the source of truth for navigation state to enable deep-linking.
         *   **Current Usage**: Sparkline or progress bar (if usage data is linked).
         *   **Last Active**: Relative timestamp (e.g., "2m ago").
 *   **Interaction**: Clicking a row navigates to `/history` filtered by that identity ID.
+
+### 5.6 Cluster View (/cluster)
+*   **Purpose**: Visualize the federation topology and node health.
+*   **Data Source**: `GET /v1/cluster/nodes`.
+*   **Visualizer**:
+    *   **Node Table**: List of all nodes (Leader, Followers).
+    *   **Columns**:
+        *   **Node ID**: Unique identifier.
+        *   **Role**: Leader / Follower.
+        *   **Status**: Active / Offline (based on heartbeat).
+        *   **Last Seen**: Timestamp.
+*   **Network Graph** (Future): Visual graph of leader-follower connections.
 
 ## 6. State Management & Data Sync
 

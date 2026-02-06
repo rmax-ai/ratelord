@@ -129,6 +129,24 @@ data: {"event_id": "...", "type": "usage_observed", ...}
 
 ### 2.5 Cluster Federation
 
+**`GET /v1/cluster/nodes`**
+Returns the current topology of the cluster (Leader and known Followers).
+
+#### Response
+```json
+{
+  "leader_id": "string",      // The current leader identity
+  "self_id": "string",        // ID of the node serving this request
+  "nodes": [
+    {
+      "node_id": "string",    // Follower ID
+      "last_seen": "string",  // ISO8601 timestamp of last grant/heartbeat
+      "status": "string"      // "active" | "offline"
+    }
+  ]
+}
+```
+
 **`POST /v1/federation/grant`**
 Follower daemons use this endpoint to request token grants from the leader.
 
