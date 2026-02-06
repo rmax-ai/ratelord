@@ -54,6 +54,11 @@ Optional:
 
 - `PHASE_LEDGER.md`, `POSTMORTEM_TEMPLATE.md`, `EXTENSIONS.md`, `LEARNING.md`
 
+## User Documentation
+
+- Comprehensive user-facing documentation lives in the `docs/` directory.
+- This includes guides, tutorials, and reference material for end-users (distinct from the design specs above).
+
 ## Review checklist (before marking “done”)
 
 - Does this change reinforce: local-first, daemon authority, event sourcing, prediction, intent negotiation?

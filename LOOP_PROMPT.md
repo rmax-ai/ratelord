@@ -15,6 +15,7 @@ Maintain the **implementation and maintenance** process for **ratelord** followi
 - **Documentation Synchronization**:
     - After any implementation, verify that relevant design docs (e.g., `API_SPEC.md`, `DATA_MODEL.md`) reflect the code.
     - If docs are stale, **immediately** update them in this iteration, OR add a high-priority task to `NEXT_STEPS.md` to update them before proceeding.
+    - **User Docs**: After major user-facing implementations, update the comprehensive user docs in `docs/`.
 - **Example Verification**:
     - Ensure major specific features have good examples in the `examples/` folder.
     - If examples are missing, add a task to `NEXT_STEPS.md` to create them.
