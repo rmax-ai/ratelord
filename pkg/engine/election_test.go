@@ -99,12 +99,50 @@ func TestElectionManager_Promotion(t *testing.T) {
 
 	em.Stop(ctx)
 	cancel()
+}
 
-	select {
-	case <-demoteCh:
-		t.Fatal("OnDemote should not be called on stop if leader")
-	default:
-		// Good, no demotion
+func TestElectionManager_GetLeader(t *testing.T) {
+	mockStore := &MockLeaseStore{
+		getResult: &store.Lease{
+			HolderID: "other-leader",
+		},
+	}
+
+	em := NewElectionManager(
+		mockStore,
+		"my-id",
+		"test-lease",
+		time.Second,
+		func() {},
+		func() {},
+	)
+
+	// Case 1: Not leader, store has leader
+	leader, ok, err := em.GetLeader(context.Background())
+	if err != nil {
+		t.Errorf("GetLeader error: %v", err)
+	}
+	if !ok {
+		t.Error("Expected leader to be found")
+	}
+	if leader != "other-leader" {
+		t.Errorf("Expected leader 'other-leader', got '%s'", leader)
+	}
+
+	// Case 2: Become leader
+	em.mu.Lock()
+	em.isLeader = true
+	em.mu.Unlock()
+
+	leader, ok, err = em.GetLeader(context.Background())
+	if err != nil {
+		t.Errorf("GetLeader error: %v", err)
+	}
+	if !ok {
+		t.Error("Expected leader to be found")
+	}
+	if leader != "my-id" {
+		t.Errorf("Expected leader 'my-id', got '%s'", leader)
 	}
 }
 

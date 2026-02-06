@@ -44,6 +44,9 @@ type Server struct {
 
 	// Federated Usage Tracker
 	tracker UsageTracker
+
+	// High Availability
+	election *engine.ElectionManager
 }
 
 // UsageTracker defines an interface for tracking local usage
@@ -72,17 +75,17 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 		poller:     poller,
 	}
 
-	mux.HandleFunc("/v1/intent", s.withAuth(s.handleIntent))
-	mux.HandleFunc("/v1/identities", s.handleIdentities)
+	mux.HandleFunc("/v1/intent", s.withLeaderCheck(s.withAuth(s.handleIntent)))
+	mux.HandleFunc("/v1/identities", s.withLeaderCheck(s.handleIdentities)) // handleIdentities checks method inside
 	mux.HandleFunc("/v1/events", s.handleEvents)
 	mux.HandleFunc("/v1/trends", s.handleTrends)
-	mux.HandleFunc("/v1/webhooks", s.withAuth(s.handleWebhooks))
-	mux.HandleFunc("/v1/federation/grant", s.handleGrant)
-	mux.HandleFunc("/v1/admin/prune", s.withAuth(s.handlePrune))
+	mux.HandleFunc("/v1/webhooks", s.withLeaderCheck(s.withAuth(s.handleWebhooks)))
+	mux.HandleFunc("/v1/federation/grant", s.withLeaderCheck(s.handleGrant))
+	mux.HandleFunc("/v1/admin/prune", s.withLeaderCheck(s.withAuth(s.handlePrune)))
 
 	// Debug endpoints
 	if poller != nil {
-		mux.HandleFunc("/debug/provider/inject", s.handleDebugInject)
+		mux.HandleFunc("/debug/provider/inject", s.withLeaderCheck(s.handleDebugInject))
 	}
 
 	// Static file handler (catch-all for SPA)
@@ -123,6 +126,11 @@ func (s *Server) SetTLS(certFile, keyFile string) {
 // SetUsageTracker sets the usage tracker for federation
 func (s *Server) SetUsageTracker(t UsageTracker) {
 	s.tracker = t
+}
+
+// SetElectionManager sets the election manager for HA routing
+func (s *Server) SetElectionManager(em *engine.ElectionManager) {
+	s.election = em
 }
 
 // Start runs the HTTP server (blocking)
@@ -719,4 +727,51 @@ func withSecureHeaders(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// Middleware: Leader Check (Redirects writes to leader)
+func (s *Server) withLeaderCheck(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Skip check if no election manager configured (standalone mode)
+		if s.election == nil {
+			next(w, r)
+			return
+		}
+
+		// Only check for write methods (POST, PUT, PATCH, DELETE)
+		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch || r.Method == http.MethodDelete {
+			if s.election.IsLeader() {
+				next(w, r)
+				return
+			}
+
+			// Not leader, find who is
+			leaderAddr, ok, err := s.election.GetLeader(r.Context())
+			if err != nil {
+				// Don't expose internal error details, but log them
+				fmt.Printf(`{"level":"error","msg":"failed_to_check_leader","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+				http.Error(w, `{"error":"internal_server_error"}`, http.StatusInternalServerError)
+				return
+			}
+			if !ok {
+				http.Error(w, `{"error":"service_unavailable","reason":"no_leader_elected"}`, http.StatusServiceUnavailable)
+				return
+			}
+
+			// Redirect
+			// If leaderAddr is "http://host:port", we just append request path
+			// Ensure leaderAddr doesn't have trailing slash
+			leaderAddr = strings.TrimRight(leaderAddr, "/")
+			targetURL := fmt.Sprintf("%s%s", leaderAddr, r.URL.Path)
+			if r.URL.RawQuery != "" {
+				targetURL += "?" + r.URL.RawQuery
+			}
+
+			http.Redirect(w, r, targetURL, http.StatusTemporaryRedirect) // 307
+			return
+		}
+
+		// Read methods allowed on followers
+		next(w, r)
+	}
 }

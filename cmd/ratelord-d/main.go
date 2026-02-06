@@ -32,16 +32,17 @@ var (
 )
 
 type Config struct {
-	DBPath     string
-	PolicyPath string
-	Port       int
-	WebDir     string
-	TLSCert    string
-	TLSKey     string
-	Mode       string
-	LeaderURL  string
-	FollowerID string
-	RedisURL   string
+	DBPath        string
+	PolicyPath    string
+	Port          int
+	WebDir        string
+	TLSCert       string
+	TLSKey        string
+	Mode          string
+	LeaderURL     string
+	FollowerID    string
+	RedisURL      string
+	AdvertisedURL string
 }
 
 type LeaderServices struct {
@@ -131,6 +132,9 @@ func LoadConfig() Config {
 	if val := os.Getenv("RATELORD_REDIS_URL"); val != "" {
 		cfg.RedisURL = val
 	}
+	if val := os.Getenv("RATELORD_ADVERTISED_URL"); val != "" {
+		cfg.AdvertisedURL = val
+	}
 
 	// Flags (override env vars)
 	flag.StringVar(&cfg.DBPath, "db", cfg.DBPath, "Path to SQLite database")
@@ -143,8 +147,20 @@ func LoadConfig() Config {
 	flag.StringVar(&cfg.LeaderURL, "leader-url", cfg.LeaderURL, "URL of the leader node (for follower mode)")
 	flag.StringVar(&cfg.FollowerID, "follower-id", cfg.FollowerID, "Unique ID for this follower")
 	flag.StringVar(&cfg.RedisURL, "redis-url", cfg.RedisURL, "Redis URL for usage storage")
+	flag.StringVar(&cfg.AdvertisedURL, "advertised-url", cfg.AdvertisedURL, "Public URL of this node (for leader redirection)")
 
 	flag.Parse()
+
+	// Default AdvertisedURL if not set
+	if cfg.AdvertisedURL == "" {
+		protocol := "http"
+		if cfg.TLSCert != "" {
+			protocol = "https"
+		}
+		// Try to get IP, or just use localhost if not specified
+		// In production, user MUST set this. For dev, localhost is fine.
+		cfg.AdvertisedURL = fmt.Sprintf("%s://localhost:%d", protocol, cfg.Port)
+	}
 
 	return cfg
 }
@@ -348,14 +364,18 @@ func main() {
 		snapshotWorker: snapshotWorker,
 	}
 
+	var em *engine.ElectionManager
+
 	if cfg.Mode == "follower" {
 		leaderServices.Start()
 	} else {
-		em := engine.NewElectionManager(leaseStore, cfg.FollowerID, "ratelord-leader", 5*time.Second, func() {
-			fmt.Printf(`{"level":"info","msg":"promoted_to_leader","holder_id":"%s"}`+"\n", cfg.FollowerID)
+		// Use AdvertisedURL as the holder ID so clients can redirect to it
+		holderID := cfg.AdvertisedURL
+		em = engine.NewElectionManager(leaseStore, holderID, "ratelord-leader", 5*time.Second, func() {
+			fmt.Printf(`{"level":"info","msg":"promoted_to_leader","holder_id":"%s"}`+"\n", holderID)
 			leaderServices.Start()
 		}, func() {
-			fmt.Printf(`{"level":"info","msg":"demoted_from_leader","holder_id":"%s"}`+"\n", cfg.FollowerID)
+			fmt.Printf(`{"level":"info","msg":"demoted_from_leader","holder_id":"%s"}`+"\n", holderID)
 			leaderServices.Stop()
 		})
 		emCtx, emCancel := context.WithCancel(context.Background())
@@ -368,6 +388,10 @@ func main() {
 	// Use NewServerWithPoller to enable debug endpoints
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, poller, addr)
+
+	if em != nil {
+		srv.SetElectionManager(em)
+	}
 
 	if usageRouter != nil {
 		srv.SetUsageTracker(usageRouter)

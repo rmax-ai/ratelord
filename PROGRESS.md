@@ -41,3 +41,4 @@
 | M32.3: Atomic Operations | COMPLETED | Implement | 2026-02-07 |
 | M33.1: Leader Election Stores (Redis/SQLite) | COMPLETED | Implement | 2026-02-07 |
 | M33.2: Standby Mode & Election Manager | COMPLETED | Implement | 2026-02-07 |
+| M33.3: Client Routing (Redirect to Leader) | COMPLETED | Implement | 2026-02-07 |

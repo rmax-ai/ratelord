@@ -487,9 +487,9 @@ Focus: Automatic Leader Election for failover.
     - [x] Implement `StandbyLoop` (Polls lease, if free -> Acquire).
     - [x] Handle `OnPromote` (Load state, start Policy Engine).
     - [x] Handle `OnDemote` (Stop Policy Engine, flush state).
-- [ ] **M33.3: Client Routing**
-    - [ ] Implement HTTP Middleware to check Leader status.
-    - [ ] Proxy requests from Followers to Leader (or return 307 Redirect).
+- [x] **M33.3: Client Routing**
+    - [x] Implement HTTP Middleware to check Leader status.
+    - [x] Proxy requests from Followers to Leader (or return 307 Redirect).
 - [ ] **M33.4: Split-Brain Protection**
     - [ ] Use Fencing Tokens (Epochs) in Event Log writes.
 

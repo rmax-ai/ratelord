@@ -88,6 +88,24 @@ func (em *ElectionManager) IsLeader() bool {
 	return em.isLeader
 }
 
+// GetLeader returns the current leader's holder ID (address) and true if known.
+func (em *ElectionManager) GetLeader(ctx context.Context) (string, bool, error) {
+	// First check if we are leader (fast path)
+	if em.IsLeader() {
+		return em.holderID, true, nil
+	}
+
+	// Otherwise check the store
+	lease, err := em.store.Get(ctx, em.leaseName)
+	if err != nil {
+		return "", false, err
+	}
+	if lease == nil {
+		return "", false, nil
+	}
+	return lease.HolderID, true, nil
+}
+
 // attemptElection performs the election logic.
 func (em *ElectionManager) attemptElection(ctx context.Context) {
 	em.mu.Lock()
