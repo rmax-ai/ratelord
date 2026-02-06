@@ -44,6 +44,47 @@ type Config struct {
 	RedisURL   string
 }
 
+type LeaderServices struct {
+	pollerCtx        context.Context
+	pollerCancel     context.CancelFunc
+	rollupCtx        context.Context
+	rollupCancel     context.CancelFunc
+	dispatcherCtx    context.Context
+	dispatcherCancel context.CancelFunc
+	snapshotCtx      context.Context
+	snapshotCancel   context.CancelFunc
+	poller           *engine.Poller
+	rollup           *engine.RollupWorker
+	dispatcher       *engine.Dispatcher
+	snapshotWorker   *engine.SnapshotWorker
+}
+
+func (ls *LeaderServices) Start() {
+	ls.pollerCtx, ls.pollerCancel = context.WithCancel(context.Background())
+	go ls.poller.Start(ls.pollerCtx)
+	ls.rollupCtx, ls.rollupCancel = context.WithCancel(context.Background())
+	go ls.rollup.Run(ls.rollupCtx)
+	ls.dispatcherCtx, ls.dispatcherCancel = context.WithCancel(context.Background())
+	go ls.dispatcher.Start(ls.dispatcherCtx)
+	ls.snapshotCtx, ls.snapshotCancel = context.WithCancel(context.Background())
+	go ls.snapshotWorker.Run(ls.snapshotCtx)
+}
+
+func (ls *LeaderServices) Stop() {
+	if ls.pollerCancel != nil {
+		ls.pollerCancel()
+	}
+	if ls.rollupCancel != nil {
+		ls.rollupCancel()
+	}
+	if ls.dispatcherCancel != nil {
+		ls.dispatcherCancel()
+	}
+	if ls.snapshotCancel != nil {
+		ls.snapshotCancel()
+	}
+}
+
 func LoadConfig() Config {
 	// Defaults
 	cwd, _ := os.Getwd()
@@ -112,6 +153,8 @@ func main() {
 	// M21.1: Load Configuration
 	cfg := LoadConfig()
 
+	var redisClient *redisclient.Client
+
 	// M1.3: Emit system_started log on boot (structured)
 	fmt.Println(`{"level":"info","msg":"system_started","component":"ratelord-d"}`)
 
@@ -134,14 +177,22 @@ func main() {
 			fmt.Printf(`{"level":"fatal","msg":"failed_to_parse_redis_url","error":"%v"}`+"\n", err)
 			os.Exit(1)
 		}
-		client := redisclient.NewClient(opt)
-		usageStore = redis.NewRedisUsageStore(client)
+		redisClient = redisclient.NewClient(opt)
+		usageStore = redis.NewRedisUsageStore(redisClient)
 		fmt.Printf(`{"level":"info","msg":"using_redis_usage_store","url":"%s"}`+"\n", cfg.RedisURL)
 	} else {
+		redisClient = nil
 		usageStore = engine.NewMemoryUsageStore()
 		fmt.Println(`{"level":"info","msg":"using_memory_usage_store"}`)
 	}
 	usageProj := engine.NewUsageProjectionWithStore(usageStore)
+
+	var leaseStore store.LeaseStore
+	if redisClient != nil {
+		leaseStore = redis.NewRedisLeaseStore(redisClient)
+	} else {
+		leaseStore = st
+	}
 
 	// Initialize Provider Projection
 	providerProj := engine.NewProviderProjection()
@@ -280,29 +331,38 @@ func main() {
 	poller.RestoreProviders(providerProj.GetState)
 	fmt.Println(`{"level":"info","msg":"restored_provider_state_from_event_stream"}`)
 
-	// Start Poller in background
-	pollerCtx, pollerCancel := context.WithCancel(context.Background())
-	defer pollerCancel()
-	go poller.Start(pollerCtx)
-
-	// M25.2: Initialize and start Rollup Worker
+	// M25.2: Initialize Rollup Worker
 	rollup := engine.NewRollupWorker(st)
-	rollupCtx, rollupCancel := context.WithCancel(context.Background())
-	defer rollupCancel()
-	go rollup.Run(rollupCtx)
 
-	// M26.2: Initialize and start Webhook Dispatcher
+	// M26.2: Initialize Webhook Dispatcher
 	dispatcher := engine.NewDispatcher(st)
-	dispatcherCtx, dispatcherCancel := context.WithCancel(context.Background())
-	defer dispatcherCancel()
-	go dispatcher.Start(dispatcherCtx)
 
-	// M27.2: Initialize and start Snapshot Worker
+	// M27.2: Initialize Snapshot Worker
 	// Run every 5 minutes by default
 	snapshotWorker := engine.NewSnapshotWorker(st, identityProj, usageProj, providerProj, forecastProj, 5*time.Minute)
-	snapshotCtx, snapshotCancel := context.WithCancel(context.Background())
-	defer snapshotCancel()
-	go snapshotWorker.Run(snapshotCtx)
+
+	leaderServices := &LeaderServices{
+		poller:         poller,
+		rollup:         rollup,
+		dispatcher:     dispatcher,
+		snapshotWorker: snapshotWorker,
+	}
+
+	if cfg.Mode == "follower" {
+		leaderServices.Start()
+	} else {
+		em := engine.NewElectionManager(leaseStore, cfg.FollowerID, "ratelord-leader", 5*time.Second, func() {
+			fmt.Printf(`{"level":"info","msg":"promoted_to_leader","holder_id":"%s"}`+"\n", cfg.FollowerID)
+			leaderServices.Start()
+		}, func() {
+			fmt.Printf(`{"level":"info","msg":"demoted_from_leader","holder_id":"%s"}`+"\n", cfg.FollowerID)
+			leaderServices.Stop()
+		})
+		emCtx, emCancel := context.WithCancel(context.Background())
+		go em.Start(emCtx)
+		defer emCancel()
+		defer em.Stop(context.Background())
+	}
 
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
@@ -378,6 +438,8 @@ func main() {
 	} else {
 		fmt.Println(`{"level":"info","msg":"server_stopped"}`)
 	}
+
+	leaderServices.Stop()
 
 	// Cleanup
 	if err := st.Close(); err != nil {
