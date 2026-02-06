@@ -12,6 +12,9 @@ Maintain the **implementation and maintenance** process for **ratelord** followi
     - **Run Tests**: After any code implementation, run relevant tests (e.g., `go test ./...`).
     - **Handle Failures**: If tests fail, **immediately** add a high-priority task to `NEXT_STEPS.md` to fix the specific broken tests. Do not mark the implementation task as "done" until tests pass.
     - **Coverage**: Ensure new code has adequate test coverage.
+- **Documentation Synchronization**:
+    - After any implementation, verify that relevant design docs (e.g., `API_SPEC.md`, `DATA_MODEL.md`) reflect the code.
+    - If docs are stale, **immediately** update them in this iteration, OR add a high-priority task to `NEXT_STEPS.md` to update them before proceeding.
 - **Resilience & Resumability**:
     - Assume work may be halted at any point.
     - Every iteration should start by reading `NEXT_STEPS.md` to pick up exactly where the last one left off.
