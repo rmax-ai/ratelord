@@ -683,3 +683,63 @@ func (s *Store) GetEvent(ctx context.Context, eventID EventID) (*Event, error) {
 	evt.Payload = json.RawMessage(payload)
 	return &evt, nil
 }
+
+// PruneEvents deletes events older than the retention duration,
+// BUT ONLY IF they are older than the most recent snapshot's last_event_id.
+// This ensures we never delete events that haven't been safely snapshotted.
+// Returns the number of deleted events.
+func (s *Store) PruneEvents(ctx context.Context, retention time.Duration) (int64, error) {
+	// 1. Get the latest snapshot
+	snap, err := s.GetLatestSnapshot(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get latest snapshot for safety check: %w", err)
+	}
+	if snap == nil {
+		// No snapshot means we can't safely prune anything, as we need at least one snapshot to restore state.
+		// Alternatively, we could prune if we assume replay from 0 is fine, but that defeats the purpose of optimization.
+		// Let's be safe: no snapshot = no prune.
+		return 0, fmt.Errorf("cannot prune: no snapshots found (create a snapshot first)")
+	}
+
+	// 2. Get the ingestion time of the snapshot's last event
+	// We need this to ensure we don't prune events that are technically "after" the snapshot in the stream,
+	// even if they are old (though that shouldn't happen with monotonic time, clocks drift).
+	// Actually, simpler: We can just use the event_id or ts_ingest of the snapshot's boundary.
+	// But `ts_ingest` is safer for range deletion.
+
+	// Let's look up the event to get its exact ts_ingest
+	snapEvent, err := s.GetEvent(ctx, EventID(snap.LastEventID))
+	if err != nil {
+		return 0, fmt.Errorf("failed to get snapshot boundary event %s: %w", snap.LastEventID, err)
+	}
+	if snapEvent == nil {
+		// This is bad state: snapshot refers to an event that doesn't exist?
+		// If we already pruned it, that's fine? No, if we pruned it, we can't verify safety.
+		// Actually, if we pruned it, we should have a NEWER snapshot.
+		// If the LATEST snapshot refers to a missing event, we are in trouble or it was already pruned.
+		// But we are pruning *older* than the snapshot. The snapshot event itself should be kept as a boundary?
+		// Let's assume we keep the snapshot event and everything after it.
+		return 0, fmt.Errorf("snapshot boundary event %s not found in events table", snap.LastEventID)
+	}
+
+	cutoffTime := time.Now().Add(-retention)
+
+	// We prune where ts_ingest < cutoffTime AND ts_ingest < snapEvent.TsIngest
+	// Actually, let's just use the minimum of the two to be safe.
+	if snapEvent.TsIngest.Before(cutoffTime) {
+		cutoffTime = snapEvent.TsIngest
+	}
+
+	query := `DELETE FROM events WHERE ts_ingest < ?`
+	res, err := s.db.ExecContext(ctx, query, cutoffTime)
+	if err != nil {
+		return 0, fmt.Errorf("failed to prune events: %w", err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get affected rows: %w", err)
+	}
+
+	return rows, nil
+}

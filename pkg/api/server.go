@@ -69,6 +69,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	mux.HandleFunc("/v1/events", s.handleEvents)
 	mux.HandleFunc("/v1/trends", s.handleTrends)
 	mux.HandleFunc("/v1/webhooks", s.withAuth(s.handleWebhooks))
+	mux.HandleFunc("/v1/admin/prune", s.withAuth(s.handlePrune))
 
 	// Debug endpoints
 	if poller != nil {
@@ -332,6 +333,47 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 		Status:     "registered",
 		EventID:    string(evt.EventID),
 		Token:      token, // Will be empty if user provided it
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_encode_response","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+	}
+}
+
+// handlePrune allows admin to delete old events.
+func (s *Server) handlePrune(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, `{"error":"method_not_allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Retention string `json:"retention"` // e.g., "720h"
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, `{"error":"invalid_json_body"}`, http.StatusBadRequest)
+		return
+	}
+
+	retention, err := time.ParseDuration(req.Retention)
+	if err != nil {
+		http.Error(w, `{"error":"invalid_retention_format","example":"720h"}`, http.StatusBadRequest)
+		return
+	}
+
+	count, err := s.store.PruneEvents(r.Context(), retention)
+	if err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_prune_events","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+		http.Error(w, fmt.Sprintf(`{"error":"prune_failed","details":"%v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"status":         "success",
+		"pruned_count":   count,
+		"retention_used": retention.String(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")

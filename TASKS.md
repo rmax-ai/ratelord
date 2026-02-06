@@ -389,12 +389,13 @@ Focus: Improve startup time and manage disk usage.
     - Create `snapshots` table (snapshot_id, timestamp, payload blob).
 - [x] **M27.2: Snapshot Worker**
     - Implement a worker that periodically serializes the `Projection` state (Usage, Limits, etc.) to a snapshot.
-- [x] **M27.3: Startup Optimization**
-    - Update `Loader` to load the latest snapshot first.
-    - Replay events only *after* the snapshot timestamp.
-    - *Acceptance*: Startup time is O(1) + O(recent_events) instead of O(all_events).
-- [ ] **M27.4: Event Pruning**
-    - Implement a command or worker to delete events older than retention policy (if they are snapshotted).
+	- [x] **M27.3: Startup Optimization**
+	    - Update `Loader` to load the latest snapshot first.
+	    - Replay events only *after* the snapshot timestamp.
+	    - *Acceptance*: Startup time is O(1) + O(recent_events) instead of O(all_events).
+	- [x] **M27.4: Event Pruning**
+	    - Implement a command or worker to delete events older than retention policy (if they are snapshotted).
+
 
 ## Epic 28: Advanced Simulation Framework
 Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_SIMULATION.md`).

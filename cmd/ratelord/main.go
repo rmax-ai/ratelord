@@ -26,23 +26,76 @@ type IdentityRegistration struct {
 }
 
 func main() {
-	if len(os.Args) < 4 {
-		fmt.Println("Usage: ratelord identity add <name> <kind>")
+	if len(os.Args) < 2 {
+		printUsage()
 		os.Exit(1)
 	}
 
 	cmd := os.Args[1]
-	subCmd := os.Args[2]
-	name := os.Args[3]
 
-	if cmd != "identity" || subCmd != "add" {
-		fmt.Println("Usage: ratelord identity add <name> <kind>")
+	switch cmd {
+	case "identity":
+		handleIdentity(os.Args[2:])
+	case "admin":
+		handleAdmin(os.Args[2:])
+	default:
+		printUsage()
+		os.Exit(1)
+	}
+}
+
+func printUsage() {
+	fmt.Println("Usage:")
+	fmt.Println("  ratelord identity add <name> <kind> [token]  Register a new identity")
+	fmt.Println("  ratelord admin prune <retention>             Prune old events (e.g. 720h)")
+}
+
+func handleAdmin(args []string) {
+	if len(args) < 2 || args[0] != "prune" {
+		fmt.Println("Usage: ratelord admin prune <retention>")
+		os.Exit(1)
+	}
+	retention := args[1]
+
+	token := os.Getenv("RATELORD_ADMIN_TOKEN")
+	if token == "" {
+		fmt.Println("Error: RATELORD_ADMIN_TOKEN env var required")
 		os.Exit(1)
 	}
 
+	payload := map[string]string{"retention": retention}
+	data, _ := json.Marshal(payload)
+
+	req, _ := http.NewRequest("POST", "http://127.0.0.1:8090/v1/admin/prune", bytes.NewBuffer(data))
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Printf("Error contacting daemon: %v\n", err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error: %s\n%s\n", resp.Status, string(body))
+		os.Exit(1)
+	}
+
+	fmt.Println(string(body))
+}
+
+func handleIdentity(args []string) {
+	if len(args) < 2 || args[0] != "add" {
+		fmt.Println("Usage: ratelord identity add <name> <kind>")
+		os.Exit(1)
+	}
+	name := args[1]
+
 	kind := "user"
-	if len(os.Args) > 4 {
-		kind = os.Args[4]
+	if len(args) > 2 {
+		kind = args[2]
 	}
 
 	token := os.Getenv("RATELORD_NEW_TOKEN")
