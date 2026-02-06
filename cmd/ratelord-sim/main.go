@@ -19,14 +19,49 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/api"
 )
 
+// SimulationResult captures the final state of the simulation for reporting
+type SimulationResult struct {
+	ScenarioName  string                 `json:"scenario_name"`
+	Duration      time.Duration          `json:"duration"`
+	TotalRequests uint64                 `json:"total_requests"`
+	TotalApproved uint64                 `json:"total_approved"`
+	TotalDenied   uint64                 `json:"total_denied"`
+	TotalModified uint64                 `json:"total_modified"`
+	TotalErrors   uint64                 `json:"total_errors"`
+	TotalInjected uint64                 `json:"total_injected"`
+	AgentStats    map[string]*AgentStats `json:"agent_stats"`
+	Invariants    []InvariantResult      `json:"invariants"`
+	Success       bool                   `json:"success"`
+}
+
+type AgentStats struct {
+	Requests uint64 `json:"requests"`
+	Approved uint64 `json:"approved"`
+	Denied   uint64 `json:"denied"`
+	Modified uint64 `json:"modified"`
+	Errors   uint64 `json:"errors"`
+}
+
+type InvariantResult struct {
+	Metric   string `json:"metric"`
+	Scope    string `json:"scope"`
+	Expected string `json:"expected"` // e.g. "> 0.95"
+	Actual   string `json:"actual"`   // e.g. "0.98"
+	Passed   bool   `json:"passed"`
+}
+
 func main() {
 	var (
 		scenarioFile string
 		apiURL       string
+		jsonOutput   bool
+		outputFile   string
 	)
 
 	flag.StringVar(&scenarioFile, "scenario", "", "Path to scenario JSON file")
 	flag.StringVar(&apiURL, "api", "http://127.0.0.1:8090", "Base URL of ratelord-d API")
+	flag.BoolVar(&jsonOutput, "json", false, "Output results as JSON")
+	flag.StringVar(&outputFile, "out", "", "Write output to file instead of stdout")
 	flag.Parse()
 
 	var scenario Scenario
@@ -40,11 +75,11 @@ func main() {
 			log.Fatalf("Failed to parse scenario file: %v", err)
 		}
 	} else {
-		// Default Scenario (Legacy flags support can be mapped here if needed, but keeping it simple)
-		fmt.Println("No scenario file provided, running default demo scenario...")
+		// Default Scenario
+		fmt.Fprintln(os.Stderr, "No scenario file provided, running default demo scenario...")
 		scenario = Scenario{
 			Name:        "Default Demo",
-			Duration:    30 * time.Second,
+			Duration:    10 * time.Second,
 			Description: "Simple periodic load",
 			Agents: []AgentConfig{
 				{
@@ -58,35 +93,54 @@ func main() {
 		}
 	}
 
-	runScenario(scenario, apiURL)
-}
+	result := runScenario(scenario, apiURL)
 
-func runScenario(s Scenario, apiURL string) {
-	fmt.Printf("Running Scenario: %s\n", s.Name)
-	fmt.Printf("Description: %s\n", s.Description)
-	fmt.Printf("Duration: %s\n", s.Duration)
+	// Evaluate Invariants
+	evaluateInvariants(&result, scenario.Invariants)
 
-	if s.Seed == 0 {
-		s.Seed = time.Now().UnixNano()
-		fmt.Printf("Random Seed: %d\n", s.Seed)
-	} else {
-		fmt.Printf("Fixed Seed: %d\n", s.Seed)
+	// Determine overall success
+	result.Success = true
+	for _, inv := range result.Invariants {
+		if !inv.Passed {
+			result.Success = false
+			break
+		}
 	}
 
-	// Global seed for fallback (though we try to use local RNGs)
+	writeReport(result, jsonOutput, outputFile)
+
+	if !result.Success {
+		os.Exit(1)
+	}
+}
+
+func runScenario(s Scenario, apiURL string) SimulationResult {
+	if s.Seed == 0 {
+		s.Seed = time.Now().UnixNano()
+	}
 	rand.Seed(s.Seed)
+
+	log.Printf("Running Scenario: %s (Seed: %d)", s.Name, s.Seed)
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.Duration)
 	defer cancel()
 
-	var (
-		totalRequests uint64
-		totalApproved uint64
-		totalDenied   uint64
-		totalModified uint64
-		totalErrors   uint64
-		totalInjected uint64
-	)
+	res := SimulationResult{
+		ScenarioName: s.Name,
+		Duration:     s.Duration,
+		AgentStats:   make(map[string]*AgentStats),
+	}
+
+	// Initialize Stats Map
+	var statsMutex sync.Mutex
+	getAgentStats := func(name string) *AgentStats {
+		statsMutex.Lock()
+		defer statsMutex.Unlock()
+		if _, ok := res.AgentStats[name]; !ok {
+			res.AgentStats[name] = &AgentStats{}
+		}
+		return res.AgentStats[name]
+	}
 
 	var wg sync.WaitGroup
 
@@ -95,19 +149,13 @@ func runScenario(s Scenario, apiURL string) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			log.Println("😈 Saboteur started")
 			ticker := time.NewTicker(s.Sabotage.Interval)
 			defer ticker.Stop()
-
-			// Saboteur needs its own RNG
 			sabotageRng := rand.New(rand.NewSource(s.Seed + 9999))
-
 			parts := strings.Split(s.Sabotage.Target, "/")
-			providerID := "mock-provider-1"
-			poolID := "default"
+			providerID, poolID := "mock-provider-1", "default"
 			if len(parts) == 2 {
-				providerID = parts[0]
-				poolID = parts[1]
+				providerID, poolID = parts[0], parts[1]
 			}
 
 			for {
@@ -115,14 +163,9 @@ func runScenario(s Scenario, apiURL string) {
 				case <-ctx.Done():
 					return
 				case <-ticker.C:
-					// Add some randomness to amount if needed, currently fixed
-					if err := injectUsage(apiURL, providerID, poolID, s.Sabotage.Amount); err != nil {
-						log.Printf("😈 Saboteur failed: %v", err)
-					} else {
-						atomic.AddUint64(&totalInjected, uint64(s.Sabotage.Amount))
-						log.Printf("😈 Saboteur injected %d units", s.Sabotage.Amount)
+					if err := injectUsage(apiURL, providerID, poolID, s.Sabotage.Amount); err == nil {
+						atomic.AddUint64(&res.TotalInjected, uint64(s.Sabotage.Amount))
 					}
-					// Consume RNG to advance state if we add randomness later
 					sabotageRng.Int63()
 				}
 			}
@@ -134,39 +177,83 @@ func runScenario(s Scenario, apiURL string) {
 		for i := 0; i < agentCfg.Count; i++ {
 			wg.Add(1)
 			agentID := fmt.Sprintf("%s-%d", agentCfg.Name, i)
-			// Deterministic seed per agent: Base + AgentGroupIndex*1000 + InstanceIndex
 			agentSeed := s.Seed + int64(agentIdx*1000) + int64(i)
+			stats := getAgentStats(agentCfg.Name) // Group stats by Agent Config Name
 
-			go func(cfg AgentConfig, aID string, seed int64) {
+			go func(cfg AgentConfig, aID string, seed int64, st *AgentStats) {
 				defer wg.Done()
-				runAgent(ctx, apiURL, aID, cfg, seed, &totalRequests, &totalApproved, &totalDenied, &totalModified, &totalErrors)
-			}(agentCfg, agentID, agentSeed)
+				runAgent(ctx, apiURL, aID, cfg, seed, &res, st)
+			}(agentCfg, agentID, agentSeed, stats)
 		}
 	}
 
 	wg.Wait()
-
-	fmt.Println("\n--- Simulation Complete ---")
-	fmt.Printf("Total Requests: %d\n", totalRequests)
-	fmt.Printf("Approved:       %d\n", totalApproved)
-	fmt.Printf("Modified:       %d\n", totalModified)
-	fmt.Printf("Denied:         %d\n", totalDenied)
-	fmt.Printf("Errors:         %d\n", totalErrors)
-	if s.Sabotage != nil && s.Sabotage.Enabled {
-		fmt.Printf("Injected Usage: %d\n", totalInjected)
-	}
+	return res
 }
 
-func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed int64, reqs, app, den, mod, errs *uint64) {
+func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed int64, global *SimulationResult, stats *AgentStats) {
 	rng := rand.New(rand.NewSource(seed))
 
-	// 1. Register
+	// Register
 	if err := registerIdentity(apiURL, cfg.IdentityID); err != nil {
 		log.Printf("[%s] Failed to register: %v", agentID, err)
 		return
 	}
 
-	// 2. Behavior Loop
+	// Helper to track request
+	track := func(decision string, err error) {
+		atomic.AddUint64(&global.TotalRequests, 1)
+		atomic.AddUint64(&stats.Requests, 1)
+		if err != nil {
+			atomic.AddUint64(&global.TotalErrors, 1)
+			atomic.AddUint64(&stats.Errors, 1)
+			return
+		}
+		switch decision {
+		case "approve":
+			atomic.AddUint64(&global.TotalApproved, 1)
+			atomic.AddUint64(&stats.Approved, 1)
+		case "approve_with_modifications":
+			atomic.AddUint64(&global.TotalModified, 1)
+			atomic.AddUint64(&stats.Modified, 1)
+		default:
+			atomic.AddUint64(&global.TotalDenied, 1)
+			atomic.AddUint64(&stats.Denied, 1)
+		}
+	}
+
+	// Behavior Loop
+	action := func() {
+		scope := cfg.ScopeID
+		if scope == "" {
+			scope = "default"
+		}
+		priority := cfg.Priority
+		if priority == "" {
+			priority = "normal"
+		}
+		req := api.IntentRequest{
+			AgentID:    agentID,
+			IdentityID: cfg.IdentityID,
+			ScopeID:    scope,
+			WorkloadID: fmt.Sprintf("job-%d", rng.Intn(10000)),
+			Priority:   priority,
+		}
+
+		resp, err := sendIntent(apiURL, req)
+		if err != nil {
+			track("", err)
+			return
+		}
+
+		decision := resp.Decision
+		track(decision, nil)
+
+		if decision == "approve_with_modifications" {
+			handleModifications(resp.Modifications)
+		}
+	}
+
 	switch cfg.Behavior {
 	case BehaviorGreedy:
 		for {
@@ -174,7 +261,7 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 			case <-ctx.Done():
 				return
 			default:
-				doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
+				action()
 			}
 		}
 	case BehaviorPoisson:
@@ -184,17 +271,13 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 			case <-ctx.Done():
 				return
 			default:
-				// Inter-arrival time for Poisson process is exponential
-				// interval = -ln(U) / lambda
 				interval := -math.Log(rng.Float64()) / lambda
 				time.Sleep(time.Duration(interval * float64(time.Second)))
-				doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
+				action()
 			}
 		}
 	case BehaviorBursty:
-		// Example: sleep 90% of time, burst in 10%
-		// Or: wait N seconds, then fire M requests
-		ticker := time.NewTicker(time.Second) // 1 burst per second
+		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for {
 			select {
@@ -202,7 +285,7 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 				return
 			case <-ticker.C:
 				for k := 0; k < cfg.Burst; k++ {
-					doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
+					action()
 				}
 			}
 		}
@@ -223,50 +306,126 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 				if cfg.Jitter > 0 {
 					time.Sleep(time.Duration(rng.Int63n(int64(cfg.Jitter))))
 				}
-				doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
+				action()
 			}
 		}
 	}
 }
 
-func doRequest(apiURL, agentID string, cfg AgentConfig, rng *rand.Rand, reqs, app, den, mod, errs *uint64) {
-	scope := cfg.ScopeID
-	if scope == "" {
-		scope = "default"
-	}
-	priority := cfg.Priority
-	if priority == "" {
-		priority = "normal"
-	}
+func evaluateInvariants(res *SimulationResult, invariants []Invariant) {
+	for _, inv := range invariants {
+		var actual float64
+		var passed bool
 
-	req := api.IntentRequest{
-		AgentID:    agentID,
-		IdentityID: cfg.IdentityID,
-		ScopeID:    scope,
-		WorkloadID: fmt.Sprintf("job-%d", rng.Intn(1000)),
-		Priority:   priority,
-	}
+		// Determine actual value based on scope
+		var stats *AgentStats
+		if inv.Scope == "global" || inv.Scope == "" {
+			stats = &AgentStats{
+				Requests: atomic.LoadUint64(&res.TotalRequests),
+				Approved: atomic.LoadUint64(&res.TotalApproved),
+				Denied:   atomic.LoadUint64(&res.TotalDenied),
+				Errors:   atomic.LoadUint64(&res.TotalErrors),
+			}
+		} else {
+			if s, ok := res.AgentStats[inv.Scope]; ok {
+				// We need to read the atomic values from the pointers in the map
+				stats = &AgentStats{
+					Requests: atomic.LoadUint64(&s.Requests),
+					Approved: atomic.LoadUint64(&s.Approved),
+					Denied:   atomic.LoadUint64(&s.Denied),
+					Errors:   atomic.LoadUint64(&s.Errors),
+				}
+			} else {
+				// Agent not found
+				res.Invariants = append(res.Invariants, InvariantResult{
+					Metric: inv.Metric, Scope: inv.Scope, Expected: fmt.Sprintf("%s %.2f", inv.Condition, inv.Value), Actual: "N/A", Passed: false,
+				})
+				continue
+			}
+		}
 
-	decision, err := sendIntent(apiURL, req)
-	atomic.AddUint64(reqs, 1)
+		if stats.Requests == 0 {
+			actual = 0
+		} else {
+			switch inv.Metric {
+			case "approval_rate":
+				actual = float64(stats.Approved) / float64(stats.Requests)
+			case "denial_rate":
+				actual = float64(stats.Denied) / float64(stats.Requests)
+			case "error_rate":
+				actual = float64(stats.Errors) / float64(stats.Requests)
+			default:
+				actual = 0
+			}
+		}
 
-	if err != nil {
-		log.Printf("[%s] Error: %v", agentID, err)
-		atomic.AddUint64(errs, 1)
-		return
-	}
+		switch inv.Condition {
+		case ">":
+			passed = actual > inv.Value
+		case ">=":
+			passed = actual >= inv.Value
+		case "<":
+			passed = actual < inv.Value
+		case "<=":
+			passed = actual <= inv.Value
+		case "==":
+			passed = math.Abs(actual-inv.Value) < 0.0001
+		}
 
-	if decision.Decision == "approve" {
-		atomic.AddUint64(app, 1)
-	} else if decision.Decision == "approve_with_modifications" {
-		atomic.AddUint64(mod, 1)
-		handleModifications(agentID, decision.Modifications)
-	} else {
-		atomic.AddUint64(den, 1)
+		res.Invariants = append(res.Invariants, InvariantResult{
+			Metric:   inv.Metric,
+			Scope:    inv.Scope,
+			Expected: fmt.Sprintf("%s %.2f", inv.Condition, inv.Value),
+			Actual:   fmt.Sprintf("%.4f", actual),
+			Passed:   passed,
+		})
 	}
 }
 
-func handleModifications(agentID string, mods map[string]interface{}) {
+func writeReport(res SimulationResult, jsonFmt bool, filePath string) {
+	var output []byte
+	var err error
+
+	if jsonFmt {
+		output, err = json.MarshalIndent(res, "", "  ")
+	} else {
+		var buf bytes.Buffer
+		buf.WriteString(fmt.Sprintf("\n--- Simulation Report: %s ---\n", res.ScenarioName))
+		buf.WriteString(fmt.Sprintf("Duration: %s\n", res.Duration))
+		buf.WriteString(fmt.Sprintf("Requests: %d | Approved: %d | Denied: %d | Errors: %d\n",
+			atomic.LoadUint64(&res.TotalRequests),
+			atomic.LoadUint64(&res.TotalApproved),
+			atomic.LoadUint64(&res.TotalDenied),
+			atomic.LoadUint64(&res.TotalErrors)))
+
+		if len(res.Invariants) > 0 {
+			buf.WriteString("\nInvariants:\n")
+			for _, inv := range res.Invariants {
+				status := "FAIL"
+				if inv.Passed {
+					status = "PASS"
+				}
+				buf.WriteString(fmt.Sprintf("[%s] %s (%s): Expected %s, Got %s\n", status, inv.Metric, inv.Scope, inv.Expected, inv.Actual))
+			}
+		}
+		output = buf.Bytes()
+	}
+
+	if err != nil {
+		log.Fatalf("Failed to marshal report: %v", err)
+	}
+
+	if filePath != "" {
+		if err := os.WriteFile(filePath, output, 0644); err != nil {
+			log.Fatalf("Failed to write report to %s: %v", filePath, err)
+		}
+		fmt.Printf("Report written to %s\n", filePath)
+	} else {
+		fmt.Println(string(output))
+	}
+}
+
+func handleModifications(mods map[string]interface{}) {
 	if val, ok := mods["wait_seconds"]; ok {
 		var seconds float64
 		switch v := val.(type) {
@@ -275,16 +434,13 @@ func handleModifications(agentID string, mods map[string]interface{}) {
 		case string:
 			fmt.Sscanf(v, "%fs", &seconds)
 		}
-
 		if seconds > 0 {
-			// log.Printf("[%s] Throttled for %.2fs", agentID, seconds)
 			time.Sleep(time.Duration(seconds * float64(time.Second)))
 		}
 	}
 }
 
-// Helpers (Same as before but cleaned up)
-
+// Reuse helper functions injectUsage, registerIdentity, sendIntent
 func injectUsage(baseURL, providerID, poolID string, amount int64) error {
 	payload := map[string]interface{}{
 		"provider_id": providerID,
@@ -309,14 +465,12 @@ func registerIdentity(baseURL, identityID string) error {
 		Kind:       "simulated-service",
 		Metadata:   map[string]interface{}{"env": "simulation"},
 	}
-
 	body, _ := json.Marshal(reg)
 	resp, err := http.Post(baseURL+"/v1/identities", "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("bad status: %d", resp.StatusCode)
 	}
@@ -330,11 +484,9 @@ func sendIntent(baseURL string, req api.IntentRequest) (*api.DecisionResponse, e
 		return nil, err
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("bad status: %d", resp.StatusCode)
 	}
-
 	var decision api.DecisionResponse
 	if err := json.NewDecoder(resp.Body).Decode(&decision); err != nil {
 		return nil, err

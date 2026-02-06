@@ -12,6 +12,14 @@ type Scenario struct {
 	Topology    Topology        `json:"topology" yaml:"topology"`
 	Agents      []AgentConfig   `json:"agents" yaml:"agents"`
 	Sabotage    *SabotageConfig `json:"sabotage,omitempty" yaml:"sabotage,omitempty"`
+	Invariants  []Invariant     `json:"invariants,omitempty" yaml:"invariants,omitempty"`
+}
+
+type Invariant struct {
+	Metric    string  `json:"metric" yaml:"metric"`       // e.g., "approval_rate", "denial_rate", "latency_p99"
+	Condition string  `json:"condition" yaml:"condition"` // e.g., ">", "<", ">=", "<="
+	Value     float64 `json:"value" yaml:"value"`
+	Scope     string  `json:"scope" yaml:"scope"` // "global" or specific agent name
 }
 
 type Topology struct {

@@ -21,10 +21,10 @@
        - [x] **M27.3: Startup Optimization**: Load from snapshot + delta replay.
        - [x] **M27.4: Event Pruning**: Policy-based retention.
 
- 4. **Epic 28: Advanced Simulation Framework** (In Progress):
+ 4. **Epic 28: Advanced Simulation Framework** (Completed):
        - [x] **M28.1: Simulation Engine Upgrade**: Refactor `ratelord-sim` to support configurable scenarios.
         - [x] **M28.2: Scenario Definitions**: Implement S-01 to S-05.
-        - [ ] **M28.3: Reporting**: JSON results and assertions.
+        - [x] **M28.3: Reporting**: JSON results and assertions.
 
  5. **New Initiatives (Phase 11 & 12)**:
        - [ ] **Epic 29**: Financial Governance (`FINANCIAL_GOVERNANCE.md`).
@@ -37,7 +37,8 @@
        - [x] **Epic 25**: Trends.
        - [x] **Epic 26**: Webhooks.
        - [x] **Epic 27**: Snapshots.
-       - [ ] **Next**: Execute Epic 28.
+       - [x] **Epic 28**: Advanced Simulation.
+       - [ ] **Next**: Execute Epic 29.
 
       - [ ] **Epic 28**: Advanced Simulation Framework (`ADVANCED_SIMULATION.md`).
       - [ ] **Epic 29**: Financial Governance (`FINANCIAL_GOVERNANCE.md`).

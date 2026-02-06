@@ -409,7 +409,7 @@ Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_S
     - [x] **S-03**: Implement "Priority Inversion Defense" scenario.
     - [x] **S-04**: Implement "Noisy Neighbor" (Shared vs Isolated) scenario.
     - [x] **S-05**: Implement "Cascading Failure Recovery" scenario.
-- [ ] **M28.3: Reporting & Verification**
+- [x] **M28.3: Reporting & Verification**
     - Output structured JSON results (latency histograms, approval rates).
     - Add assertions to verify scenario success criteria.
 
