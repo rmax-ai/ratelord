@@ -208,6 +208,12 @@ func main() {
 	defer rollupCancel()
 	go rollup.Run(rollupCtx)
 
+	// M26.2: Initialize and start Webhook Dispatcher
+	dispatcher := engine.NewDispatcher(st)
+	dispatcherCtx, dispatcherCancel := context.WithCancel(context.Background())
+	defer dispatcherCancel()
+	go dispatcher.Start(dispatcherCtx)
+
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
 	addr := fmt.Sprintf(":%d", cfg.Port)

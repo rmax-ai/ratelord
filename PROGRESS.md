@@ -13,3 +13,4 @@
 | M25.3: Trend API | COMPLETED | Implement | 2026-02-06 |
 | M25.4: Integration Test | COMPLETED | Implement | 2026-02-06 |
 | M26.1: Webhook Registry | COMPLETED | Implement | 2026-02-06 |
+| M26.2: Dispatcher | COMPLETED | Implement | 2026-02-06 |

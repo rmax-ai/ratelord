@@ -52,4 +52,4 @@
 - [x] **M25.2: Rollup Worker Core** (Epic 25) - Created `pkg/engine/rollup.go` with `RollupWorker` struct and `Run(ctx)` method. Implemented aggregation logic to read `usage_observed` events, group by bucket hour, calculate min/max/event_count/total_usage (sum deltas), and upsert to `usage_hourly`. Integrated into `cmd/ratelord-d/main.go` to start in background goroutine.
 - [x] **M25.3: Trend API** (Epic 25) - Implemented `GetUsageStats` in Store with filtering support. Added `GET /v1/trends` endpoint to API server to serve aggregated usage data. Verified with integration tests.
 - [x] **M25.4: Integration Test** (Epic 25) - Created `tests/integration/trends_test.go` to verify end-to-end functionality: from event ingestion -> rollup worker aggregation -> API serving correct statistics.
-
+- [x] **M26.2: Dispatcher** (Epic 26) - Created `pkg/engine/dispatcher.go` with `Dispatcher` struct. Implemented async polling loop, event matching, HTTP dispatch with retries, and cursor management in `system_state`. Integrated into `cmd/ratelord-d/main.go` and verified with unit test `pkg/engine/dispatcher_test.go`.

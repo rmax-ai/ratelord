@@ -373,10 +373,9 @@ Focus: Push alerts to external systems.
 - [x] **M26.1: Webhook Registry**
     - [x] Create `webhook_configs` table.
     - [x] Implement `POST /v1/webhooks` to register URLs.
-- [ ] **M26.2: Dispatcher**
-
-    - Async worker to send HTTP POST payloads to registered webhooks.
-    - Handle retries and backoff.
+- [x] **M26.2: Dispatcher**
+    - [x] Async worker to send HTTP POST payloads to registered webhooks.
+    - [x] Handle retries and backoff.
 - [ ] **M26.3: Security (HMAC)**
     - Sign webhook payloads with a shared secret.
     - Include `X-Ratelord-Signature` header.
