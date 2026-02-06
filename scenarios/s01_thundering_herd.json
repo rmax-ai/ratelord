@@ -1,0 +1,16 @@
+{
+  "name": "S-01: Thundering Herd",
+  "description": "100+ agents wake up simultaneously (e.g., cron job alignment).",
+  "duration": 30000000000,
+  "seed": 1001,
+  "agents": [
+    {
+      "name": "cron-worker",
+      "count": 100,
+      "identity_id": "cron-service",
+      "scope_id": "job-queue",
+      "behavior": "greedy",
+      "rate": 10
+    }
+  ]
+}

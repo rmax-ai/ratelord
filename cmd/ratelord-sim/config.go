@@ -23,6 +23,8 @@ type AgentConfig struct {
 	Name       string        `json:"name" yaml:"name"`
 	Count      int           `json:"count" yaml:"count"`
 	IdentityID string        `json:"identity_id" yaml:"identity_id"`
+	ScopeID    string        `json:"scope_id" yaml:"scope_id"` // Target Scope (default: "default")
+	Priority   string        `json:"priority" yaml:"priority"` // low, normal, high, critical
 	Behavior   BehaviorType  `json:"behavior" yaml:"behavior"`
 	Rate       int           `json:"rate" yaml:"rate"` // Requests per second
 	Burst      int           `json:"burst" yaml:"burst"`

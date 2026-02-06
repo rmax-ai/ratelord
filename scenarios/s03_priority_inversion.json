@@ -1,0 +1,25 @@
+{
+  "name": "S-03: Priority Inversion Defense",
+  "description": "High-volume low-priority traffic threatens to block critical operations.",
+  "duration": 45000000000,
+  "seed": 1003,
+  "agents": [
+    {
+      "name": "low-prio-flood",
+      "count": 50,
+      "identity_id": "background-worker",
+      "priority": "low",
+      "behavior": "greedy",
+      "rate": 20
+    },
+    {
+      "name": "high-prio-user",
+      "count": 5,
+      "identity_id": "interactive-user",
+      "priority": "high",
+      "behavior": "periodic",
+      "rate": 1,
+      "jitter": 500000000
+    }
+  ]
+}

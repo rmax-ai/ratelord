@@ -1,0 +1,15 @@
+{
+  "name": "S-05: Cascading Failure Recovery",
+  "description": "Provider behaves erratically (Note: Requires Provider Failure Injection support).",
+  "duration": 30000000000,
+  "seed": 1005,
+  "agents": [
+    {
+      "name": "resilient-app",
+      "count": 20,
+      "identity_id": "frontend",
+      "behavior": "periodic",
+      "rate": 5
+    }
+  ]
+}

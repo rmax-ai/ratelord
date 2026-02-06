@@ -1,0 +1,24 @@
+{
+  "name": "S-04: Noisy Neighbor (Shared)",
+  "description": "One misbehaving agent in a shared pool.",
+  "duration": 30000000000,
+  "seed": 1004,
+  "agents": [
+    {
+      "name": "noisy-agent",
+      "count": 1,
+      "identity_id": "bad-actor",
+      "scope_id": "shared-tenant",
+      "behavior": "greedy",
+      "rate": 500
+    },
+    {
+      "name": "victim-agent",
+      "count": 1,
+      "identity_id": "good-actor",
+      "scope_id": "shared-tenant",
+      "behavior": "periodic",
+      "rate": 2
+    }
+  ]
+}

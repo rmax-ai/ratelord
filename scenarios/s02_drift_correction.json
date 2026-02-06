@@ -1,0 +1,21 @@
+{
+  "name": "S-02: Drift & Correction",
+  "description": "Saboteur makes hidden requests directly to Provider, causing drift.",
+  "duration": 60000000000,
+  "seed": 1002,
+  "agents": [
+    {
+      "name": "regular-app",
+      "count": 10,
+      "identity_id": "app-service",
+      "behavior": "periodic",
+      "rate": 5
+    }
+  ],
+  "sabotage": {
+    "enabled": true,
+    "interval": 2000000000,
+    "amount": 10,
+    "target": "mock-provider-1/default"
+  }
+}

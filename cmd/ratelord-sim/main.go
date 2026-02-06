@@ -174,7 +174,7 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 			case <-ctx.Done():
 				return
 			default:
-				doRequest(apiURL, agentID, cfg.IdentityID, rng, reqs, app, den, mod, errs)
+				doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
 			}
 		}
 	case BehaviorPoisson:
@@ -188,7 +188,7 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 				// interval = -ln(U) / lambda
 				interval := -math.Log(rng.Float64()) / lambda
 				time.Sleep(time.Duration(interval * float64(time.Second)))
-				doRequest(apiURL, agentID, cfg.IdentityID, rng, reqs, app, den, mod, errs)
+				doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
 			}
 		}
 	case BehaviorBursty:
@@ -202,7 +202,7 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 				return
 			case <-ticker.C:
 				for k := 0; k < cfg.Burst; k++ {
-					doRequest(apiURL, agentID, cfg.IdentityID, rng, reqs, app, den, mod, errs)
+					doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
 				}
 			}
 		}
@@ -223,19 +223,28 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 				if cfg.Jitter > 0 {
 					time.Sleep(time.Duration(rng.Int63n(int64(cfg.Jitter))))
 				}
-				doRequest(apiURL, agentID, cfg.IdentityID, rng, reqs, app, den, mod, errs)
+				doRequest(apiURL, agentID, cfg, rng, reqs, app, den, mod, errs)
 			}
 		}
 	}
 }
 
-func doRequest(apiURL, agentID, identityID string, rng *rand.Rand, reqs, app, den, mod, errs *uint64) {
+func doRequest(apiURL, agentID string, cfg AgentConfig, rng *rand.Rand, reqs, app, den, mod, errs *uint64) {
+	scope := cfg.ScopeID
+	if scope == "" {
+		scope = "default"
+	}
+	priority := cfg.Priority
+	if priority == "" {
+		priority = "normal"
+	}
+
 	req := api.IntentRequest{
 		AgentID:    agentID,
-		IdentityID: identityID,
-		ScopeID:    "default",
+		IdentityID: cfg.IdentityID,
+		ScopeID:    scope,
 		WorkloadID: fmt.Sprintf("job-%d", rng.Intn(1000)),
-		Priority:   "normal",
+		Priority:   priority,
 	}
 
 	decision, err := sendIntent(apiURL, req)

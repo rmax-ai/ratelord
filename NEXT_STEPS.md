@@ -23,8 +23,8 @@
 
  4. **Epic 28: Advanced Simulation Framework** (In Progress):
        - [x] **M28.1: Simulation Engine Upgrade**: Refactor `ratelord-sim` to support configurable scenarios.
-       - [ ] **M28.2: Scenario Definitions**: Implement S-01 to S-05.
-       - [ ] **M28.3: Reporting**: JSON results and assertions.
+        - [x] **M28.2: Scenario Definitions**: Implement S-01 to S-05.
+        - [ ] **M28.3: Reporting**: JSON results and assertions.
 
  5. **New Initiatives (Phase 11 & 12)**:
        - [ ] **Epic 29**: Financial Governance (`FINANCIAL_GOVERNANCE.md`).
