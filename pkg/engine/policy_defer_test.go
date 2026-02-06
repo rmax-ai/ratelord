@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -30,7 +31,8 @@ func TestPolicyEngine_DeferAction(t *testing.T) {
 	}
 
 	// 3. Setup PolicyEngine with a "defer" policy
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	// Create a policy that defers if remaining < 100 (we'll simulate low remaining)
 	// First set low remaining
@@ -49,7 +51,8 @@ func TestPolicyEngine_DeferAction(t *testing.T) {
 	policyConfig := &PolicyConfig{
 		Policies: []PolicyDefinition{
 			{
-				ID: "defer-policy",
+				ID:    "defer-policy",
+				Scope: "global",
 				Rules: []RuleDefinition{
 					{
 						Condition: "remaining < 100",
@@ -97,7 +100,8 @@ func TestPolicyEngine_DeferAction(t *testing.T) {
 func TestPolicyEngine_DeferAction_NoResetAt(t *testing.T) {
 	// Test behavior when ResetAt is missing (should default to 0 wait?)
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	// Set usage to trigger condition, but NO reset time
 	usagePayload, _ := json.Marshal(map[string]interface{}{
@@ -115,7 +119,8 @@ func TestPolicyEngine_DeferAction_NoResetAt(t *testing.T) {
 	policyConfig := &PolicyConfig{
 		Policies: []PolicyDefinition{
 			{
-				ID: "defer-policy",
+				ID:    "defer-policy",
+				Scope: "global",
 				Rules: []RuleDefinition{
 					{
 						Condition: "remaining < 100",

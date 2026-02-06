@@ -7,13 +7,15 @@ import (
 
 	"github.com/rmax-ai/ratelord/pkg/engine/currency"
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 func TestPolicyCostCondition(t *testing.T) {
 	// Setup usage projection
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	// Create policy config with cost rule
 	config := &PolicyConfig{
@@ -80,7 +82,8 @@ func TestPolicyCostCondition(t *testing.T) {
 func TestPolicyForecastTTECondition(t *testing.T) {
 	// Setup usage projection
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	// Create policy config with TTE rule
 	config := &PolicyConfig{
@@ -148,7 +151,8 @@ func TestPolicyForecastTTECondition(t *testing.T) {
 func TestPolicyProviderIDCondition(t *testing.T) {
 	// Setup usage projection
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	// Create policy config with provider check
 	config := &PolicyConfig{

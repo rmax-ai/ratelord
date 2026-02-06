@@ -3,12 +3,14 @@ package engine
 import (
 	"testing"
 
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 func TestPolicyWarn(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	config := &PolicyConfig{
 		Policies: []PolicyDefinition{
@@ -65,7 +67,8 @@ func TestPolicyWarn(t *testing.T) {
 
 func TestPolicyDelay(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	config := &PolicyConfig{
 		Policies: []PolicyDefinition{

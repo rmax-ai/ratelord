@@ -44,6 +44,7 @@ type PolicyEngine struct {
 	usage      *UsageProjection
 	mu         sync.RWMutex
 	policies   *PolicyConfig
+	policyMap  map[string]PolicyDefinition
 	controller *DelayController
 	graph      *graph.Projection
 }
@@ -54,6 +55,7 @@ func NewPolicyEngine(usage *UsageProjection, graphProj *graph.Projection) *Polic
 		usage:      usage,
 		controller: NewDelayController(1.0),
 		graph:      graphProj,
+		policyMap:  make(map[string]PolicyDefinition),
 	}
 }
 
@@ -61,6 +63,14 @@ func NewPolicyEngine(usage *UsageProjection, graphProj *graph.Projection) *Polic
 func (pe *PolicyEngine) UpdatePolicies(newConfig *PolicyConfig) {
 	pe.mu.Lock()
 	pe.policies = newConfig
+	// Rebuild map as a new object (COW)
+	newMap := make(map[string]PolicyDefinition)
+	if newConfig != nil {
+		for _, p := range newConfig.Policies {
+			newMap[p.ID] = p
+		}
+	}
+	pe.policyMap = newMap
 	pe.mu.Unlock()
 
 	// Sync with graph outside the lock to avoid potential deadlocks if graph methods lock
@@ -85,6 +95,7 @@ func (pe *PolicyEngine) syncGraph(config *PolicyConfig) {
 func (pe *PolicyEngine) Evaluate(intent Intent) PolicyEvaluationResult {
 	pe.mu.RLock()
 	activePolicies := pe.policies
+	activeMap := pe.policyMap
 	pe.mu.RUnlock()
 
 	// Fallback if no policy loaded (or for bootstrapping)
@@ -92,12 +103,35 @@ func (pe *PolicyEngine) Evaluate(intent Intent) PolicyEvaluationResult {
 		return pe.evaluateLegacy(intent)
 	}
 
-	return pe.evaluateDynamic(intent, activePolicies)
+	return pe.evaluateDynamic(intent, activeMap)
 }
 
-func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) PolicyEvaluationResult {
-	// Simple linear scan of policies -> rules
-	// In a real implementation, we'd have a compiled rule tree.
+func (pe *PolicyEngine) evaluateDynamic(intent Intent, policyMap map[string]PolicyDefinition) PolicyEvaluationResult {
+	// Identify relevant policies via Graph
+	var policiesToEvaluate []PolicyDefinition
+
+	// Helper to append policies for a scope
+	addPoliciesForScope := func(scopeID string) {
+		nodes, err := pe.graph.FindConstraintsForScope(scopeID)
+		if err != nil {
+			return
+		}
+		for _, n := range nodes {
+			if p, ok := policyMap[n.ID]; ok {
+				policiesToEvaluate = append(policiesToEvaluate, p)
+			}
+		}
+	}
+
+	// 1. Specific Scope
+	if intent.ScopeID != "" {
+		addPoliciesForScope(intent.ScopeID)
+	}
+
+	// 2. Global Scope (if different)
+	if intent.ScopeID != "global" {
+		addPoliciesForScope("global")
+	}
 
 	// Fetch pool state once for the intent context
 	var poolState PoolState
@@ -106,10 +140,7 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) Pol
 		poolState, exists = pe.usage.GetPoolState(intent.ProviderID, intent.PoolID)
 	}
 
-	for _, policy := range config.Policies {
-		// TODO: Match Scope (e.g. wildcard or exact match)
-		// For now, assume "global" or match
-
+	for _, policy := range policiesToEvaluate {
 		for _, rule := range policy.Rules {
 			// Check TimeWindow if present
 			if rule.TimeWindow != nil {

@@ -513,9 +513,9 @@ Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
     - [x] **M35.2.2: Event Handlers**: Implement handlers for `IdentityRegistered` (PolicyUpdated pending).
     - [x] **M35.2.3: Replay Integration**: Hook `GraphProjection` into the main `Loader` replay loop.
     - [x] **M35.2.4: Policy Graph Population**: Handle `PolicyUpdated` events (or load from config) to create `Constraint` and `Pool` nodes and `AppliesTo`/`Limits` edges.
-- [ ] **M35.3: Policy Matcher on Graph**
+- [x] **M35.3: Policy Matcher on Graph**
     - [x] **M35.3.1: Traversal Logic**: Implement `GetConstraintsForIdentity(id)` (Implemented `FindConstraintsForScope`).
-    - [ ] **M35.3.2: Engine Integration**: Wire `GraphProjection` into `PolicyEngine` to replace linear search with graph traversal.
+    - [x] **M35.3.2: Engine Integration**: Wire `GraphProjection` into `PolicyEngine` to replace linear search with graph traversal.
 - [ ] **M35.4: Graph Visualization**
     - [ ] Add `GET /v1/graph` endpoint (JSON/Dot format).
     - [ ] Visualize in Web UI (Force-directed graph).

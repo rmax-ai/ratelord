@@ -5,12 +5,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 func TestPolicyShape(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	// Define policy with shape action
 	config := &PolicyConfig{
@@ -65,7 +67,8 @@ func TestPolicyShape(t *testing.T) {
 
 func TestPolicyDefer(t *testing.T) {
 	usage := NewUsageProjection()
-	engine := NewPolicyEngine(usage, nil)
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
 
 	// Define policy with defer action
 	config := &PolicyConfig{
