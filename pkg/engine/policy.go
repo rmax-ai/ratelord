@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
@@ -87,6 +88,18 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, config *PolicyConfig) Pol
 		// For now, assume "global" or match
 
 		for _, rule := range policy.Rules {
+			// Check TimeWindow if present
+			if rule.TimeWindow != nil {
+				match, err := rule.TimeWindow.Matches(time.Now())
+				if err != nil {
+					// TODO: Log warning about invalid time window
+					continue
+				}
+				if !match {
+					continue
+				}
+			}
+
 			if pe.checkCondition(rule.Condition, intent, policy.Limit, poolState, exists) {
 				return pe.applyAction(rule.Action, rule.Params, poolState)
 			}

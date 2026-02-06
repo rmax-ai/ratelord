@@ -38,8 +38,17 @@ type PolicyDefinition struct {
 
 // RuleDefinition maps individual logic rules
 type RuleDefinition struct {
-	Name      string                 `json:"name"`
-	Condition string                 `json:"condition"` // Simple DSL: "remaining < 100"
-	Action    string                 `json:"action"`    // "approve", "deny", "shape"
-	Params    map[string]interface{} `json:"params,omitempty"`
+	Name       string                 `json:"name"`
+	Condition  string                 `json:"condition"` // Simple DSL: "remaining < 100"
+	Action     string                 `json:"action"`    // "approve", "deny", "shape"
+	Params     map[string]interface{} `json:"params,omitempty"`
+	TimeWindow *TimeWindow            `json:"time_window,omitempty"`
+}
+
+// TimeWindow defines a temporal constraint for a rule
+type TimeWindow struct {
+	StartTime string   `json:"start_time,omitempty"` // HH:MM (24-hour)
+	EndTime   string   `json:"end_time,omitempty"`   // HH:MM (24-hour)
+	Days      []string `json:"days,omitempty"`       // ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+	Location  string   `json:"location,omitempty"`   // e.g., "America/New_York" (defaults to UTC)
 }

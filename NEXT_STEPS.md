@@ -24,7 +24,11 @@
          - [x] **M22.1.1: Policy Action Types**: Add `warn` and `delay` actions.
          - [x] **M22.1.2: Evaluator Updates**: Update `Evaluate` logic.
          - [x] **M22.1.3: API Response**: Ensure warnings/delays are propagated.
-     - [ ] **M22.2: Temporal Rules**: Implement time-based matching.
+     - [x] **M22.2: Temporal Rules**: Implement time-based matching.
+         - [x] **M22.2.1: TimeWindow Schema**: Add `TimeWindow` struct (Start, End, Days, Location) to Policy config.
+         - [x] **M22.2.2: Time Matcher Logic**: Implement `Matches(t time.Time)` method for windows.
+         - [x] **M22.2.3: Evaluator Integration**: Update `Evaluate` to check time windows before rule application.
+         - [x] **M22.2.4: Unit Tests**: Verify timezone handling and boundary conditions.
 
  4. **Epic 23: Security Hardening**:
      - [ ] **M23.1: TLS Termination**: Support HTTPS.

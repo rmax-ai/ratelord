@@ -44,3 +44,6 @@
 - [x] **Epic 18: Web UI Implementation** - Status: Completed. Implemented Dashboard, History, and Identity Explorer. React + Vite + Tailwind stack embedded in Go binary.
 - [x] **M21.1: Robust Config Loader** (Epic 21) - Implemented `Config` struct in `ratelord-d` with priority: Flags > Env Vars > Defaults. Supported `db`, `policy`, `port`, and `web-dir`. Updated `NewServer` to accept custom address. Verified build.
 
+## 2026-02-06
+- [x] **M22.2: Temporal Rules** (Epic 22) - Implemented `TimeWindow` schema in `PolicyConfig`, `Matches` logic in `pkg/engine/policy_time.go`, and integrated it into the Policy Evaluator. Verified with unit tests covering timezone handling, day matching, and cross-midnight ranges.
+
