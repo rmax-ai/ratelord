@@ -1,5 +1,7 @@
 package api
 
+import "time"
+
 // IntentRequest matches the POST /v1/intent body schema
 type IntentRequest struct {
 	AgentID       string                 `json:"agent_id"`
@@ -36,4 +38,18 @@ type IdentityResponse struct {
 	Status     string `json:"status"`
 	EventID    string `json:"event_id"`
 	Token      string `json:"token,omitempty"` // Returned only if generated
+}
+
+// GrantRequest matches the POST /v1/federation/grant body schema
+type GrantRequest struct {
+	FollowerID string `json:"follower_id"`
+	PoolID     string `json:"pool_id"`
+	Amount     int64  `json:"amount"`
+}
+
+// GrantResponse matches the response for POST /v1/federation/grant
+type GrantResponse struct {
+	Granted         int64     `json:"granted"`
+	ValidUntil      time.Time `json:"valid_until"`
+	RemainingGlobal int64     `json:"remaining_global,omitempty"`
 }

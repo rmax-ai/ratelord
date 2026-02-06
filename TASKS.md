@@ -434,8 +434,8 @@ Focus: Elevating "Cost" to a first-class constraint alongside Rate Limits (`FINA
 Focus: Expanding from single-node daemon to distributed fleet governance (`CLUSTER_FEDERATION.md`).
 - [x] **M30.1: Grant Protocol Definition**
     - [x] Define protocol in `API_SPEC.md` and `CLUSTER_FEDERATION.md`.
-    - [ ] Define `GrantRequest` and `GrantResponse` structs (Implementation).
-    - [ ] Implement `POST /v1/federation/grant` endpoint on Leader.
+    - [x] Define `GrantRequest` and `GrantResponse` structs (Implementation).
+    - [x] Implement `POST /v1/federation/grant` endpoint on Leader.
 - [ ] **M30.2: Follower Mode**
     - [ ] Add `--mode=follower` flag to `ratelord-d`.
     - [ ] Implement `RemoteProvider` that requests grants from Leader instead of direct token bucket.
