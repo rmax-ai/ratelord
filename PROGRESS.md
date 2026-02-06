@@ -76,3 +76,4 @@
 | Makefile | UPDATED | Implement | 2026-01-26 |
 | WEB_UI_SPEC.md | REFINED/IMPLEMENTED | Sub-Agent | 2026-01-26 |
 | M19.1: SDK Specification | COMPLETED | Orchestrator | 2026-02-06 |
+| M19.2: Project Scaffold | COMPLETED | Implement | 2026-02-06 |

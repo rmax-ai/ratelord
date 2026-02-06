@@ -276,10 +276,10 @@ Focus: Modern, graphical interface for observing system state.
 
 ## Epic 19: Node.js / TypeScript SDK
 Focus: Enable the largest ecosystem of agents (JS/TS) to use Ratelord.
-- [ ] **M19.1: SDK Specification**
+- [x] **M19.1: SDK Specification**
     - Define TypeScript interfaces for Intent, Decision, and Client options.
     - Create `sdk/js/SPEC.md` or update `CLIENT_SDK_SPEC.md`.
-- [ ] **M19.2: Project Scaffold**
+- [x] **M19.2: Project Scaffold**
     - Initialize `sdk/js` with `package.json`, `tsconfig.json`.
     - Setup Jest/Vitest for testing.
 - [ ] **M19.3: Core Implementation**

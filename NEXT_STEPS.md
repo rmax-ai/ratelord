@@ -9,7 +9,8 @@
 
  1. **Epic 19: Node.js / TypeScript SDK**:
      - [x] **M19.1: SDK Specification**: Define TypeScript interfaces in `CLIENT_SDK_SPEC.md` or `sdk/js/README.md`.
-     - [ ] **M19.2: Project Scaffold**: Initialize `sdk/js` directory and tools.
+     - [x] **M19.2: Project Scaffold**: Initialize `sdk/js` directory and tools.
+     - [ ] **M19.3: Core Implementation**: Implement `RatelordClient` and `ask` method.
 
  2. **Epic 20: Operational Visibility**:
      - [ ] **M20.1: Prometheus Exporter**: Expose `/metrics`.
