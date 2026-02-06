@@ -401,9 +401,13 @@ Focus: Validate complex scenarios and stress test the system (as per `ADVANCED_S
 - [ ] **M28.1: Simulation Engine Upgrade**
     - Refactor `ratelord-sim` to support configurable scenarios (JSON/YAML).
     - Implement deterministic seeding for RNG.
+    - Implement `AgentBehavior` interface (Greedy, Poisson, Periodic).
 - [ ] **M28.2: Scenario Definitions**
-    - Implement "Thundering Herd" scenario config.
-    - Implement "Drift & Correction" scenario (requires Drift Saboteur).
+    - [ ] **S-01**: Implement "Thundering Herd" scenario config.
+    - [ ] **S-02**: Implement "Drift & Correction" scenario (requires Drift Saboteur).
+    - [ ] **S-03**: Implement "Priority Inversion Defense" scenario.
+    - [ ] **S-04**: Implement "Noisy Neighbor" (Shared vs Isolated) scenario.
+    - [ ] **S-05**: Implement "Cascading Failure Recovery" scenario.
 - [ ] **M28.3: Reporting & Verification**
     - Output structured JSON results (latency histograms, approval rates).
     - Add assertions to verify scenario success criteria.
