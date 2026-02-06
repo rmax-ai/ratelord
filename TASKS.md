@@ -440,9 +440,9 @@ Focus: Expanding from single-node daemon to distributed fleet governance (`CLUST
     - [x] Add `--mode=follower` flag to `ratelord-d`.
     - [x] Implement `RemoteProvider` that requests grants from Leader instead of direct token bucket.
     - [x] Implement local cache for granted tokens.
-- [ ] **M30.3: Leader State Store**
-    - [ ] Abstract `TokenBucket` storage to support Redis (optional) or keep in-memory for Leader.
-    - [ ] Implement Leader Election or static config.
+- [x] **M30.3: Leader State Store**
+    - [x] Abstract `TokenBucket` storage (See M32.1).
+    - [x] Implement Leader Election (See M33.1).
 
 # Phase 12: Release Engineering
 
@@ -458,3 +458,29 @@ Focus: Zero-touch versioning and artifact publication (`RELEASING.md`).
 - [ ] **M31.3: Documentation & Changelog**
     - [ ] Configure changelog generation from Conventional Commits.
     - [ ] Auto-update `RELEASE_NOTES.md` or GitHub Release body.
+
+# Phase 13: Scale & Reliability
+
+## Epic 32: External State Stores
+Focus: Allow the Leader to persist state in shared storage (Redis/Etcd) for stateless deployments.
+- [x] **M32.1: Usage Store Interface**
+    - [x] Refactor `UsageProjection` to use `UsageStore` interface.
+    - [x] Implement `MemoryUsageStore` (default).
+- [ ] **M32.2: Redis Implementation**
+    - [ ] Implement `RedisUsageStore` using `go-redis`.
+    - [ ] Add `RATELORD_REDIS_URL` config.
+- [ ] **M32.3: Atomic Operations**
+    - [ ] Ensure `Increment/Decrement` are atomic (Lua scripts).
+
+## Epic 33: High Availability
+Focus: Automatic Leader Election for failover.
+- [ ] **M33.1: Leader Election**
+    - [ ] Implement simple lease-based election using the Storage Backend (Redis/SQL).
+- [ ] **M33.2: Standby Mode**
+    - [ ] Daemons start in "Standby" and promote to "Leader" if lease acquired.
+
+## Epic 34: Federation UI
+Focus: Visualize the entire cluster.
+- [ ] **M34.1: Cluster View**
+    - [ ] Add `/cluster` route to Web UI.
+    - [ ] Show connected Followers and their Grant status.

@@ -31,3 +31,6 @@
 | Epic 29: Financial Governance | COMPLETED | Orchestrator | 2026-02-06 |
 | M30.1: Grant Protocol Definition | COMPLETED | Docs | 2026-02-06 |
 | M30.2: Follower Mode | COMPLETED | Implement | 2026-02-06 |
+| Phase 13: Scope Expansion | COMPLETED | Orchestrator | 2026-02-06 |
+| M30.3: Leader State Store | COMPLETED | Implement | 2026-02-06 |
+| M32.1: Usage Store Interface | COMPLETED | Implement | 2026-02-06 |

@@ -11,6 +11,46 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
+// UsageStore abstracts the storage of pool state
+type UsageStore interface {
+	Get(providerID, poolID string) (PoolState, bool)
+	Set(state PoolState)
+	GetAll() []PoolState
+	Clear()
+}
+
+// MemoryUsageStore implements UsageStore using an in-memory map
+type MemoryUsageStore struct {
+	pools map[string]PoolState
+}
+
+func NewMemoryUsageStore() *MemoryUsageStore {
+	return &MemoryUsageStore{
+		pools: make(map[string]PoolState),
+	}
+}
+
+func (s *MemoryUsageStore) Get(providerID, poolID string) (PoolState, bool) {
+	state, ok := s.pools[makePoolKey(providerID, poolID)]
+	return state, ok
+}
+
+func (s *MemoryUsageStore) Set(state PoolState) {
+	s.pools[makePoolKey(state.ProviderID, state.PoolID)] = state
+}
+
+func (s *MemoryUsageStore) GetAll() []PoolState {
+	list := make([]PoolState, 0, len(s.pools))
+	for _, pool := range s.pools {
+		list = append(list, pool)
+	}
+	return list
+}
+
+func (s *MemoryUsageStore) Clear() {
+	s.pools = make(map[string]PoolState)
+}
+
 // PoolState represents the current usage state of a constraint pool
 type PoolState struct {
 	ProviderID     string             `json:"provider_id"`
@@ -26,7 +66,7 @@ type PoolState struct {
 // UsageProjection maintains in-memory usage state per pool
 type UsageProjection struct {
 	mu             sync.RWMutex
-	pools          map[string]PoolState // Key: provider_id:pool_id
+	store          UsageStore
 	lastEventID    string
 	lastIngestTime time.Time
 }
@@ -34,7 +74,7 @@ type UsageProjection struct {
 // NewUsageProjection creates a new empty projection
 func NewUsageProjection() *UsageProjection {
 	return &UsageProjection{
-		pools: make(map[string]PoolState),
+		store: NewMemoryUsageStore(),
 	}
 }
 
@@ -75,8 +115,7 @@ func (p *UsageProjection) applyForecast(event store.Event) error {
 
 	RatelordForecastSeconds.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(payload.Forecast.TTE.P99Seconds))
 
-	key := makePoolKey(payload.ProviderID, payload.PoolID)
-	state, exists := p.pools[key]
+	state, exists := p.store.Get(payload.ProviderID, payload.PoolID)
 	if !exists {
 		state = PoolState{
 			ProviderID: payload.ProviderID,
@@ -87,7 +126,7 @@ func (p *UsageProjection) applyForecast(event store.Event) error {
 	state.LatestForecast = &payload.Forecast
 	state.LastUpdated = event.TsIngest
 
-	p.pools[key] = state
+	p.store.Set(state)
 
 	return nil
 }
@@ -105,8 +144,7 @@ func (p *UsageProjection) applyUsage(event store.Event) error {
 		return fmt.Errorf("failed to unmarshal usage payload: %w", err)
 	}
 
-	key := makePoolKey(payload.ProviderID, payload.PoolID)
-	state, exists := p.pools[key]
+	state, exists := p.store.Get(payload.ProviderID, payload.PoolID)
 	if !exists {
 		state = PoolState{
 			ProviderID: payload.ProviderID,
@@ -122,7 +160,7 @@ func (p *UsageProjection) applyUsage(event store.Event) error {
 	state.Cost = payload.Cost
 	state.LastUpdated = event.TsIngest
 
-	p.pools[key] = state
+	p.store.Set(state)
 
 	// Update metrics
 	RatelordUsage.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(payload.Used))
@@ -142,8 +180,7 @@ func (p *UsageProjection) applyReset(event store.Event) error {
 		return fmt.Errorf("failed to unmarshal reset payload: %w", err)
 	}
 
-	key := makePoolKey(payload.ProviderID, payload.PoolID)
-	state, exists := p.pools[key]
+	state, exists := p.store.Get(payload.ProviderID, payload.PoolID)
 	if !exists {
 		state = PoolState{
 			ProviderID: payload.ProviderID,
@@ -154,7 +191,7 @@ func (p *UsageProjection) applyReset(event store.Event) error {
 	state.ResetAt = payload.ResetAt
 	state.LastUpdated = event.TsIngest
 
-	p.pools[key] = state
+	p.store.Set(state)
 	return nil
 }
 
@@ -179,11 +216,10 @@ func (p *UsageProjection) LoadState(lastEventID string, lastIngestTime time.Time
 	p.lastEventID = lastEventID
 	p.lastIngestTime = lastIngestTime
 
-	p.pools = make(map[string]PoolState)
+	p.store.Clear()
 
 	for _, pool := range pools {
-		key := makePoolKey(pool.ProviderID, pool.PoolID)
-		p.pools[key] = pool
+		p.store.Set(pool)
 	}
 }
 
@@ -192,8 +228,7 @@ func (p *UsageProjection) GetPoolState(providerID, poolID string) (PoolState, bo
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
-	state, ok := p.pools[makePoolKey(providerID, poolID)]
-	return state, ok
+	return p.store.Get(providerID, poolID)
 }
 
 // GetState returns the current state and the last applied event ID/Timestamp
@@ -201,11 +236,7 @@ func (p *UsageProjection) GetState() (string, time.Time, []PoolState) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
-	list := make([]PoolState, 0, len(p.pools))
-	for _, pool := range p.pools {
-		list = append(list, pool)
-	}
-	return p.lastEventID, p.lastIngestTime, list
+	return p.lastEventID, p.lastIngestTime, p.store.GetAll()
 }
 
 // CalculateWaitTime returns the seconds until reset for a pool
