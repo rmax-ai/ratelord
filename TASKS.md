@@ -467,10 +467,11 @@ Focus: Allow the Leader to persist state in shared storage (Redis/Etcd) for stat
     - [x] Refactor `UsageProjection` to use `UsageStore` interface.
     - [x] Implement `MemoryUsageStore` (default).
 - [x] **M32.2: Redis Implementation**
-    - [ ] Implement `RedisUsageStore` using `go-redis`.
-    - [ ] Add `RATELORD_REDIS_URL` config.
+    - [x] Implement `RedisUsageStore` using `go-redis`.
+    - [x] Add `RATELORD_REDIS_URL` config.
 - [ ] **M32.3: Atomic Operations**
-    - [ ] Ensure `Increment/Decrement` are atomic (Lua scripts).
+    - [ ] Refactor `PoolState` storage to Redis Hash (`HSET`) to support partial updates.
+    - [ ] Implement `IncrementUsed` with Lua scripts for atomicity.
 
 ## Epic 33: High Availability
 Focus: Automatic Leader Election for failover.
@@ -482,6 +483,11 @@ Focus: Automatic Leader Election for failover.
     - [ ] Implement `StandbyLoop` (Polls lease, if free -> Acquire).
     - [ ] Handle `OnPromote` (Load state, start Policy Engine).
     - [ ] Handle `OnDemote` (Stop Policy Engine, flush state).
+- [ ] **M33.3: Client Routing**
+    - [ ] Implement HTTP Middleware to check Leader status.
+    - [ ] Proxy requests from Followers to Leader (or return 307 Redirect).
+- [ ] **M33.4: Split-Brain Protection**
+    - [ ] Use Fencing Tokens (Epochs) in Event Log writes.
 
 ## Epic 34: Federation UI
 Focus: Visualize the entire cluster.
@@ -489,20 +495,24 @@ Focus: Visualize the entire cluster.
     - [ ] Update `API_SPEC.md` with `GET /v1/cluster/nodes`.
     - [ ] Implement `ClusterTopology` projection (tracks heartbeat from peers).
     - [ ] Web UI: Add "Cluster" tab (Network graph or Table).
-
-# Phase 14: Architecture Convergence & Advanced Platform
+- [ ] **M34.2: Node Diagnostics**
+    - [ ] Visualize Replication Lag per node.
+    - [ ] Show Election Status (Leader/Follower).
 
 ## Epic 35: Canonical Constraint Graph
 Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
-- [ ] **M35.1: Graph Schema**
-    - [ ] Nodes: Agent, Identity, Resource; Edges: Owns, Uses, Limits.
-    - [ ] Define canonical Node and Edge types in `pkg/graph`.
-- [ ] **M35.2: In-Memory Graph**
-    - [ ] Implement graph structure (gonum/graph or custom adjacency list).
-    - [ ] Implement `GraphProjection` to materialize the graph from events.
-- [ ] **M35.3: Policy Matcher**
-    - [ ] Traverse graph to find applicable policies for a given Identity/Resource.
-    - [ ] Allow policies to target Graph patterns (e.g., "All constraints in Scope X").
+- [ ] **M35.1: Graph Schema Definition**
+    - [ ] Define Node Types: `Agent`, `Identity`, `Workload`, `Resource`, `Pool`.
+    - [ ] Define Edge Types: `Owns`, `Triggers`, `Limits`, `Depletes`.
+    - [ ] Define canonical struct in `pkg/graph`.
+- [ ] **M35.2: In-Memory Graph Projection**
+    - [ ] Implement graph structure (using `gonum/graph` or similar).
+    - [ ] Materialize graph from `IdentityRegistered` and `Policy` events.
+- [ ] **M35.3: Policy Matcher on Graph**
+    - [ ] Traverse graph to find applicable policies (e.g., "Find all limits affecting Agent X").
+- [ ] **M35.4: Graph Visualization**
+    - [ ] Add `GET /v1/graph` endpoint (JSON/Dot format).
+    - [ ] Visualize in Web UI (Force-directed graph).
 
 ## Epic 36: Advanced Retention & Compaction
 Focus: Managing long-term storage and compliance.
@@ -512,6 +522,9 @@ Focus: Managing long-term storage and compliance.
 - [ ] **M36.2: Cold Storage Offload**
     - [ ] Implement S3/GCS adapter for archiving old events/snapshots.
     - [ ] Implement "Hydrate from Archive" for historical analysis.
+- [ ] **M36.3: Compliance & Deletion**
+    - [ ] Implement `DeleteIdentity` (GDPR "Right to be Forgotten").
+    - [ ] Prune all events associated with a specific Identity ID.
 
 ## Epic 37: Explainability & Audit
 Focus: Answering "Why?" for every decision.
@@ -521,3 +534,6 @@ Focus: Answering "Why?" for every decision.
 - [ ] **M37.2: Compliance Reports**
     - [ ] Generate PDF/CSV reports of Usage vs Limits over time.
     - [ ] Generate "Access Log" of all Intents.
+- [ ] **M37.3: Policy Debugging**
+    - [ ] Implement "Trace Mode" for Policy Engine (logs every rule result).
+    - [ ] Web UI: Visualize Policy Evaluation Tree.

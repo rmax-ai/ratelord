@@ -15,7 +15,7 @@
 
  2. **Epic 32: External State Stores** (`TASKS.md`):
        - [x] **M32.2: Redis Implementation**: Implement RedisUsageStore.
-       - [ ] **M32.3: Atomic Operations**: Ensure safety.
+       - [ ] **M32.3: Atomic Operations**: Ensure safety (Switch to Hash, Lua scripts).
 
 ## Phase History
 - [x] **Phase 10**: Epics 24-27 Complete.

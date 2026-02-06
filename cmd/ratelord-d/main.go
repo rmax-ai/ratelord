@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	redisclient "github.com/redis/go-redis/v9"
 	"github.com/rmax-ai/ratelord/pkg/api"
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
@@ -128,7 +129,13 @@ func main() {
 	// M5.1: Initialize Usage Projection
 	var usageStore engine.UsageStore
 	if cfg.RedisURL != "" {
-		usageStore = redis.NewRedisUsageStore(cfg.RedisURL)
+		opt, err := redisclient.ParseURL(cfg.RedisURL)
+		if err != nil {
+			fmt.Printf(`{"level":"fatal","msg":"failed_to_parse_redis_url","error":"%v"}`+"\n", err)
+			os.Exit(1)
+		}
+		client := redisclient.NewClient(opt)
+		usageStore = redis.NewRedisUsageStore(client)
 		fmt.Printf(`{"level":"info","msg":"using_redis_usage_store","url":"%s"}`+"\n", cfg.RedisURL)
 	} else {
 		usageStore = engine.NewMemoryUsageStore()
