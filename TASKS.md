@@ -633,9 +633,33 @@ Focus: Address technical debt, stubbed features, and missing tests identified du
     - [x] `pkg/provider/federated/provider.go`: Fix TODOs (error reporting, pre-seeding note).
     - [x] `pkg/engine/poller.go`: Verified configurable units implementation.
     - [x] `pkg/api/federation.go`: Verified `RemainingGlobal` lookup.
-    - [ ] **M43.5: Final Validation**
-    - [ ] Execute `ratelord-sim` full suite.
-    - [ ] Verify acceptance criteria from `ACCEPTANCE.md`.
+
+# Phase 17: Future & Roadmap (Post-v1.0)
+
+## Epic 44: Advanced Adaptive Policy
+Focus: Implement the sophisticated shaping behaviors from the original vision.
+- [ ] **M44.1: Adaptive Actions**
+    - Implement `route` action (load balancing across identities).
+    - Implement `switch_protocol` action (REST <-> GraphQL).
+- [ ] **M44.2: Client Negotiation**
+    - Update `Intent` response to include detailed modification instructions beyond `wait_seconds`.
+    - Update SDKs to handle complex negotiation.
+
+## Epic 45: Enhanced Simulation & UI
+Focus: Bring the simulation capabilities into the visual domain.
+- [ ] **M45.1: Web UI Simulation Lab**
+    - Create "Simulation" tab in Web UI.
+    - Implement frontend for configuring scenarios (Agents, Policies, Bursts).
+    - Run `ratelord-sim` (wasm or server-side) and visualize results.
+
+## Epic 46: Distributed Consistency
+Focus: Hardening the distributed system guarantees.
+- [ ] **M46.1: Global State Aggregation**
+    - Implement CRDT or gossip protocol for accurate global limit tracking in Federation.
+    - Move beyond "Leader Local = Global" simplification.
+- [ ] **M46.2: Graph Concurrency**
+    - Refactor `GraphProjection` for Copy-On-Write or safe concurrent access.
+
 
 
 
