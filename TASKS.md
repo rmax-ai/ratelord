@@ -617,20 +617,20 @@ Focus: Create user-facing documentation to explain concepts and usage.
 
 ## Epic 43: Final Polish & Debt Paydown
 Focus: Address technical debt, stubbed features, and missing tests identified during final assessment.
-- [ ] **M43.1: Complete Reporting Engine**
+- [x] **M43.1: Complete Reporting Engine**
     - [x] Implement actual CSV generation logic in `pkg/reports/csv.go`.
     - [x] Add unit tests for `pkg/reports`.
 - [x] **M43.2: Complete Graph Projection**
     - [x] Handle `PolicyUpdated` events in `pkg/graph/projection.go`.
     - [x] Optimize graph traversal (Index for O(1) lookup).
-    - [ ] **M43.3: Hardening & Configuration**
-    - [ ] Remove hardcoded `resetAt` in `pkg/engine/forecast/service.go`.
-    - [ ] Fix `pkg/api/server.go` correct pool ID usage.
-    - [ ] Add unit tests for `pkg/mcp` (Server and Handlers).
-    - [ ] Add unit tests for `pkg/blob` (Local Store).
-- [ ] **M43.4: Codebase Cleanup (Assessment Findings)**
-    - [ ] `pkg/api/federation.go`: Implement real `RemainingGlobal` lookup.
-    - [ ] `pkg/engine/poller.go`: Make units configurable and emit error events.
-    - [ ] `pkg/provider/federated/provider.go`: Fix hardcoded version and error details.
+    - [x] **M43.3: Hardening & Configuration**
+    - [x] Remove hardcoded `resetAt` in `pkg/engine/forecast/service.go`.
+    - [x] Fix `pkg/api/server.go` correct pool ID usage.
+    - [x] Add unit tests for `pkg/mcp` (Server and Handlers).
+    - [x] Add unit tests for `pkg/blob` (Local Store).
+- [x] **M43.4: Codebase Cleanup (Assessment Findings)**
+    - [x] `pkg/api/federation.go`: Implement real `RemainingGlobal` lookup.
+    - [x] `pkg/engine/poller.go`: Make units configurable and emit error events.
+    - [x] `pkg/provider/federated/provider.go`: Fix hardcoded version and error details.
 
 

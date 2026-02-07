@@ -262,7 +262,7 @@ func main() {
 	// M7.3: Initialize Forecast Projection and Forecaster
 	forecastProj := forecast.NewForecastProjection(20) // Window size of 20 points
 	linearModel := &forecast.LinearModel{}
-	forecaster := forecast.NewForecaster(st, forecastProj, linearModel)
+	forecaster := forecast.NewForecaster(st, forecastProj, linearModel, usageProj)
 
 	// Replay events to build projection
 	// NOTE: This blocks startup, but safe for small event logs

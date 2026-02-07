@@ -88,3 +88,5 @@
 | docs/guides/mcp.md | DRAFTED | Docs | 2026-02-07 |
 | Project Assessment (Test Run & Code Review) | COMPLETED | Orchestrator | 2026-02-07 |
 | M43.1: Complete Reporting Engine | COMPLETED | Orchestrator | 2026-02-07 |
+| M43.2: Complete Graph Projection (Events & Index) | COMPLETED | Orchestrator | 2026-02-07 |
+| M43.3: Hardening (ResetAt, PoolID, Tests) | COMPLETED | Orchestrator | 2026-02-07 |

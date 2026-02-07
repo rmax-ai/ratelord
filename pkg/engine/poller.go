@@ -129,7 +129,41 @@ func (p *Poller) poll(ctx context.Context, prov provider.Provider) {
 	result, err := prov.Poll(ctx)
 	if err != nil {
 		log.Printf("Poll failed for provider %s: %v", prov.ID(), err)
-		// TODO: emit provider_error event if needed
+
+		now := time.Now().UTC()
+		errorEvent := &store.Event{
+			EventID:       store.EventID(fmt.Sprintf("error_%s_%d", prov.ID(), now.UnixNano())),
+			EventType:     store.EventTypeProviderError,
+			SchemaVersion: 1,
+			TsEvent:       now,
+			TsIngest:      now,
+			Epoch:         p.getEpoch(),
+			Source: store.EventSource{
+				OriginKind: "daemon",
+				OriginID:   "poller",
+				WriterID:   "ratelord-d",
+			},
+			Dimensions: store.EventDimensions{
+				AgentID:    store.SentinelSystem,
+				IdentityID: store.SentinelGlobal,
+				WorkloadID: store.SentinelSystem,
+				ScopeID:    store.SentinelGlobal,
+			},
+			Correlation: store.EventCorrelation{
+				CorrelationID: fmt.Sprintf("poll_err_%s_%d", prov.ID(), now.Unix()),
+				CausationID:   store.SentinelUnknown,
+			},
+		}
+
+		payload, _ := json.Marshal(map[string]interface{}{
+			"provider_id": string(prov.ID()),
+			"error":       err.Error(),
+		})
+		errorEvent.Payload = payload
+
+		if err := p.store.AppendEvent(ctx, errorEvent); err != nil {
+			log.Printf("Failed to append error event: %v", err)
+		}
 		return
 	}
 
@@ -203,23 +237,28 @@ func (p *Poller) poll(ctx context.Context, prov provider.Provider) {
 			},
 		}
 
+		units := "requests"
+		var costPerUnit int64
+
+		// Calculate cost and units if policy config is available
+		p.mu.RLock()
+		if p.policyCfg != nil {
+			costPerUnit = p.policyCfg.GetCost(string(result.ProviderID), obs.PoolID)
+			units = p.policyCfg.GetUnit(string(result.ProviderID))
+		}
+		p.mu.RUnlock()
+
 		usagePayload := map[string]interface{}{
 			"provider_id": string(result.ProviderID),
 			"pool_id":     obs.PoolID,
-			"units":       "requests", // Assuming requests for mock; TODO: make configurable
+			"units":       units,
 			"remaining":   obs.Remaining,
 			"used":        obs.Used,
 		}
 
-		// Calculate cost if pricing is available
-		p.mu.RLock()
-		if p.policyCfg != nil {
-			costPerUnit := p.policyCfg.GetCost(string(result.ProviderID), obs.PoolID)
-			if costPerUnit > 0 {
-				usagePayload["cost"] = obs.Used * costPerUnit
-			}
+		if costPerUnit > 0 {
+			usagePayload["cost"] = obs.Used * costPerUnit
 		}
-		p.mu.RUnlock()
 
 		payloadBytes, _ := json.Marshal(usagePayload)
 		usageEvent.Payload = payloadBytes

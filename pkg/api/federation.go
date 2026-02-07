@@ -65,10 +65,15 @@ func (s *Server) handleGrant(w http.ResponseWriter, r *http.Request) {
 		validUntil = time.Now() // Immediate expiry
 	}
 
+	remaining := int64(0)
+	if poolState, ok := s.usage.GetPoolState(req.ProviderID, req.PoolID); ok {
+		remaining = poolState.Remaining
+	}
+
 	resp := GrantResponse{
 		Granted:         granted,
 		ValidUntil:      validUntil,
-		RemainingGlobal: 0, // TODO: Fetch from UsageProjection if needed
+		RemainingGlobal: remaining,
 	}
 
 	// Emit GrantIssued Event only if granted > 0

@@ -5,6 +5,7 @@ type PolicyConfig struct {
 	Policies  []PolicyDefinition          `json:"policies" yaml:"policies"`
 	Providers ProvidersConfig             `json:"providers,omitempty" yaml:"providers,omitempty"`
 	Pricing   map[string]map[string]int64 `json:"pricing,omitempty" yaml:"pricing,omitempty"`
+	Units     map[string]string           `json:"units,omitempty" yaml:"units,omitempty"` // provider_id -> unit_name
 	Retention *RetentionConfig            `json:"retention,omitempty" yaml:"retention,omitempty"`
 }
 
@@ -28,6 +29,16 @@ func (c *PolicyConfig) GetCost(providerID, poolID string) int64 {
 		}
 	}
 	return 0
+}
+
+// GetUnit returns the unit for a given provider, defaulting to "requests".
+func (c *PolicyConfig) GetUnit(providerID string) string {
+	if c.Units != nil {
+		if unit, ok := c.Units[providerID]; ok {
+			return unit
+		}
+	}
+	return "requests"
 }
 
 // ProvidersConfig holds configuration for various providers

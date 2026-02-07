@@ -238,6 +238,10 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 			ScopeID:    scope,
 			WorkloadID: fmt.Sprintf("job-%d", rng.Intn(10000)),
 			Priority:   priority,
+			ClientContext: map[string]interface{}{
+				"provider_id": "mock-provider-1",
+				"pool_id":     "default",
+			},
 		}
 
 		resp, err := sendIntent(apiURL, req)

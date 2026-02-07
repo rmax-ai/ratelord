@@ -25,6 +25,8 @@ type FederatedProvider struct {
 	startTime   time.Time
 }
 
+const ProviderVersion = "1.0.0"
+
 type PoolState struct {
 	Granted    int64
 	UsedLocal  int64
@@ -105,7 +107,7 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 				Amount:     askAmount,
 				Metadata: map[string]interface{}{
 					"uptime":  time.Since(p.startTime).String(),
-					"version": "1.0.0", // TODO: Get from build info
+					"version": ProviderVersion,
 				},
 			}
 

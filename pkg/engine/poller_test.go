@@ -41,7 +41,7 @@ func TestPoller_Poll(t *testing.T) {
 	defer st.Close()
 
 	// Setup Forecaster
-	fore := forecast.NewForecaster(st, forecast.NewForecastProjection(10), nil)
+	fore := forecast.NewForecaster(st, forecast.NewForecastProjection(10), nil, nil)
 
 	poller := NewPoller(st, time.Hour, fore, &PolicyConfig{})
 

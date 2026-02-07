@@ -10,20 +10,27 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
+// ResetTimeProvider defines the interface for retrieving pool reset times
+type ResetTimeProvider interface {
+	GetResetAt(providerID, poolID string) (time.Time, bool)
+}
+
 // Forecaster ties together the projection, model, and event emission
 type Forecaster struct {
-	store      *store.Store
-	projection *ForecastProjection
-	model      Model
-	epochFunc  func() int64
+	store         *store.Store
+	projection    *ForecastProjection
+	model         Model
+	resetProvider ResetTimeProvider
+	epochFunc     func() int64
 }
 
 // NewForecaster creates a new forecaster instance
-func NewForecaster(store *store.Store, projection *ForecastProjection, model Model) *Forecaster {
+func NewForecaster(store *store.Store, projection *ForecastProjection, model Model, resetProvider ResetTimeProvider) *Forecaster {
 	return &Forecaster{
-		store:      store,
-		projection: projection,
-		model:      model,
+		store:         store,
+		projection:    projection,
+		model:         model,
+		resetProvider: resetProvider,
 	}
 }
 
@@ -64,8 +71,13 @@ func (f *Forecaster) OnUsageObserved(ctx context.Context, event *store.Event) {
 		return
 	}
 
-	// Assume reset at next day or something; for now, hardcode to 24 hours from now
-	resetAt := time.Now().Add(24 * time.Hour) // TODO: get from pool config
+	// Get reset time from provider (usage projection)
+	resetAt := time.Now().Add(24 * time.Hour) // Default fallback
+	if f.resetProvider != nil {
+		if t, ok := f.resetProvider.GetResetAt(payload.ProviderID, payload.PoolID); ok && !t.IsZero() {
+			resetAt = t
+		}
+	}
 
 	// Predict
 	forecast, err := f.model.Predict(history, payload.Remaining, resetAt)

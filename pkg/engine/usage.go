@@ -316,6 +316,15 @@ func (p *UsageProjection) GetState() (string, time.Time, []PoolState) {
 	return p.lastEventID, p.lastIngestTime, p.store.GetAll()
 }
 
+// GetResetAt returns the reset time for a specific pool
+func (p *UsageProjection) GetResetAt(providerID, poolID string) (time.Time, bool) {
+	state, exists := p.GetPoolState(providerID, poolID)
+	if !exists {
+		return time.Time{}, false
+	}
+	return state.ResetAt, true
+}
+
 // CalculateWaitTime returns the seconds until reset for a pool
 func (p *UsageProjection) CalculateWaitTime(providerID, poolID string) float64 {
 	state, exists := p.GetPoolState(providerID, poolID)

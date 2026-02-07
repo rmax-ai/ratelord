@@ -236,18 +236,34 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 
 	// M5.2: Use Policy Engine
 	// Construct Intent object
-	// Note: In a real system we would infer ProviderID/PoolID from context or graph.
-	// For now, we assume if they are passed in client_context or similar we use them,
-	// or we default to empty.
+	// Resolve ProviderID/PoolID from context or defaults.
+	providerID := ""
+	poolID := ""
+
+	if req.ClientContext != nil {
+		if p, ok := req.ClientContext["provider_id"].(string); ok && p != "" {
+			providerID = p
+		}
+		if p, ok := req.ClientContext["pool_id"].(string); ok && p != "" {
+			poolID = p
+		}
+	}
+
+	// Fallback to mock defaults if not provided (Legacy/Testing behavior)
+	if providerID == "" {
+		providerID = "mock-provider-1"
+	}
+	if poolID == "" {
+		poolID = "default"
+	}
+
 	intent := engine.Intent{
-		IntentID:   "intent_" + fmt.Sprintf("%d", time.Now().UnixNano()),
-		IdentityID: req.IdentityID,
-		WorkloadID: req.WorkloadID,
-		ScopeID:    req.ScopeID,
-		// ProviderID and PoolID would be resolved here.
-		// For bootstrapping, map scope "default" to mock provider
-		ProviderID:   "mock-provider-1",
-		PoolID:       "default",
+		IntentID:     "intent_" + fmt.Sprintf("%d", time.Now().UnixNano()),
+		IdentityID:   req.IdentityID,
+		WorkloadID:   req.WorkloadID,
+		ScopeID:      req.ScopeID,
+		ProviderID:   providerID,
+		PoolID:       poolID,
 		ExpectedCost: 1, // Default cost
 		Debug:        req.Debug,
 	}
@@ -328,18 +344,17 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 	if result.Decision == "approve" || result.Decision == "approve_with_modifications" {
 		// Federation Hook
 		if s.tracker != nil {
-			// TODO: Use correct pool ID from policy evaluation or intent
 			s.tracker.TrackUsage(intent.ProviderID, intent.PoolID, intent.ExpectedCost)
 		}
 
-		poolState, exists := s.usage.GetPoolState("mock-provider-1", "default")
+		poolState, exists := s.usage.GetPoolState(intent.ProviderID, intent.PoolID)
 		if exists {
 			newUsed := poolState.Used + 1
 			newRemaining := poolState.Remaining - 1
 			now := time.Now()
 			payload, _ := json.Marshal(map[string]interface{}{
-				"provider_id": "mock-provider-1",
-				"pool_id":     "default",
+				"provider_id": intent.ProviderID,
+				"pool_id":     intent.PoolID,
 				"used":        newUsed,
 				"remaining":   newRemaining,
 			})

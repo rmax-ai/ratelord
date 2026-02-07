@@ -36,7 +36,7 @@ func TestForecaster(t *testing.T) {
 	// Setup components
 	projection := NewForecastProjection(10)
 	mockModel := new(MockModel)
-	forecaster := NewForecaster(s, projection, mockModel)
+	forecaster := NewForecaster(s, projection, mockModel, nil)
 
 	// Set epoch func
 	epoch := int64(100)
