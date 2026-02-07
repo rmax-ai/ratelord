@@ -655,12 +655,19 @@ Focus: Bring the simulation capabilities into the visual domain.
     - Run `ratelord-sim` (wasm or server-side) and visualize results.
 
 ## Epic 46: Distributed Consistency
-Focus: Hardening the distributed system guarantees.
-- [ ] **M46.1: Global State Aggregation**
-    - Implement CRDT or gossip protocol for accurate global limit tracking in Federation.
-    - Move beyond "Leader Local = Global" simplification.
-- [ ] **M46.2: Graph Concurrency**
-    - Refactor `GraphProjection` for Copy-On-Write or safe concurrent access.
+    Focus: Hardening the distributed system guarantees.
+    - [ ] **M46.1: Global State Aggregation**
+        - Implement CRDT or gossip protocol for accurate global limit tracking in Federation.
+        - Move beyond "Leader Local = Global" simplification.
+    - [ ] **M46.2: Graph Concurrency**
+        - Refactor `GraphProjection` for Copy-On-Write or safe concurrent access.
+
+## Epic 47: Provider Intelligence
+    Focus: Smarter provider integration.
+    - [ ] **M47.1: OpenAI Smart Probing**
+        - Implement "Probe" mode that hits a cheap endpoint (e.g. chat completion with max_tokens=1) if `/models` doesn't return relevant rate limit headers.
+        - Handle model-specific rate limits (gpt-4 vs gpt-3.5).
+
 
 
 
