@@ -618,8 +618,8 @@ Focus: Create user-facing documentation to explain concepts and usage.
 ## Epic 43: Final Polish & Debt Paydown
 Focus: Address technical debt, stubbed features, and missing tests identified during final assessment.
 - [ ] **M43.1: Complete Reporting Engine**
-    - [ ] Implement actual CSV generation logic in `pkg/reports/csv.go`.
-    - [ ] Add unit tests for `pkg/reports`.
+    - [x] Implement actual CSV generation logic in `pkg/reports/csv.go`.
+    - [x] Add unit tests for `pkg/reports`.
 - [ ] **M43.2: Complete Graph Projection**
     - [ ] Handle `PolicyUpdated` events in `pkg/graph/projection.go`.
     - [ ] Optimize graph traversal (Index for O(1) lookup).

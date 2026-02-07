@@ -80,7 +80,7 @@ Returns aggregated usage statistics over a specified time window.
 Generates and downloads CSV reports for audit or analysis.
 
 **Parameters:**
-- `type`: Report type (`usage` or `access_log`).
+- `type`: Report type (`usage`, `access_log`, or `events`).
 - `from`: Start timestamp.
 - `to`: End timestamp.
 

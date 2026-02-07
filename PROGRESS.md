@@ -87,4 +87,4 @@
 | M42.5+: User Docs Refinement (Shared vs Isolated, Config Defaults) | COMPLETED | Orchestrator | 2026-02-07 |
 | docs/guides/mcp.md | DRAFTED | Docs | 2026-02-07 |
 | Project Assessment (Test Run & Code Review) | COMPLETED | Orchestrator | 2026-02-07 |
-| M43.1: Complete Reporting Engine | IN PROGRESS | Orchestrator | 2026-02-07 |
+| M43.1: Complete Reporting Engine | COMPLETED | Orchestrator | 2026-02-07 |
