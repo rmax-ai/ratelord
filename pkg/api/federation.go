@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -28,55 +29,92 @@ func (s *Server) handleGrant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Mock Logic for Grant Allocation (In a real system this would check usage store)
-	// For now we just approve up to some limit or blindly.
-	// TODO: Integrate with M32.1 usage store for atomic deduct.
+	// M38.1: Use Policy Engine to validate grant
+	// We treat the grant request as an Intent
+	intent := engine.Intent{
+		IntentID:     "grant_" + fmt.Sprintf("%d", time.Now().UnixNano()),
+		IdentityID:   req.FollowerID,
+		WorkloadID:   "federation_sync",
+		ScopeID:      "global", // Default scope for federation grants
+		ProviderID:   req.ProviderID,
+		PoolID:       req.PoolID,
+		ExpectedCost: req.Amount,
+	}
+
+	result := s.policy.Evaluate(intent)
+
+	var granted int64
+	var validUntil time.Time
+
+	if result.Decision == engine.DecisionApprove || result.Decision == engine.DecisionApproveWithModifications {
+		granted = req.Amount
+		validUntil = time.Now().Add(1 * time.Minute) // Default TTL
+
+		// Apply modifications if any
+		if result.Decision == engine.DecisionApproveWithModifications {
+			// For grants, we might support "shaping" by reducing the amount
+			// But the current Policy Engine returns "wait_seconds".
+			// If wait is requested, we effectively deny this grant (return 0).
+			if _, ok := result.Modifications["wait_seconds"]; ok {
+				granted = 0
+			}
+		}
+	} else {
+		// Denied
+		granted = 0
+		validUntil = time.Now() // Immediate expiry
+	}
 
 	resp := GrantResponse{
-		Granted:         req.Amount,
-		ValidUntil:      time.Now().Add(1 * time.Minute),
-		RemainingGlobal: 10000,
+		Granted:         granted,
+		ValidUntil:      validUntil,
+		RemainingGlobal: 0, // TODO: Fetch from UsageProjection if needed
 	}
 
-	// Emit GrantIssued Event
-	now := time.Now()
-	payload, _ := json.Marshal(map[string]interface{}{
-		"follower_id": req.FollowerID,
-		"pool_id":     req.PoolID,
-		"amount":      resp.Granted,
-	})
+	// Emit GrantIssued Event only if granted > 0
+	if granted > 0 {
+		now := time.Now()
+		payload, _ := json.Marshal(map[string]interface{}{
+			"follower_id": req.FollowerID,
+			"provider_id": req.ProviderID, // Added M38.1
+			"pool_id":     req.PoolID,
+			"amount":      granted,
+		})
 
-	evt := store.Event{
-		EventID:       store.EventID(fmt.Sprintf("grant_%d", now.UnixNano())),
-		EventType:     store.EventTypeGrantIssued,
-		SchemaVersion: 1,
-		TsEvent:       now,
-		TsIngest:      now,
-		Source: store.EventSource{
-			OriginKind: "daemon",
-			OriginID:   "api",
-			WriterID:   "ratelord-d",
-		},
-		Dimensions: store.EventDimensions{
-			AgentID:    store.SentinelSystem,
-			IdentityID: store.SentinelGlobal,
-			WorkloadID: store.SentinelSystem,
-			ScopeID:    store.SentinelGlobal,
-		},
-		Correlation: store.EventCorrelation{
-			CorrelationID: fmt.Sprintf("grant_req_%s", req.FollowerID),
-			CausationID:   store.SentinelUnknown,
-		},
-		Payload: payload,
-	}
+		evt := store.Event{
+			EventID:       store.EventID(fmt.Sprintf("grant_%d", now.UnixNano())),
+			EventType:     store.EventTypeGrantIssued,
+			SchemaVersion: 1,
+			TsEvent:       now,
+			TsIngest:      now,
+			Source: store.EventSource{
+				OriginKind: "daemon",
+				OriginID:   "api",
+				WriterID:   "ratelord-d",
+			},
+			Dimensions: store.EventDimensions{
+				AgentID:    store.SentinelSystem,
+				IdentityID: req.FollowerID,
+				WorkloadID: "federation",
+				ScopeID:    "global",
+			},
+			Correlation: store.EventCorrelation{
+				CorrelationID: fmt.Sprintf("grant_req_%s", req.FollowerID),
+				CausationID:   store.SentinelUnknown,
+			},
+			Payload: payload,
+		}
 
-	if err := s.store.AppendEvent(r.Context(), &evt); err != nil {
-		fmt.Printf(`{"level":"error","msg":"failed_to_append_grant_event","error":"%v"}`+"\n", err)
-		// We proceed anyway as this is observability for now, but in strict mode we might fail
-	} else {
-		// Update topology immediately
-		if s.cluster != nil {
-			s.cluster.Apply(evt)
+		if err := s.store.AppendEvent(r.Context(), &evt); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_append_grant_event","error":"%v"}`+"\n", err)
+			// Proceed but logging error
+		} else {
+			// Update topology
+			if s.cluster != nil {
+				s.cluster.Apply(evt)
+			}
+			// Update local usage immediately so subsequent grants see the usage
+			s.usage.Apply(evt)
 		}
 	}
 
@@ -87,8 +125,8 @@ func (s *Server) handleGrant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log grant
-	fmt.Printf(`{"level":"info","msg":"grant_issued","trace_id":"%s","follower_id":"%s","pool_id":"%s","granted":%d}`+"\n",
-		getTraceID(r.Context()), req.FollowerID, req.PoolID, resp.Granted)
+	fmt.Printf(`{"level":"info","msg":"grant_issued","trace_id":"%s","follower_id":"%s","provider_id":"%s","pool_id":"%s","granted":%d}`+"\n",
+		getTraceID(r.Context()), req.FollowerID, req.ProviderID, req.PoolID, resp.Granted)
 }
 
 // handleClusterNodes returns the current topology.

@@ -131,7 +131,51 @@ func (p *UsageProjection) Apply(event store.Event) error {
 		return p.applyReset(event)
 	case store.EventTypeForecastComputed:
 		return p.applyForecast(event)
+	case store.EventTypeGrantIssued:
+		return p.applyGrant(event)
 	}
+	return nil
+}
+
+func (p *UsageProjection) applyGrant(event store.Event) error {
+	var payload struct {
+		ProviderID string `json:"provider_id"`
+		FollowerID string `json:"follower_id"`
+		PoolID     string `json:"pool_id"`
+		Amount     int64  `json:"amount"`
+	}
+
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return fmt.Errorf("failed to unmarshal grant payload: %w", err)
+	}
+
+	if payload.ProviderID == "" {
+		// Fallback for legacy events or incomplete data: try to infer or skip
+		// For now, logging error or returning nil is safer than crashing
+		return fmt.Errorf("grant event missing provider_id")
+	}
+
+	state, exists := p.store.Get(payload.ProviderID, payload.PoolID)
+	if !exists {
+		// If pool doesn't exist, we can create it or ignore.
+		// Creating it seems correct as we are tracking usage.
+		state = PoolState{
+			ProviderID: payload.ProviderID,
+			PoolID:     payload.PoolID,
+		}
+	}
+
+	// Grants deplete remaining budget and increase used count
+	state.Used += payload.Amount
+	state.Remaining -= payload.Amount
+	state.LastUpdated = event.TsIngest
+
+	p.store.Set(state)
+
+	// Update metrics
+	RatelordUsage.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(state.Used))
+	RatelordLimit.WithLabelValues(payload.ProviderID, payload.PoolID).Set(float64(state.Remaining))
+
 	return nil
 }
 

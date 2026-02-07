@@ -5,21 +5,21 @@
 - **Phase 11 In-Flight**: Advanced Capabilities (Simulation, Finance, Federation).
 - **Completed**: Phase 10 (Epics 24-27) + Epic 28 + Epic 29 + Epic 30 + Epic 31 + Epic 32.
 - **Phase 12**: Release Engineering (Completed).
-- **Future**: Phase 13 (Scale) & Phase 14 (Architecture Convergence).
+- **Future**: Phase 13 (Scale), Phase 14 (Architecture Convergence) & Phase 15 (Ecosystem).
 
 ## Immediate Actions
 
  1. **Epic 38: Architecture Convergence** (`TASKS.md`):
-       - [ ] **M38.1: Constraint Graph Integration**: Refactor Policy Engine to use Graph.
+       - [x] **M38.1: Constraint Graph Integration**: Refactor Policy Engine to use Graph.
            - [x] Refactor Policy Engine (Done in M35.3).
-           - [ ] Ensure Federation respects Graph.
+           - [x] Ensure Federation respects Graph (Done).
        - [ ] **M38.2: Unified Store Audit**: Verify Redis/SQLite parity.
 
  2. **Epic 34: Federation UI** (`TASKS.md`):
        - [ ] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
 
  3. **Epic 36: Advanced Retention & Compaction** (`TASKS.md`):
-       - [ ] **M36.1: Retention Policy Engine**: Configure TTL per Event Type.
+       - [x] **M36.1: Retention Policy Engine**: Configure TTL per Event Type.
 
 ## Phase History
 - [x] **Epic 35**: Canonical Constraint Graph.

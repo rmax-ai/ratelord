@@ -98,6 +98,7 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 
 			req := api.GrantRequest{
 				FollowerID: p.followerID,
+				ProviderID: string(p.id),
 				PoolID:     poolID,
 				Amount:     askAmount,
 			}

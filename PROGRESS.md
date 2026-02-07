@@ -51,3 +51,5 @@
 | M35.3.1: Traversal Logic (Partial) | COMPLETED | Implement | 2026-02-07 |
 | M35.3.2: Engine Integration (Graph Policy Lookup) | COMPLETED | Implement | 2026-02-07 |
 | M35.4: Graph Visualization | COMPLETED | Implement | 2026-02-07 |
+| Epic 38: Architecture Convergence (Scope Add) | COMPLETED | Orchestrator | 2026-02-07 |
+| M38.1: Constraint Graph Integration (Federation) | COMPLETED | Implement | 2026-02-07 |

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -29,12 +30,18 @@ func setupTestServer(t *testing.T) (*Server, func()) {
 		t.Fatalf("failed to create store: %v", err)
 	}
 
-	// Cluster
+	// Dependencies
 	cluster := engine.NewClusterTopology()
+	usage := engine.NewUsageProjection()
+	graphProj := graph.NewProjection()
+	policy := engine.NewPolicyEngine(usage, graphProj)
 
 	s := &Server{
 		store:   st,
 		cluster: cluster,
+		usage:   usage,
+		policy:  policy,
+		graph:   graphProj,
 	}
 
 	cleanup := func() {
@@ -60,6 +67,7 @@ func TestHandleGrant(t *testing.T) {
 	// Create Request
 	reqBody := GrantRequest{
 		FollowerID: "follower-123",
+		ProviderID: "provider-xyz",
 		PoolID:     "pool-abc",
 		Amount:     500,
 	}
@@ -126,6 +134,7 @@ func TestHandleClusterNodes(t *testing.T) {
 	// Pre-populate topology via Grant
 	reqBody := GrantRequest{
 		FollowerID: "node-1",
+		ProviderID: "provider-1",
 		PoolID:     "pool-1",
 		Amount:     100,
 	}

@@ -544,6 +544,16 @@ Focus: Answering "Why?" for every decision.
     - [ ] Implement "Trace Mode" for Policy Engine (logs every rule result).
     - [ ] Web UI: Visualize Policy Evaluation Tree.
 
+## Epic 38: Architecture Convergence
+Focus: Unifying subsystems and paying down technical debt.
+- [ ] **M38.1: Constraint Graph Integration**
+    - [x] Refactor Policy Engine to use Graph (Done in M35.3).
+    - [x] Ensure Federation Grant logic respects Graph constraints.
+    - [x] Ensure Usage Projection handles Grant consumption.
+- [ ] **M38.2: Unified Store Audit**
+    - [ ] Verify Redis/SQLite parity for Usage Store.
+    - [ ] Consolidate "TokenBucket" vs "UsageStore" abstractions if any diverge.
+
 # Phase 15: Ecosystem & Interoperability
 
 ## Epic 39: Model Context Protocol (MCP) Integration

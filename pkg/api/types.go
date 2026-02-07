@@ -43,6 +43,7 @@ type IdentityResponse struct {
 // GrantRequest matches the POST /v1/federation/grant body schema
 type GrantRequest struct {
 	FollowerID string `json:"follower_id"`
+	ProviderID string `json:"provider_id"` // Added for M38.1
 	PoolID     string `json:"pool_id"`
 	Amount     int64  `json:"amount"`
 }
