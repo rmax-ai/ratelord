@@ -17,7 +17,7 @@
        - [x] **M39.2**: Resource Exporter (Events/Usage).
        - [x] **M39.3**: Tool Exporter (AskIntent).
        - [x] **M39.4**: Prompts (Ratelord-Aware).
-       - [ ] **M39.5**: Advanced Tools (CheckUsage, Config).
+       - [x] **M39.5**: Advanced Tools (CheckUsage, Config).
 
  3. **Epic 38: Architecture Convergence** (`TASKS.md`):
        - [x] **M38.1: Constraint Graph Integration**: Refactor Policy Engine to use Graph.

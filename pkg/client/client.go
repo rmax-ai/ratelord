@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"net/http"
 	"time"
 )
@@ -185,6 +186,31 @@ func (c *Client) GetTrends(ctx context.Context, opts TrendsOptions) ([]UsageStat
 	}
 
 	return stats, nil
+}
+
+// GetGraph fetches the current constraint graph.
+func (c *Client) GetGraph(ctx context.Context) (*graph.Graph, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", c.endpoint+"/v1/graph", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	var g graph.Graph
+	if err := json.NewDecoder(resp.Body).Decode(&g); err != nil {
+		return nil, err
+	}
+
+	return &g, nil
 }
 
 // failClosed returns a denied decision with a specific reason.

@@ -55,6 +55,14 @@ func (s *Server) registerResources() {
 		mcp.WithResourceDescription("Aggregated usage statistics for the last hour"),
 		mcp.WithMIMEType("application/json"),
 	), s.handleReadUsage)
+
+	// ratelord://config
+	s.mcpServer.AddResource(mcp.NewResource(
+		"ratelord://config",
+		"Active Policy Config (Graph)",
+		mcp.WithResourceDescription("The current constraint graph defining all policies, pools, and scopes"),
+		mcp.WithMIMEType("application/json"),
+	), s.handleReadConfig)
 }
 
 // --- Tools ---
@@ -69,6 +77,16 @@ func (s *Server) registerTools() {
 		mcp.WithString("scope_id", mcp.Required(), mcp.Description("The target scope (e.g., 'repo:owner/name')")),
 		mcp.WithNumber("cost", mcp.Description("Expected cost (default 1.0)")),
 	), s.handleAskIntent)
+
+	// check_usage
+	s.mcpServer.AddTool(mcp.NewTool(
+		"check_usage",
+		mcp.WithDescription("Check current usage for a specific Identity, Scope, or Pool."),
+		mcp.WithString("identity_id", mcp.Description("Filter by Identity ID")),
+		mcp.WithString("scope_id", mcp.Description("Filter by Scope ID")),
+		mcp.WithString("pool_id", mcp.Description("Filter by Pool ID (e.g. 'github-core')")),
+		mcp.WithString("provider_id", mcp.Description("Filter by Provider ID")),
+	), s.handleCheckUsage)
 }
 
 // --- Prompts ---
@@ -129,6 +147,26 @@ func (s *Server) handleReadUsage(ctx context.Context, request mcp.ReadResourceRe
 	}, nil
 }
 
+func (s *Server) handleReadConfig(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	graph, err := s.apiClient.GetGraph(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch config graph: %w", err)
+	}
+
+	data, err := json.MarshalIndent(graph, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal graph: %w", err)
+	}
+
+	return []mcp.ResourceContents{
+		mcp.TextResourceContents{
+			URI:      request.Params.URI,
+			MIMEType: "application/json",
+			Text:     string(data),
+		},
+	}, nil
+}
+
 func (s *Server) handleAskIntent(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	identityID := mcp.ParseString(request, "identity_id", "")
 	action := mcp.ParseString(request, "action", "")
@@ -154,6 +192,39 @@ func (s *Server) handleAskIntent(ctx context.Context, request mcp.CallToolReques
 	// Format result
 	resultMsg := fmt.Sprintf("Decision: %s\nReason: %s", decision.Status, decision.Reason)
 	return mcp.NewToolResultText(resultMsg), nil
+}
+
+func (s *Server) handleCheckUsage(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	identityID := mcp.ParseString(request, "identity_id", "")
+	scopeID := mcp.ParseString(request, "scope_id", "")
+	poolID := mcp.ParseString(request, "pool_id", "")
+	providerID := mcp.ParseString(request, "provider_id", "")
+
+	opts := client.TrendsOptions{
+		Bucket:     "hour",
+		From:       time.Now().Add(-1 * time.Hour),
+		To:         time.Now(),
+		IdentityID: identityID,
+		ScopeID:    scopeID,
+		PoolID:     poolID,
+		ProviderID: providerID,
+	}
+
+	stats, err := s.apiClient.GetTrends(ctx, opts)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("API error: %v", err)), nil
+	}
+
+	if len(stats) == 0 {
+		return mcp.NewToolResultText("No usage found for the specified criteria."), nil
+	}
+
+	data, err := json.MarshalIndent(stats, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal stats: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText(string(data)), nil
 }
 
 func (s *Server) handleGetPrompt(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {

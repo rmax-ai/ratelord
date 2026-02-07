@@ -565,10 +565,10 @@ Focus: Allow LLMs (Claude, Gemini, etc.) to natively discover and query Ratelord
 - [x] **M39.2: Resource Exporter**
     - [x] **M39.2.1: Events Resource**: Implement `ratelord://events` fetching from `GET /v1/events` (limit 50).
     - [x] **M39.2.2: Usage Resource**: Implement `ratelord://usage` fetching from `GET /v1/trends` (or `GET /v1/graph` for structure).
-    - [ ] **M39.2.3: Config Resource**: Implement `ratelord://config` to expose current policy rules (read-only).
+    - [x] **M39.2.3: Config Resource**: Implement `ratelord://config` to expose current policy rules (read-only).
 - [x] **M39.3: Tool Exporter**
     - [x] **M39.3.1: Ask Intent Tool**: Implement `ask_intent` tool wrapping `POST /v1/intent`.
-    - [ ] **M39.3.2: Check Usage Tool**: Implement `check_usage` tool that allows querying specific pools/identities.
+    - [x] **M39.3.2: Check Usage Tool**: Implement `check_usage` tool that allows querying specific pools/identities.
 - [x] **M39.4: Prompts**
     - [x] **M39.4.1: System Prompt**: Implement `ratelord-aware` MCP prompt.
 
