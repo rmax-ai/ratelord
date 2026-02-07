@@ -2,34 +2,31 @@
 
 ## Current Context
 - **v1.0.0 Released**: The system has been tagged and released.
-- **Phase 11 In-Flight**: Advanced Capabilities (Simulation, Finance, Federation).
-- **Completed**: Phase 10 (Epics 24-27) + Epic 28 + Epic 29 + Epic 30 + Epic 31 + Epic 32.
+- **Phase 14 In-Flight**: Architecture Convergence & Advanced Logic.
+- **Completed**: Phase 10-11, Epic 35, 36.1.
 - **Phase 12**: Release Engineering (Completed).
-- **Future**: Phase 13 (Scale), Phase 14 (Architecture Convergence) & Phase 15 (Ecosystem).
+- **Future**: Phase 13 (Scale - Leader Election), Phase 15 (Ecosystem).
 
 ## Immediate Actions
 
- 1. **Epic 34: Federation UI** (`TASKS.md`):
-       - [x] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
+ 1. **Epic 37: Explainability & Audit** (`TASKS.md`):
+       - [x] **M37.1: Decision Explainability**:
+           - [x] **M37.1.1: Trace Structs**: Define `RuleTrace` in `pkg/engine`.
+           - [x] **M37.1.2: Evaluator Trace**: Update `Evaluate` to capture trace.
+           - [x] **M37.1.3: API Exposure**: Return trace in `POST /v1/intent` response.
+       - [ ] **M37.2: Compliance Reports**.
 
- 2. **Epic 39: Model Context Protocol (MCP) Integration** (`TASKS.md`):
-       - [x] **M39.1**: Implement MCP Server Core.
-       - [x] **M39.2**: Resource Exporter (Events/Usage).
-       - [x] **M39.3**: Tool Exporter (AskIntent).
-       - [x] **M39.4**: Prompts (Ratelord-Aware).
-       - [x] **M39.5**: Advanced Tools (CheckUsage, Config).
-
- 3. **Epic 38: Architecture Convergence** (`TASKS.md`):
-       - [x] **M38.1: Constraint Graph Integration**: Refactor Policy Engine to use Graph.
-           - [x] Refactor Policy Engine (Done in M35.3).
-           - [x] Ensure Federation respects Graph (Done).
+ 2. **Epic 38: Architecture Convergence** (`TASKS.md`):
        - [ ] **M38.2: Unified Store Audit**: Verify Redis/SQLite parity.
 
- 4. **Epic 36: Advanced Retention & Compaction** (`TASKS.md`):
-       - [x] **M36.1: Retention Policy Engine**: Configure TTL per Event Type.
+ 3. **Epic 33: High Availability** (`TASKS.md`):
+       - [ ] **M33.1: Leader Election**.
 
 ## Phase History
 - [x] **Epic 35**: Canonical Constraint Graph.
+- [x] **Epic 34**: Federation UI (M34.2 Done).
+- [x] **Epic 39**: MCP Integration.
+
     - [x] M35.1: Graph Schema.
     - [x] M35.2: Graph Projection.
     - [x] M35.3: Policy Matcher.

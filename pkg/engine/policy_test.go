@@ -216,3 +216,89 @@ func TestPolicyScopePrecedence(t *testing.T) {
 		t.Errorf("Expected Approve for tenant_B, got %s", resB.Decision)
 	}
 }
+
+func TestPolicyTrace(t *testing.T) {
+	usage := NewUsageProjection()
+	graphProj := graph.NewProjection()
+	engine := NewPolicyEngine(usage, graphProj)
+
+	config := &PolicyConfig{
+		Policies: []PolicyDefinition{
+			{
+				ID:    "test_policy",
+				Scope: "global",
+				Type:  "hard",
+				Limit: 100,
+				Rules: []RuleDefinition{
+					{
+						Name:      "low_remaining",
+						Condition: "remaining < 10",
+						Action:    "deny",
+						Params: map[string]interface{}{
+							"reason": "insufficient remaining budget",
+						},
+					},
+					{
+						Name:      "high_cost",
+						Condition: "cost > 5000000",
+						Action:    "warn",
+						Params: map[string]interface{}{
+							"message": "high cost detected",
+						},
+					},
+				},
+			},
+		},
+	}
+	engine.UpdatePolicies(config)
+
+	// Set up pool state: Used=95, so remaining=5
+	event := store.Event{
+		EventType: store.EventTypeUsageObserved,
+		Payload:   []byte(`{"provider_id":"p1","pool_id":"pool1","used":95,"remaining":5,"cost":1000000}`),
+	}
+	usage.Apply(event)
+
+	intent := Intent{
+		IntentID:     "test_intent",
+		IdentityID:   "user1",
+		WorkloadID:   "workload1",
+		ScopeID:      "global",
+		ProviderID:   "p1",
+		PoolID:       "pool1",
+		ExpectedCost: 1,
+	}
+
+	result := engine.Evaluate(intent)
+
+	// Should deny due to low remaining
+	if result.Decision != DecisionDenyWithReason {
+		t.Errorf("Expected DecisionDenyWithReason, got %s", result.Decision)
+	}
+	if result.Reason != "insufficient remaining budget" {
+		t.Errorf("Expected reason 'insufficient remaining budget', got '%s'", result.Reason)
+	}
+
+	// Check trace
+	if len(result.Trace) != 1 {
+		t.Errorf("Expected 1 trace entry, got %d", len(result.Trace))
+	}
+	if len(result.Trace) > 0 {
+		trace := result.Trace[0]
+		if trace.PolicyID != "test_policy" {
+			t.Errorf("Expected policy_id 'test_policy', got '%s'", trace.PolicyID)
+		}
+		if trace.RuleIndex != 0 {
+			t.Errorf("Expected rule_index 0, got %d", trace.RuleIndex)
+		}
+		if trace.Condition != "remaining < 10" {
+			t.Errorf("Expected condition 'remaining < 10', got '%s'", trace.Condition)
+		}
+		if !trace.Result {
+			t.Errorf("Expected result true, got %v", trace.Result)
+		}
+		if trace.Reason != "passed: remaining 5 < 10" {
+			t.Errorf("Expected reason 'passed: remaining 5 < 10', got '%s'", trace.Reason)
+		}
+	}
+}

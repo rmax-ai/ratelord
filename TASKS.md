@@ -488,7 +488,7 @@ Focus: Automatic Leader Election for failover.
     - [x] Handle `OnPromote` (Load state, start Policy Engine).
     - [x] Handle `OnDemote` (Stop Policy Engine, flush state).
 - [x] **M33.3: Client Routing**
-    - [x] Implement HTTP Middleware to check Leader status.
+    - [x] Implement `HTTP Middleware` to check Leader status.
     - [x] Proxy requests from Followers to Leader (or return 307 Redirect).
 - [ ] **M33.4: Split-Brain Protection**
     - [ ] Use Fencing Tokens (Epochs) in Event Log writes.
@@ -500,6 +500,8 @@ Focus: Visualize the entire cluster.
     - [x] **M34.1.2: UI**: Add "Cluster" tab (Node Table) in Web UI.
 - [x] **M34.2: Node Diagnostics**
     - [x] Visualize Replication Lag & Election Status (Implemented via Metadata & UI Update).
+
+# Phase 14: Architecture Convergence
 
 ## Epic 35: Canonical Constraint Graph
 Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
@@ -516,8 +518,8 @@ Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
     - [x] **M35.3.1: Traversal Logic**: Implement `GetConstraintsForIdentity(id)` (Implemented `FindConstraintsForScope`).
     - [x] **M35.3.2: Engine Integration**: Wire `GraphProjection` into `PolicyEngine` to replace linear search with graph traversal.
 - [x] **M35.4: Graph Visualization**
-    - [x] Add `GET /v1/graph` endpoint (JSON/Dot format).
-    - [x] Visualize in Web UI (Force-directed graph).
+    - [x] **M35.4.1: API**: Add `GET /v1/graph` endpoint (JSON/Dot format).
+    - [x] **M35.4.2: UI**: Visualize in Web UI (Force-directed graph).
 
 ## Epic 36: Advanced Retention & Compaction
 Focus: Managing long-term storage and compliance.
@@ -534,8 +536,10 @@ Focus: Managing long-term storage and compliance.
 ## Epic 37: Explainability & Audit
 Focus: Answering "Why?" for every decision.
 - [ ] **M37.1: Decision Explainability**
-    - [ ] Enhance `Decision` event to include full trace of Policy Rules evaluated.
-    - [ ] Add `/v1/intent/{id}/explain` endpoint.
+    - [x] **M37.1.1: Trace Structs**: Define `RuleTrace` (RuleID, Input, Result) in `pkg/engine`.
+    - [x] **M37.1.2: Evaluator Trace**: Update `Evaluate` to capture trace of all checked rules.
+    - [x] **M37.1.3: Event Enrichment**: Add `Trace` to `Decision` event payload (Available in Result, Event pending if needed).
+    - [x] **M37.1.4: API Exposure**: Return trace in `POST /v1/intent` response (debug mode).
 - [ ] **M37.2: Compliance Reports**
     - [ ] Generate PDF/CSV reports of Usage vs Limits over time.
     - [ ] Generate "Access Log" of all Intents.

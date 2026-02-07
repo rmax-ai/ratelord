@@ -37,6 +37,16 @@ type PolicyEvaluationResult struct {
 	Reason        string                 `json:"reason"`
 	Modifications map[string]interface{} `json:"modifications,omitempty"`
 	Warnings      []string               `json:"warnings,omitempty"`
+	Trace         []RuleTrace            `json:"trace,omitempty"`
+}
+
+// RuleTrace provides explainability for each rule evaluation
+type RuleTrace struct {
+	PolicyID  string `json:"policy_id"`
+	RuleIndex int    `json:"rule_index"`
+	Condition string `json:"condition"`
+	Result    bool   `json:"result"`
+	Reason    string `json:"reason,omitempty"` // e.g. "passed", "failed: remaining < 100"
 }
 
 // PolicyEngine is responsible for arbitrating intents
@@ -140,6 +150,9 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, policyMap map[string]Poli
 		poolState, exists = pe.usage.GetPoolState(intent.ProviderID, intent.PoolID)
 	}
 
+	var trace []RuleTrace
+	ruleIndex := 0
+
 	for _, policy := range policiesToEvaluate {
 		for _, rule := range policy.Rules {
 			// Check TimeWindow if present
@@ -154,8 +167,18 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, policyMap map[string]Poli
 				}
 			}
 
-			if pe.checkCondition(rule.Condition, intent, policy.Limit, poolState, exists) {
-				return pe.applyAction(rule.Action, rule.Params, poolState)
+			result, reason := pe.checkCondition(rule.Condition, intent, policy.Limit, poolState, exists)
+			trace = append(trace, RuleTrace{
+				PolicyID:  policy.ID,
+				RuleIndex: ruleIndex,
+				Condition: rule.Condition,
+				Result:    result,
+				Reason:    reason,
+			})
+			ruleIndex++
+
+			if result {
+				return pe.applyAction(rule.Action, rule.Params, poolState, trace)
 			}
 		}
 	}
@@ -164,10 +187,11 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, policyMap map[string]Poli
 	return PolicyEvaluationResult{
 		Decision: DecisionApprove,
 		Reason:   "policy:default_allow",
+		Trace:    trace,
 	}
 }
 
-func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, poolState PoolState, exists bool) bool {
+func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, poolState PoolState, exists bool) (bool, string) {
 	// Very basic DSL parser for M9.3 & M29.3
 	// Supported:
 	// - "remaining < X"
@@ -178,19 +202,25 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, 
 	// 1. Check provider_id (independent of pool state)
 	var pid string
 	if n, err := fmt.Sscanf(cond, "provider_id == %q", &pid); err == nil && n == 1 {
-		return intent.ProviderID == pid
+		if intent.ProviderID == pid {
+			return true, "passed: provider_id matches"
+		}
+		return false, "failed: provider_id does not match"
 	}
 	// Also try without quotes just in case
 	if n, err := fmt.Sscanf(cond, "provider_id == %s", &pid); err == nil && n == 1 {
-		return intent.ProviderID == pid
+		if intent.ProviderID == pid {
+			return true, "passed: provider_id matches"
+		}
+		return false, "failed: provider_id does not match"
 	}
 
 	if intent.ProviderID == "" || intent.PoolID == "" {
-		return false
+		return false, "failed: provider_id or pool_id not set"
 	}
 
 	if !exists {
-		return false
+		return false, "failed: pool state not found"
 	}
 
 	var remaining int64
@@ -203,32 +233,41 @@ func (pe *PolicyEngine) checkCondition(cond string, intent Intent, limit int64, 
 	var threshold int64
 	// Try to parse "remaining < 100"
 	if n, err := fmt.Sscanf(cond, "remaining < %d", &threshold); err == nil && n == 1 {
-		return remaining < threshold
+		if remaining < threshold {
+			return true, fmt.Sprintf("passed: remaining %d < %d", remaining, threshold)
+		}
+		return false, fmt.Sprintf("failed: remaining %d >= %d", remaining, threshold)
 	}
 
 	// Try to parse "cost > 5000000" (MicroUSD)
 	var costThreshold int64
 	if n, err := fmt.Sscanf(cond, "cost > %d", &costThreshold); err == nil && n == 1 {
-		return poolState.Cost > currency.MicroUSD(costThreshold)
+		if poolState.Cost > currency.MicroUSD(costThreshold) {
+			return true, fmt.Sprintf("passed: cost %d > %d", poolState.Cost, costThreshold)
+		}
+		return false, fmt.Sprintf("failed: cost %d <= %d", poolState.Cost, costThreshold)
 	}
 
 	// Try to parse "forecast_tte < 3600" (seconds)
 	var tteThreshold float64
 	if n, err := fmt.Sscanf(cond, "forecast_tte < %f", &tteThreshold); err == nil && n == 1 {
 		if poolState.LatestForecast != nil {
-			return float64(poolState.LatestForecast.TTE.P99Seconds) < tteThreshold
+			if float64(poolState.LatestForecast.TTE.P99Seconds) < tteThreshold {
+				return true, fmt.Sprintf("passed: forecast_tte %.2f < %.2f", float64(poolState.LatestForecast.TTE.P99Seconds), tteThreshold)
+			}
+			return false, fmt.Sprintf("failed: forecast_tte %.2f >= %.2f", float64(poolState.LatestForecast.TTE.P99Seconds), tteThreshold)
 		}
-		return false
+		return false, "failed: no forecast available"
 	}
 
-	return false
+	return false, "failed: unrecognized condition"
 }
 
 func (pe *PolicyEngine) calculateWaitTime(providerID, poolID string) float64 {
 	return pe.usage.CalculateWaitTime(providerID, poolID)
 }
 
-func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}, poolState PoolState) PolicyEvaluationResult {
+func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}, poolState PoolState, trace []RuleTrace) PolicyEvaluationResult {
 	switch action {
 	case "deny":
 		reason := "policy:rule_matched"
@@ -238,6 +277,7 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 		return PolicyEvaluationResult{
 			Decision: DecisionDenyWithReason,
 			Reason:   reason,
+			Trace:    trace,
 		}
 
 	case "warn":
@@ -249,6 +289,7 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 			Decision: DecisionApprove,
 			Reason:   "policy:rule_passed_with_warning",
 			Warnings: []string{msg},
+			Trace:    trace,
 		}
 
 	case "shape", "delay":
@@ -278,6 +319,7 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 				"wait_seconds": wait,
 			},
 			Reason: "policy:shaping_applied",
+			Trace:  trace,
 		}
 
 	case "defer":
@@ -297,12 +339,14 @@ func (pe *PolicyEngine) applyAction(action string, params map[string]interface{}
 				"wait_seconds": wait,
 			},
 			Reason: "policy:deferred_until_reset",
+			Trace:  trace,
 		}
 	}
 
 	return PolicyEvaluationResult{
 		Decision: DecisionApprove,
 		Reason:   "policy:rule_passed",
+		Trace:    trace,
 	}
 }
 

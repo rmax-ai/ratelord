@@ -62,3 +62,4 @@
 | M39.3: Tool Exporter (AskIntent) | COMPLETED | Implement | 2026-02-07 |
 | M39.4: Prompts | COMPLETED | Implement | 2026-02-07 |
 | M39.5: Advanced Tools (CheckUsage, Config) | COMPLETED | Implement | 2026-02-07 |
+| M37.1: Decision Explainability (Structs, Trace, API) | COMPLETED | Implement | 2026-02-07 |

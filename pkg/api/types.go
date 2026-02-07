@@ -20,6 +20,7 @@ type DecisionResponse struct {
 	Reason        string                 `json:"reason,omitempty"`
 	Modifications map[string]interface{} `json:"modifications,omitempty"`
 	Warnings      []string               `json:"warnings,omitempty"`
+	Trace         []interface{}          `json:"trace,omitempty"`       // For explainability
 	ModifiedBy    string                 `json:"modified_by,omitempty"` // if decision=modify
 	ValidUntil    string                 `json:"valid_until,omitempty"` // ISO8601
 }

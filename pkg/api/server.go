@@ -209,6 +209,12 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 	// TODO: Write intent_submitted and intent_decided events to store.
 	// For M5.2, we just return the result.
 
+	// Convert trace to []interface{} for JSON serialization
+	var trace []interface{}
+	for _, t := range result.Trace {
+		trace = append(trace, t)
+	}
+
 	resp := DecisionResponse{
 		IntentID:      intent.IntentID,
 		Decision:      string(result.Decision),
@@ -216,6 +222,7 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		ValidUntil:    time.Now().Add(5 * time.Minute).Format(time.RFC3339),
 		Modifications: result.Modifications,
 		Warnings:      result.Warnings,
+		Trace:         trace,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
