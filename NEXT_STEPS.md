@@ -19,6 +19,7 @@
 - [x] **M43.2 (Graph)**: Implement `PolicyUpdated` handling in `pkg/graph/projection.go` and add adjacency index.
 - [x] **M43.3 (Hardening)**: Fix hardcoded `resetAt`, fix API pool ID, and add tests for `pkg/mcp` and `pkg/blob`.
 - [x] **M43.4 (Cleanup)**: Address TODOs in Federation, Poller, and Provider packages (from Assessment).
+- [ ] **M43.6 (Quick Fixes)**: Inject Provider Version at build time (from latest Assessment).
 - [ ] **M43.5 (Final Validation)**: Run full simulation and acceptance suite before final sign-off.
 - [ ] **Phase 16 Continues**: Final pre-release validation and debt paydown.
 
