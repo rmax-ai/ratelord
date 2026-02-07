@@ -34,5 +34,22 @@ This explorer visualizes the hierarchical structure of your system.
 *   **Status**: Quickly identify which identities are active, idle, or nearing exhaustion.
 *   **Navigation**: Clicking an identity jumps to the History view filtered for that specific actor.
 
+### 4. Graph (`/graph`)
+Visualizes the constraint graph's topology.
+*   **Node Graph**: An interactive force-directed graph showing how Agents, Scopes, and Resource Pools are connected.
+*   **Dependency Tracing**: Hover over nodes to highlight their upstream and downstream dependencies.
+
+### 5. Cluster (`/cluster`)
+Dedicated view for federated environments.
+*   **Topology Map**: Displays the Leader and all connected Follower nodes.
+*   **Node Status**: Shows health, latency, and synchronization status for each node in the cluster.
+
+### 6. Reports (`/reports`)
+Access to generated system reports.
+*   **Download Center**: Generate and download CSV reports for offline analysis.
+*   **Types**:
+    *   **Usage Reports**: Aggregated consumption data.
+    *   **Access Logs**: Detailed audit trails of all requests.
+
 ## Simulation (Experimental)
 The `/simulate` view allows "what-if" analysis. You can replay historical windows with modified parameters (e.g., "What if we doubled our rate limit?" or "What if we added 5 more agents?") to forecast outcomes before making changes in production.

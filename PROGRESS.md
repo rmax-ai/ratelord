@@ -81,3 +81,4 @@
 | docs/configuration.md | DRAFTED | Docs | 2026-02-07 |
 | docs/sdks/python.md | DRAFTED | Docs | 2026-02-07 |
 | docs/sdks/javascript.md | DRAFTED | Docs | 2026-02-07 |
+| M42.3: User Guides (CLI, Web UI, API Updates) | COMPLETED | Docs | 2026-02-07 |

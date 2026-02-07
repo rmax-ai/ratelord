@@ -54,6 +54,78 @@ Returns the operational status of the daemon.
 }
 ```
 
+#### `GET /v1/graph`
+Returns the current constraint graph as a JSON object, describing nodes (pools, scopes) and edges (relationships).
+
+**Response:**
+```json
+{
+  "nodes": [...],
+  "edges": [...]
+}
+```
+
+### Analytics & Reporting
+
+#### `GET /v1/trends`
+Returns aggregated usage statistics over a specified time window.
+
+**Parameters:**
+- `from`: Start timestamp (ISO 8601).
+- `to`: End timestamp (ISO 8601).
+- `bucket`: Aggregation interval (e.g., "1h", "15m").
+- `provider_id`: Filter by provider (optional).
+
+#### `GET /v1/reports`
+Generates and downloads CSV reports for audit or analysis.
+
+**Parameters:**
+- `type`: Report type (`usage` or `access_log`).
+- `from`: Start timestamp.
+- `to`: End timestamp.
+
+### Federation & Clustering
+
+#### `GET /v1/cluster/nodes`
+Returns the topology of the cluster, listing all known leaders and followers.
+
+#### `POST /v1/federation/grant`
+Used during leader-follower negotiation to issue a grant for resource usage.
+
+**Request:**
+```json
+{
+  "node_id": "follower-01",
+  "resource": "github-api",
+  "amount": 1000
+}
+```
+
+### Integrations
+
+#### `POST /v1/webhooks`
+Registers a webhook URL to receive real-time event notifications.
+
+**Request:**
+```json
+{
+  "url": "https://hooks.slack.com/...",
+  "events": ["intent.denied", "system.alert"]
+}
+```
+
+### Administration
+
+#### `POST /v1/admin/prune`
+Manually triggers the pruning of old events from the ledger to free up storage.
+
+**Request:**
+```json
+{
+  "before": "2023-01-01T00:00:00Z"
+}
+```
+
 ### Event Streaming
 
 #### `GET /v1/events`

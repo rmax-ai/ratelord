@@ -6,12 +6,12 @@
 - **Phase 14 & 15**: Complete.
 
 ## Immediate Actions
-- [ ] **Review Documentation**: Verify the newly created user docs in `docs/` align with the implementation and are clear.
-- [ ] **M42.3 (Optional)**: Add more guides (CLI usage, Web UI tour) if needed.
+- [x] **Review Documentation**: Verify the newly created user docs in `docs/` align with the implementation and are clear.
+- [x] **M42.3 (Optional)**: Add more guides (CLI usage, Web UI tour) if needed.
 - [ ] **Phase 16 Continues**: Run advanced simulation scenarios (Epic 28) or focus on release prep.
 
 ## Phase History
-- [x] **M42.1 & M42.2**: User Documentation (Concepts & API Ref).
+- [x] **M42.1, M42.2, M42.3**: User Documentation (Concepts, API Ref, Guides).
 - [x] **M41.3: Engine Package Coverage** (Achieved 80.9%).
 - [x] **M41.2: Store Package Coverage** (Achieved 80.8%).
 - [x] **M41.1: API Package Coverage** (Achieved 80.1%).

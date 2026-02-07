@@ -610,5 +610,8 @@ Focus: Create user-facing documentation to explain concepts and usage.
     - [x] Draft `docs/concepts/core-model.md` (Identity, Scope, Pool, Constraint).
 - [x] **M42.2: API Reference**
     - [x] Draft `docs/reference/api.md` (Endpoints and Client Behavior).
+- [x] **M42.3: User Guides**
+    - [x] Update `docs/guides/cli.md` (MCP, Identity, Mode).
+    - [x] Update `docs/guides/web-ui.md` (Graph, Cluster, Reports).
 
 

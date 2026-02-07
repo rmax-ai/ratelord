@@ -11,13 +11,25 @@ go install ./cmd/ratelord
 go install ./cmd/ratelord-tui
 ```
 
+## Running the Daemon
+
+The daemon `ratelord-d` is the core component.
+
+```bash
+ratelord-d [flags]
+```
+
+**Common Flags:**
+*   `--mode`: Operating mode. Defaults to `leader`. Set to `follower` for federation.
+*   `--port`: HTTP port (default `8090`).
+
 ## Managing Identities
 
 Ratelord requires explicit registration of identities (API keys, tokens, users) before they can be used in intents.
 
 ### Registering an Identity
 
-Use the `identity add` command to register a new actor.
+Use the `identity add` command to register a new actor. If no token is provided, one will be generated for you.
 
 ```bash
 ratelord identity add <identity_id> [flags]
@@ -31,10 +43,24 @@ ratelord identity add <identity_id> [flags]
 
 **Example:**
 ```bash
+# Register and auto-generate a token
 ratelord identity add pat:bot-01 --scope org:engineering
+
+# Register with an existing known token (if supported)
+ratelord identity add pat:bot-02 --scope org:engineering --token "existing-secret"
 ```
 
 This event is recorded in the ledger, and the identity becomes immediately available for policy evaluation.
+
+## MCP Integration
+
+Ratelord supports the Model Context Protocol (MCP), allowing AI assistants to directly interact with the daemon.
+
+```bash
+ratelord mcp
+```
+
+This starts an MCP server over stdio that exposes Ratelord's capabilities (reading status, analyzing trends) to compatible LLM clients.
 
 ## Monitoring with the TUI
 
