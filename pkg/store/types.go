@@ -21,6 +21,7 @@ const (
 	EventTypePolicyTriggered      EventType = "policy_triggered"
 	EventTypeThrottleAdvised      EventType = "throttle_advised"
 	EventTypeIdentityRegistered   EventType = "identity_registered"
+	EventTypeIdentityDeleted      EventType = "identity_deleted"
 	EventTypeGrantIssued          EventType = "grant_issued"
 )
 

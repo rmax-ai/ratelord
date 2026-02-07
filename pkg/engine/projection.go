@@ -42,34 +42,42 @@ func (p *IdentityProjection) Apply(event store.Event) error {
 	p.lastEventID = string(event.EventID)
 	p.lastIngestTime = event.TsIngest
 
-	if event.EventType != store.EventTypeIdentityRegistered {
-		return nil // Ignore irrelevant events
-	}
+	switch event.EventType {
+	case store.EventTypeIdentityRegistered:
+		var payload struct {
+			Kind      string                 `json:"kind"`
+			Metadata  map[string]interface{} `json:"metadata"`
+			TokenHash string                 `json:"token_hash"`
+		}
 
-	var payload struct {
-		Kind      string                 `json:"kind"`
-		Metadata  map[string]interface{} `json:"metadata"`
-		TokenHash string                 `json:"token_hash"`
-	}
+		if err := json.Unmarshal(event.Payload, &payload); err != nil {
+			return fmt.Errorf("failed to unmarshal payload for event %s: %w", event.EventID, err)
+		}
 
-	if err := json.Unmarshal(event.Payload, &payload); err != nil {
-		return fmt.Errorf("failed to unmarshal payload for event %s: %w", event.EventID, err)
-	}
+		// Dimensions.IdentityID is the source of truth for the ID
+		id := event.Dimensions.IdentityID
+		p.identities[id] = Identity{
+			ID:        id,
+			Kind:      payload.Kind,
+			Metadata:  payload.Metadata,
+			TokenHash: payload.TokenHash,
+		}
 
-	p.mu.Lock()
-	defer p.mu.Unlock()
+		if payload.TokenHash != "" {
+			p.tokenMap[payload.TokenHash] = id
+		}
 
-	// Dimensions.IdentityID is the source of truth for the ID
-	id := event.Dimensions.IdentityID
-	p.identities[id] = Identity{
-		ID:        id,
-		Kind:      payload.Kind,
-		Metadata:  payload.Metadata,
-		TokenHash: payload.TokenHash,
-	}
+	case store.EventTypeIdentityDeleted:
+		id := event.Dimensions.IdentityID
+		if identity, exists := p.identities[id]; exists {
+			if identity.TokenHash != "" {
+				delete(p.tokenMap, identity.TokenHash)
+			}
+			delete(p.identities, id)
+		}
 
-	if payload.TokenHash != "" {
-		p.tokenMap[payload.TokenHash] = id
+	default:
+		// Ignore irrelevant events
 	}
 
 	return nil

@@ -51,6 +51,7 @@ func main() {
 func printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  ratelord identity add <name> <kind> [token]  Register a new identity")
+	fmt.Println("  ratelord identity delete <id>               Delete an identity")
 	fmt.Println("  ratelord admin prune <retention>             Prune old events (e.g. 720h)")
 	fmt.Println("  ratelord mcp [--url <url>]                   Run MCP server (stdio)")
 }
@@ -109,68 +110,115 @@ func handleAdmin(args []string) {
 }
 
 func handleIdentity(args []string) {
-	if len(args) < 2 || args[0] != "add" {
-		fmt.Println("Usage: ratelord identity add <name> <kind>")
-		os.Exit(1)
-	}
-	name := args[1]
-
-	kind := "user"
-	if len(args) > 2 {
-		kind = args[2]
-	}
-
-	token := os.Getenv("RATELORD_NEW_TOKEN")
-
-	payload := IdentityRegistration{
-		IdentityID: name,
-		Kind:       kind,
-		Metadata: map[string]interface{}{
-			"source": "cli",
-		},
-		Token: token,
-	}
-
-	data, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Printf("Error encoding request: %v\n", err)
+	if len(args) < 1 {
+		fmt.Println("Usage: ratelord identity add <name> <kind> [token] | delete <id>")
 		os.Exit(1)
 	}
 
-	resp, err := http.Post("http://127.0.0.1:8090/v1/identities", "application/json", bytes.NewBuffer(data))
-	if err != nil {
-		fmt.Printf("Error contacting daemon: %v\n", err)
-		fmt.Println("Is ratelord-d running?")
+	subcmd := args[0]
+	switch subcmd {
+	case "add":
+		if len(args) < 2 {
+			fmt.Println("Usage: ratelord identity add <name> <kind> [token]")
+			os.Exit(1)
+		}
+		name := args[1]
+
+		kind := "user"
+		if len(args) > 2 {
+			kind = args[2]
+		}
+
+		token := os.Getenv("RATELORD_NEW_TOKEN")
+
+		payload := IdentityRegistration{
+			IdentityID: name,
+			Kind:       kind,
+			Metadata: map[string]interface{}{
+				"source": "cli",
+			},
+			Token: token,
+		}
+
+		data, err := json.Marshal(payload)
+		if err != nil {
+			fmt.Printf("Error encoding request: %v\n", err)
+			os.Exit(1)
+		}
+
+		resp, err := http.Post("http://127.0.0.1:8090/v1/identities", "application/json", bytes.NewBuffer(data))
+		if err != nil {
+			fmt.Printf("Error contacting daemon: %v\n", err)
+			fmt.Println("Is ratelord-d running?")
+			os.Exit(1)
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("Error reading response: %v\n", err)
+			os.Exit(1)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			fmt.Printf("Error: Server returned %s\n%s\n", resp.Status, string(body))
+			os.Exit(1)
+		}
+
+		var response struct {
+			IdentityID string `json:"identity_id"`
+			Status     string `json:"status"`
+			EventID    string `json:"event_id"`
+			Token      string `json:"token,omitempty"`
+		}
+
+		if err := json.Unmarshal(body, &response); err != nil {
+			fmt.Println(string(body)) // Fallback to raw output
+			return
+		}
+
+		fmt.Printf("Identity Registered: %s\n", response.IdentityID)
+		if response.Token != "" {
+			fmt.Printf("Token: %s\n", response.Token)
+			fmt.Println("WARNING: Save this token! It will not be shown again.")
+		}
+	case "delete":
+		if len(args) < 2 {
+			fmt.Println("Usage: ratelord identity delete <id>")
+			os.Exit(1)
+		}
+		id := args[1]
+
+		token := os.Getenv("RATELORD_ADMIN_TOKEN")
+		if token == "" {
+			fmt.Println("Error: RATELORD_ADMIN_TOKEN env var required")
+			os.Exit(1)
+		}
+
+		req, err := http.NewRequest("DELETE", "http://127.0.0.1:8090/v1/identities/"+id, nil)
+		if err != nil {
+			fmt.Printf("Error creating request: %v\n", err)
+			os.Exit(1)
+		}
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Printf("Error contacting daemon: %v\n", err)
+			fmt.Println("Is ratelord-d running?")
+			os.Exit(1)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusNoContent {
+			fmt.Printf("Identity deleted: %s\n", id)
+		} else {
+			body, _ := io.ReadAll(resp.Body)
+			fmt.Printf("Error: Server returned %s\n%s\n", resp.Status, string(body))
+			os.Exit(1)
+		}
+	default:
+		fmt.Println("Usage: ratelord identity add <name> <kind> [token] | delete <id>")
 		os.Exit(1)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("Error reading response: %v\n", err)
-		os.Exit(1)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error: Server returned %s\n%s\n", resp.Status, string(body))
-		os.Exit(1)
-	}
-
-	var response struct {
-		IdentityID string `json:"identity_id"`
-		Status     string `json:"status"`
-		EventID    string `json:"event_id"`
-		Token      string `json:"token,omitempty"`
-	}
-
-	if err := json.Unmarshal(body, &response); err != nil {
-		fmt.Println(string(body)) // Fallback to raw output
-		return
-	}
-
-	fmt.Printf("Identity Registered: %s\n", response.IdentityID)
-	if response.Token != "" {
-		fmt.Printf("Token: %s\n", response.Token)
-		fmt.Println("WARNING: Save this token! It will not be shown again.")
 	}
 }

@@ -980,11 +980,11 @@ func (s *Store) ReadCandidateEvents(ctx context.Context, before time.Time, limit
 	return events, nil
 }
 
-// DeleteEvents deletes a specific set of events by ID.
-// Used after archiving events to cold storage.
-func (s *Store) DeleteEvents(ctx context.Context, eventIDs []string) error {
-	if len(eventIDs) == 0 {
-		return nil
+// DeleteIdentityData performs a hard delete of all data associated with a specific identity.
+// This includes events and usage statistics. The operation is performed in a transaction.
+func (s *Store) DeleteIdentityData(ctx context.Context, identityID string) error {
+	if identityID == "" {
+		return fmt.Errorf("identityID cannot be empty")
 	}
 
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -992,6 +992,37 @@ func (s *Store) DeleteEvents(ctx context.Context, eventIDs []string) error {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer tx.Rollback()
+
+	// Delete from events table
+	_, err = tx.ExecContext(ctx, "DELETE FROM events WHERE identity_id = ?", identityID)
+	if err != nil {
+		return fmt.Errorf("failed to delete events for identity %s: %w", identityID, err)
+	}
+
+	// Delete from usage_hourly table
+	_, err = tx.ExecContext(ctx, "DELETE FROM usage_hourly WHERE identity_id = ?", identityID)
+	if err != nil {
+		return fmt.Errorf("failed to delete hourly usage for identity %s: %w", identityID, err)
+	}
+
+	// Delete from usage_daily table
+	_, err = tx.ExecContext(ctx, "DELETE FROM usage_daily WHERE identity_id = ?", identityID)
+	if err != nil {
+		return fmt.Errorf("failed to delete daily usage for identity %s: %w", identityID, err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteEvents deletes events by their IDs.
+func (s *Store) DeleteEvents(ctx context.Context, eventIDs []string) error {
+	if len(eventIDs) == 0 {
+		return nil
+	}
 
 	placeholders := make([]string, len(eventIDs))
 	args := make([]interface{}, len(eventIDs))
@@ -1002,13 +1033,9 @@ func (s *Store) DeleteEvents(ctx context.Context, eventIDs []string) error {
 
 	query := fmt.Sprintf("DELETE FROM events WHERE event_id IN (%s)", strings.Join(placeholders, ","))
 
-	_, err = tx.ExecContext(ctx, query, args...)
+	_, err := s.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return fmt.Errorf("failed to delete events: %w", err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil

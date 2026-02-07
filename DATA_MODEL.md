@@ -247,6 +247,17 @@ Payload (typical):
 - `recommended_until`: optional timestamp or condition (e.g., “until reset”, “until P90 TTE > 30m”)
 - `rationale`: forecast/policy grounded explanation
 
+### `identity_deleted`
+
+An identity has been removed, triggering privacy/compliance cleanup (GDPR "Right to be Forgotten").
+
+Payload (typical):
+
+- `identity_id`: the identity being removed (also in dimensions)
+- `reason`: compliance | user_request | cleanup
+- `requested_at`: timestamp of the external delete request
+- `impact`: expected side effects (e.g., "scrub_history")
+
 ---
 
 ## Correlation and Causation Semantics
@@ -358,6 +369,17 @@ The event log is append-only, but local disk is finite. Compaction must preserve
 - Compaction must be policy-driven and transparent:
   - compaction configuration should be visible in the system and treated as governance, not a hidden maintenance task
   - compaction should never remove security-relevant evidence (auth failures, persistent 429s, repeated denials)
+
+### Deletion & Compliance (GDPR / Right to be Forgotten)
+
+While the event log is immutable by design ("Event Log is Truth"), legal compliance (GDPR) overrides architectural purity.
+
+- **Trigger**: An `identity_deleted` event is the sole authorized trigger for destructive updates.
+- **Action**: Upon processing `identity_deleted`, the store must execute a "hard delete" or "scrub" on historical events associated with that `identity_id`.
+- **Scrubbing Semantics**:
+  - **Preferred**: Replace `identity_id` with `sentinel:deleted` (or a cryptographic hash) in historical events. This preserves the *shape* of the traffic (counts, costs, forecasts) for aggregate modeling while removing PII links.
+  - **Fallback**: Delete the events entirely if scrubbing is technically infeasible, provided that faithful aggregate rollups (which are anonymized) have already been secured.
+- **Audit**: The `identity_deleted` event itself *remains* in the log as the tombstone/audit record of the deletion.
 
 Suggested retention tiers (non-normative):
 

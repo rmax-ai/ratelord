@@ -13,19 +13,16 @@
 
 ## Immediate Actions
 
- 1. **M36.3: Compliance & Deletion** (`TASKS.md`):
-       - [ ] Implement `DeleteIdentity` (GDPR "Right to be Forgotten").
-       - [ ] Prune all events associated with a specific Identity ID.
-
- 2. **M37.3: Policy Debugging** (`TASKS.md`):
+ 1. **M37.3: Policy Debugging** (`TASKS.md`):
        - [ ] Implement "Trace Mode" for Policy Engine.
        - [ ] Web UI: Visualize Policy Evaluation Tree.
 
- 3. **M31.3: Documentation & Changelog** (`TASKS.md`):
+ 2. **M31.3: Documentation & Changelog** (`TASKS.md`):
        - [ ] Configure changelog generation.
        - [ ] Auto-update `RELEASE_NOTES.md`.
 
 ## Phase History
+- [x] **M36.3**: Compliance & Deletion (GDPR support).
 - [x] **M36.2**: Cold Storage Offload (ArchiveWorker + LocalBlobStore).
 - [x] **Epic 40**: Client Resilience (M40.1, M40.2, M40.3).
 - [x] **Epic 33**: High Availability (M33.1, M33.4).

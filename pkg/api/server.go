@@ -299,6 +299,71 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 
 // handleIdentities registers a new identity.
 func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodDelete {
+		// Extract ID from path
+		path := strings.TrimPrefix(r.URL.Path, "/v1/identities")
+		if path == "" || path == "/" {
+			http.Error(w, `{"error":"missing_identity_id"}`, http.StatusBadRequest)
+			return
+		}
+		id := strings.TrimPrefix(path, "/")
+		if id == "" {
+			http.Error(w, `{"error":"invalid_identity_id"}`, http.StatusBadRequest)
+			return
+		}
+
+		// Emit event
+		now := time.Now()
+		payload, _ := json.Marshal(map[string]interface{}{
+			"reason": "api_request",
+		})
+		evt := store.Event{
+			EventID:       store.EventID(fmt.Sprintf("evt_del_%d", now.UnixNano())),
+			EventType:     store.EventTypeIdentityDeleted,
+			SchemaVersion: 1,
+			TsEvent:       now,
+			TsIngest:      now,
+			Epoch:         s.getEpoch(),
+			Source: store.EventSource{
+				OriginKind: "client",
+				OriginID:   "api",
+				WriterID:   "ratelord-d",
+			},
+			Dimensions: store.EventDimensions{
+				AgentID:    store.SentinelSystem,
+				IdentityID: id,
+				WorkloadID: store.SentinelSystem,
+				ScopeID:    store.SentinelGlobal,
+			},
+			Correlation: store.EventCorrelation{
+				CorrelationID: fmt.Sprintf("del_%s", id),
+				CausationID:   store.SentinelUnknown,
+			},
+			Payload: payload,
+		}
+		if err := s.store.AppendEvent(r.Context(), &evt); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_append_delete_event","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+			http.Error(w, `{"error":"internal_server_error"}`, http.StatusInternalServerError)
+			return
+		}
+
+		// Delete data
+		if err := s.store.DeleteIdentityData(r.Context(), id); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_delete_identity_data","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+			http.Error(w, `{"error":"internal_server_error"}`, http.StatusInternalServerError)
+			return
+		}
+
+		// Apply to projection
+		if err := s.identities.Apply(evt); err != nil {
+			fmt.Printf(`{"level":"error","msg":"failed_to_update_projection","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+			// We don't fail the request, but we log the inconsistency
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	if r.Method == http.MethodGet {
 		identities := s.identities.GetAll()
 		w.Header().Set("Content-Type", "application/json")

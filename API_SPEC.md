@@ -103,6 +103,15 @@ Registers a new identity (actor) in the system. This emits an `identity_register
 }
 ```
 
+**`DELETE /v1/identities/{id}`**
+Permanently removes an identity and scrubs associated data from the event log (GDPR compliance).
+
+#### Response
+*   `204 No Content`: Success.
+*   `404 Not Found`: If the identity doesn't exist.
+
+> **Note**: This action is irreversible.
+
 ---
 
 ### 2.4 Event Streaming (TUI)

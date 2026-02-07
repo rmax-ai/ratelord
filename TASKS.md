@@ -531,9 +531,9 @@ Focus: Managing long-term storage and compliance.
 - [x] **M36.2: Cold Storage Offload**
     - [x] Implement S3/GCS adapter for archiving old events/snapshots (Implemented `LocalBlobStore` as first adapter).
     - [x] Implement "Hydrate from Archive" for historical analysis (Partial - ArchiveWorker implemented).
-- [ ] **M36.3: Compliance & Deletion**
-    - [ ] Implement `DeleteIdentity` (GDPR "Right to be Forgotten").
-    - [ ] Prune all events associated with a specific Identity ID.
+- [x] **M36.3: Compliance & Deletion**
+    - [x] Implement `DeleteIdentity` (GDPR "Right to be Forgotten").
+    - [x] Prune all events associated with a specific Identity ID.
 
 ## Epic 37: Explainability & Audit
 Focus: Answering "Why?" for every decision.
