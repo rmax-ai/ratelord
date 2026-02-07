@@ -508,7 +508,7 @@ Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
     - [x] **M35.1.1: Node Types**: Define `Agent`, `Identity`, `Workload`, `Resource`, `Pool`, `Constraint` structs in `pkg/graph`.
     - [x] **M35.1.2: Edge Types**: Define `Owns`, `Triggers`, `Limits`, `Depletes`, `AppliesTo`, `Bounds` edge definitions.
     - [x] **M35.1.3: Graph Interface**: Define the `Graph` interface for adding nodes/edges and traversing.
-- [ ] **M35.2: In-Memory Graph Projection**
+- [x] **M35.2: In-Memory Graph Projection**
     - [x] **M35.2.1: Projection Struct**: Implement `GraphProjection` that holds the graph state.
     - [x] **M35.2.2: Event Handlers**: Implement handlers for `IdentityRegistered` (PolicyUpdated pending).
     - [x] **M35.2.3: Replay Integration**: Hook `GraphProjection` into the main `Loader` replay loop.
@@ -544,17 +544,22 @@ Focus: Answering "Why?" for every decision.
     - [ ] Implement "Trace Mode" for Policy Engine (logs every rule result).
     - [ ] Web UI: Visualize Policy Evaluation Tree.
 
-# Phase 14: Architecture Convergence
+# Phase 15: Ecosystem & Interoperability
 
-## Epic 38: System Unification & Optimization
-Focus: Ensuring all subsystems (Graph, Policy, Federation) work seamlessly together as a single cohesive unit, validating the "Constraint Graph" as the core source of truth.
-- [ ] **M38.1: Constraint Graph Integration**
-    - [ ] Refactor Policy Engine to strictly use the `ConstraintGraph` (Epic 35) for topology lookups.
-    - [ ] Ensure Federation (Epic 30) respects Graph boundaries (e.g. Org-level limits sync across clusters).
-- [ ] **M38.2: Unified Storage Audit**
-    - [ ] Verify feature parity across SQLite (Local) and Redis (Distributed) stores.
-    - [ ] Optimize "Hot Path" (Intent Evaluation) to minimize locking/latency.
-- [ ] **M38.3: Performance Benchmarking**
-    - [ ] Create standard benchmark suite (Intents/sec, Event Ingestion rate).
-    - [ ] Profile and optimize critical paths to meet `A-02` (Latency) under load.
+## Epic 39: Model Context Protocol (MCP) Integration
+Focus: Allow LLMs (Claude, Gemini, etc.) to natively discover and query Ratelord constraints.
+- [ ] **M39.1: MCP Server Core**
+    - [ ] Implement MCP Protocol (JSON-RPC 2.0 via Stdio/SSE).
+    - [ ] Map `ratelord` concepts to MCP Resources (`ratelord://limits`).
+- [ ] **M39.2: Tools & Prompts**
+    - [ ] Implement `check_budget` tool.
+    - [ ] Implement `get_forecast` tool.
+    - [ ] Add system prompts for budget awareness.
+
+## Epic 40: Client Resilience Library
+Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
+- [ ] **M40.1: Backoff Algorithms**
+    - [ ] Implement "Decorrelated Jitter" in Go/Python/TS SDKs.
+- [ ] **M40.2: Circuit Breaker**
+    - [ ] Implement client-side circuit breaking when Ratelord is unreachable or consistently denying.
 

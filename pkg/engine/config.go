@@ -5,6 +5,15 @@ type PolicyConfig struct {
 	Policies  []PolicyDefinition          `json:"policies"`
 	Providers ProvidersConfig             `json:"providers,omitempty"`
 	Pricing   map[string]map[string]int64 `json:"pricing,omitempty"`
+	Retention *RetentionConfig            `json:"retention,omitempty"`
+}
+
+// RetentionConfig defines data lifecycle rules
+type RetentionConfig struct {
+	Enabled       bool              `json:"enabled"`
+	DefaultTTL    string            `json:"default_ttl"`              // e.g., "720h"
+	ByType        map[string]string `json:"by_type,omitempty"`        // event_type -> "24h"
+	CheckInterval string            `json:"check_interval,omitempty"` // e.g., "1h"
 }
 
 // GetCost looks up the cost per unit for a given provider and pool.

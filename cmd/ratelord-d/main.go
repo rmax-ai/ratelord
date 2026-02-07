@@ -55,10 +55,13 @@ type LeaderServices struct {
 	dispatcherCancel context.CancelFunc
 	snapshotCtx      context.Context
 	snapshotCancel   context.CancelFunc
+	pruneCtx         context.Context
+	pruneCancel      context.CancelFunc
 	poller           *engine.Poller
 	rollup           *engine.RollupWorker
 	dispatcher       *engine.Dispatcher
 	snapshotWorker   *engine.SnapshotWorker
+	pruneWorker      *engine.PruneWorker
 }
 
 func (ls *LeaderServices) Start() {
@@ -70,6 +73,8 @@ func (ls *LeaderServices) Start() {
 	go ls.dispatcher.Start(ls.dispatcherCtx)
 	ls.snapshotCtx, ls.snapshotCancel = context.WithCancel(context.Background())
 	go ls.snapshotWorker.Run(ls.snapshotCtx)
+	ls.pruneCtx, ls.pruneCancel = context.WithCancel(context.Background())
+	go ls.pruneWorker.Run(ls.pruneCtx)
 }
 
 func (ls *LeaderServices) Stop() {
@@ -84,6 +89,9 @@ func (ls *LeaderServices) Stop() {
 	}
 	if ls.snapshotCancel != nil {
 		ls.snapshotCancel()
+	}
+	if ls.pruneCancel != nil {
+		ls.pruneCancel()
 	}
 }
 
@@ -373,11 +381,20 @@ func main() {
 	// Run every 5 minutes by default
 	snapshotWorker := engine.NewSnapshotWorker(st, identityProj, usageProj, providerProj, forecastProj, 5*time.Minute)
 
+	// M36.1: Initialize Prune Worker
+	// Defaults to disabled if no policy
+	var retentionCfg *engine.RetentionConfig
+	if policyCfg != nil {
+		retentionCfg = policyCfg.Retention
+	}
+	pruneWorker := engine.NewPruneWorker(st, retentionCfg)
+
 	leaderServices := &LeaderServices{
 		poller:         poller,
 		rollup:         rollup,
 		dispatcher:     dispatcher,
 		snapshotWorker: snapshotWorker,
+		pruneWorker:    pruneWorker,
 	}
 
 	var em *engine.ElectionManager
@@ -456,6 +473,7 @@ func main() {
 			if cfgReloader, err := engine.LoadPolicyConfig(cfg.PolicyPath); err == nil {
 				policyEngine.UpdatePolicies(cfgReloader)
 				poller.UpdateConfig(cfgReloader)
+				pruneWorker.UpdateConfig(cfgReloader.Retention)
 				fmt.Printf(`{"level":"info","msg":"policy_reloaded","policies_count":%d}`+"\n", len(cfgReloader.Policies))
 			} else {
 				fmt.Printf(`{"level":"error","msg":"failed_to_reload_policy","error":"%v"}`+"\n", err)

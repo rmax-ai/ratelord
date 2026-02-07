@@ -398,7 +398,7 @@ func (s *Server) handlePrune(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	count, err := s.store.PruneEvents(r.Context(), retention)
+	count, err := s.store.PruneEvents(r.Context(), retention, "", nil)
 	if err != nil {
 		fmt.Printf(`{"level":"error","msg":"failed_to_prune_events","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 		http.Error(w, fmt.Sprintf(`{"error":"prune_failed","details":"%v"}`, err), http.StatusInternalServerError)
