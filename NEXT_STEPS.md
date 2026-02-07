@@ -13,11 +13,10 @@
 
 ## Immediate Actions
 
- 1. **M31.3: Documentation & Changelog** (`TASKS.md`):
-       - [ ] Configure changelog generation.
-       - [ ] Auto-update `RELEASE_NOTES.md`.
+(None - All Phases Complete)
 
 ## Phase History
+- [x] **M31.3**: Documentation & Changelog (Release Automation).
 - [x] **M37.3**: Policy Debugging (Trace Mode & UI).
 - [x] **M36.3**: Compliance & Deletion (GDPR support).
 - [x] **M36.2**: Cold Storage Offload (ArchiveWorker + LocalBlobStore).

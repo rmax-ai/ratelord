@@ -71,4 +71,5 @@
 | M40.3: Python SDK Resilience (Jitter) | COMPLETED | Implement | 2026-02-07 |
 | M38.2: Unified Store Audit (Redis/Memory Parity) | COMPLETED | Implement | 2026-02-07 |
 | M36.3: Compliance & Deletion | COMPLETED | Implement | 2026-02-07 |
-| M37.3: Policy Debugging (Trace UI) | COMPLETED | Implement | 2026-02-07 |
+| M31.3: Documentation & Changelog | COMPLETED | Orchestrator | 2026-02-07 |
+

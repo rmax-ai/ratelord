@@ -26,3 +26,12 @@ dockers:
       - "rmax/ratelord-d:latest"
     build_flag_templates:
       - "--platform=linux/amd64"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^merge:"

@@ -448,16 +448,16 @@ Focus: Expanding from single-node daemon to distributed fleet governance (`CLUST
 
 ## Epic 31: Automated Release Pipeline
 Focus: Zero-touch versioning and artifact publication (`RELEASING.md`).
-- [ ] **M31.1: CI Workflows**
+- [x] **M31.1: CI Workflows**
     - [x] Create `.github/workflows/test.yaml` (Go test, lint).
     - [x] Create `.github/workflows/release.yaml` (Trigger on tag).
 - [x] **M31.2: Release Script / Goreleaser**
     - [x] Configure `.goreleaser.yaml`.
     - [x] Ensure cross-compilation (Darwin/Linux, AMD64/ARM64).
     - [x] Configure Docker build and push.
-- [ ] **M31.3: Documentation & Changelog**
-    - [ ] Configure changelog generation from Conventional Commits.
-    - [ ] Auto-update `RELEASE_NOTES.md` or GitHub Release body.
+- [x] **M31.3: Documentation & Changelog**
+    - [x] Configure changelog generation from Conventional Commits.
+    - [x] Auto-update `RELEASE_NOTES.md` or GitHub Release body.
 
 # Phase 13: Scale & Reliability
 
@@ -497,7 +497,7 @@ Focus: Automatic Leader Election for failover.
 
 ## Epic 34: Federation UI
 Focus: Visualize the entire cluster.
-- [ ] **M34.1: Cluster View**
+- [x] **M34.1: Cluster View**
     - [x] **M34.1.1: API**: Implement `GET /v1/cluster/nodes` and `ClusterTopology` projection.
     - [x] **M34.1.2: UI**: Add "Cluster" tab (Node Table) in Web UI.
 - [x] **M34.2: Node Diagnostics**
@@ -537,7 +537,7 @@ Focus: Managing long-term storage and compliance.
 
 ## Epic 37: Explainability & Audit
 Focus: Answering "Why?" for every decision.
-- [ ] **M37.1: Decision Explainability**
+- [x] **M37.1: Decision Explainability**
     - [x] **M37.1.1: Trace Structs**: Define `RuleTrace` (RuleID, Input, Result) in `pkg/engine`.
     - [x] **M37.1.2: Evaluator Trace**: Update `Evaluate` to capture trace of all checked rules.
     - [x] **M37.1.3: Event Enrichment**: Add `Trace` to `Decision` event payload (Available in Result, Event pending if needed).
@@ -554,7 +554,7 @@ Focus: Answering "Why?" for every decision.
 
 ## Epic 38: Architecture Convergence
 Focus: Unifying subsystems and paying down technical debt.
-- [ ] **M38.1: Constraint Graph Integration**
+- [x] **M38.1: Constraint Graph Integration**
     - [x] Refactor Policy Engine to use Graph (Done in M35.3).
     - [x] Ensure Federation Grant logic respects Graph constraints.
     - [x] Ensure Usage Projection handles Grant consumption.
@@ -583,7 +583,7 @@ Focus: Allow LLMs (Claude, Gemini, etc.) to natively discover and query Ratelord
 
 ## Epic 40: Client Resilience Library
 Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
-- [ ] **M40.1: Go SDK Resilience**
+- [x] **M40.1: Go SDK Resilience**
     - [x] Add Backoff & Jitter.
 - [x] **M40.2: JS SDK Resilience**
     - [x] Add `bottleneck` or custom backoff.
