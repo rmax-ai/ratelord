@@ -590,3 +590,18 @@ Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
 - [x] **M40.3: Python SDK Resilience**
     - [x] Add `tenacity` integration.
 
+# Phase 16: Quality Assurance & Hardening
+
+## Epic 41: Test Coverage Improvement
+Focus: Increasing test coverage for critical packages to >80%.
+- [x] **M41.1: API Package Coverage**
+    - Target: `pkg/api` > 80% coverage.
+    - Implement tests for handlers, middleware, and validation.
+- [ ] **M41.2: Store Package Coverage**
+    - Target: `pkg/store` > 80% coverage.
+    - Implement tests for SQLite store, event reading/writing.
+- [ ] **M41.3: Engine Package Coverage**
+    - Target: `pkg/engine` > 80% coverage.
+    - Improve tests for policy evaluation and state management.
+
+

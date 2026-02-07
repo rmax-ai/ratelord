@@ -72,4 +72,5 @@
 | M38.2: Unified Store Audit (Redis/Memory Parity) | COMPLETED | Implement | 2026-02-07 |
 | M36.3: Compliance & Deletion | COMPLETED | Implement | 2026-02-07 |
 | M31.3: Documentation & Changelog | COMPLETED | Orchestrator | 2026-02-07 |
-
+| Phase 16: Quality Assurance | INITIATED | Orchestrator | 2026-02-07 |
+| M41.1: API Package Coverage | COMPLETED | Implement | 2026-02-07 |
