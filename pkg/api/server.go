@@ -19,6 +19,7 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/provider"
+	"github.com/rmax-ai/ratelord/pkg/reports"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -84,6 +85,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	mux.HandleFunc("/v1/identities", s.withLeaderCheck(s.handleIdentities)) // handleIdentities checks method inside
 	mux.HandleFunc("/v1/events", s.handleEvents)
 	mux.HandleFunc("/v1/trends", s.handleTrends)
+	mux.HandleFunc("/v1/reports", s.handleReports)
 	mux.HandleFunc("/v1/graph", s.handleGraph)
 	mux.HandleFunc("/v1/webhooks", s.withLeaderCheck(s.withAuth(s.handleWebhooks)))
 	mux.HandleFunc("/v1/federation/grant", s.withLeaderCheck(s.handleGrant))
@@ -536,6 +538,95 @@ func (s *Server) handleGraph(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(g); err != nil {
 		fmt.Printf(`{"level":"error","msg":"failed_to_encode_graph","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+	}
+}
+
+// handleReports generates and streams reports.
+func (s *Server) handleReports(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `{"error":"method_not_allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse parameters
+	q := r.URL.Query()
+	reportType := reports.ReportType(q.Get("type"))
+	if reportType == "" {
+		http.Error(w, `{"error":"missing_type"}`, http.StatusBadRequest)
+		return
+	}
+
+	fromStr := q.Get("from")
+	toStr := q.Get("to")
+
+	// Default time range: last 24h if not specified
+	to := time.Now()
+	if toStr != "" {
+		var err error
+		to, err = time.Parse(time.RFC3339, toStr)
+		if err != nil {
+			http.Error(w, `{"error":"invalid_to","format":"RFC3339"}`, http.StatusBadRequest)
+			return
+		}
+	}
+
+	from := to.Add(-24 * time.Hour)
+	if fromStr != "" {
+		var err error
+		from, err = time.Parse(time.RFC3339, fromStr)
+		if err != nil {
+			http.Error(w, `{"error":"invalid_from","format":"RFC3339"}`, http.StatusBadRequest)
+			return
+		}
+	}
+
+	// Build params
+	params := reports.ReportParams{
+		Start:   from,
+		End:     to,
+		Filters: make(map[string]interface{}),
+	}
+
+	// Pass through filters
+	if id := q.Get("identity_id"); id != "" {
+		params.Filters["identity_id"] = id
+	}
+	if sc := q.Get("scope_id"); sc != "" {
+		params.Filters["scope_id"] = sc
+	}
+	if prov := q.Get("provider_id"); prov != "" {
+		params.Filters["provider_id"] = prov
+	}
+	if pool := q.Get("pool_id"); pool != "" {
+		params.Filters["pool_id"] = pool
+	}
+	if bucket := q.Get("bucket"); bucket != "" {
+		params.Filters["bucket"] = bucket
+	}
+
+	// Create generator
+	gen, err := reports.NewReportGenerator(reportType, s.store)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error":"invalid_report_type","details":"%v"}`, err), http.StatusBadRequest)
+		return
+	}
+
+	// Generate
+	reader, err := gen.Generate(r.Context(), params)
+	if err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_generate_report","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+		http.Error(w, `{"error":"report_generation_failed"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Set headers
+	w.Header().Set("Content-Type", "text/csv")
+	filename := fmt.Sprintf("report_%s_%d.csv", reportType, time.Now().Unix())
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+
+	// Stream response
+	if _, err := io.Copy(w, reader); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_stream_report","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 	}
 }
 

@@ -10,11 +10,9 @@
 ## Immediate Actions
 
  1. **Epic 37: Explainability & Audit** (`TASKS.md`):
-       - [x] **M37.1: Decision Explainability**:
-           - [x] **M37.1.1: Trace Structs**: Define `RuleTrace` in `pkg/engine`.
-           - [x] **M37.1.2: Evaluator Trace**: Update `Evaluate` to capture trace.
-           - [x] **M37.1.3: API Exposure**: Return trace in `POST /v1/intent` response.
-       - [ ] **M37.2: Compliance Reports**.
+       - [x] **M37.1: Decision Explainability** (Completed).
+       - [x] **M37.2: Compliance Reports** (Completed).
+       - [ ] **M37.3: Policy Debugging**.
 
  2. **Epic 38: Architecture Convergence** (`TASKS.md`):
        - [ ] **M38.2: Unified Store Audit**: Verify Redis/SQLite parity.

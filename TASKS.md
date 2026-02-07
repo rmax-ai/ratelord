@@ -540,9 +540,12 @@ Focus: Answering "Why?" for every decision.
     - [x] **M37.1.2: Evaluator Trace**: Update `Evaluate` to capture trace of all checked rules.
     - [x] **M37.1.3: Event Enrichment**: Add `Trace` to `Decision` event payload (Available in Result, Event pending if needed).
     - [x] **M37.1.4: API Exposure**: Return trace in `POST /v1/intent` response (debug mode).
-- [ ] **M37.2: Compliance Reports**
-    - [ ] Generate PDF/CSV reports of Usage vs Limits over time.
-    - [ ] Generate "Access Log" of all Intents.
+- [x] **M37.2: Compliance Reports**
+    - [x] **M37.2.1: Report Engine**: Create `pkg/reports` with interface `Generator`.
+    - [x] **M37.2.2: CSV Generator**: Implement `CSVGenerator` for flat tabular data.
+    - [x] **M37.2.3: Access Log Report**: Implement `AccessLogReport` (Date, Identity, Intent, Decision, RuleTrace).
+    - [x] **M37.2.4: Usage Report**: Implement `UsageReport` (Date, Pool, Usage, Limit, Cost).
+    - [x] **M37.2.5: API Endpoint**: Implement `GET /v1/reports` with `type` and `format` params.
 - [ ] **M37.3: Policy Debugging**
     - [ ] Implement "Trace Mode" for Policy Engine (logs every rule result).
     - [ ] Web UI: Visualize Policy Evaluation Tree.

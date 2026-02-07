@@ -111,6 +111,16 @@ type UsageFilter struct {
 	ScopeID    string
 }
 
+// EventFilter defines filters for querying events.
+type EventFilter struct {
+	From       time.Time
+	To         time.Time
+	EventTypes []EventType
+	IdentityID string
+	ScopeID    string
+	Limit      int
+}
+
 // WebhookConfig represents a registered webhook endpoint for event notifications.
 type WebhookConfig struct {
 	WebhookID string    `json:"webhook_id"`

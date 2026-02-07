@@ -90,6 +90,18 @@ func (s *Store) migrate() error {
 	-- Index for replay by ingestion order (implicit rowid is efficient, but ingest time is explicit)
 	CREATE INDEX IF NOT EXISTS idx_events_ts_ingest ON events(ts_ingest);
 	
+	-- Index for querying by event time
+	CREATE INDEX IF NOT EXISTS idx_events_ts_event ON events(ts_event);
+	
+	-- Index for filtering by event type
+	CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);
+	
+	-- Index for filtering by identity
+	CREATE INDEX IF NOT EXISTS idx_events_identity ON events(identity_id);
+	
+	-- Index for filtering by scope
+	CREATE INDEX IF NOT EXISTS idx_events_scope ON events(scope_id);
+	
 	-- Index for lookup by correlation (common access pattern)
 	CREATE INDEX IF NOT EXISTS idx_events_correlation ON events(correlation_id);
 	
@@ -341,6 +353,115 @@ func (s *Store) ReadRecentEvents(ctx context.Context, limit int) ([]*Event, erro
 	rows, err := s.db.QueryContext(ctx, query, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query recent events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []*Event
+
+	for rows.Next() {
+		var evt Event
+		var payload []byte
+
+		err := rows.Scan(
+			&evt.EventID,
+			&evt.EventType,
+			&evt.SchemaVersion,
+			&evt.TsEvent,
+			&evt.TsIngest,
+			&evt.Source.OriginKind,
+			&evt.Source.OriginID,
+			&evt.Source.WriterID,
+			&evt.Dimensions.AgentID,
+			&evt.Dimensions.IdentityID,
+			&evt.Dimensions.WorkloadID,
+			&evt.Dimensions.ScopeID,
+			&evt.Correlation.CorrelationID,
+			&evt.Correlation.CausationID,
+			&payload,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan event row: %w", err)
+		}
+
+		evt.Payload = json.RawMessage(payload)
+		events = append(events, &evt)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return events, nil
+}
+
+// QueryEvents retrieves events based on the provided filter.
+func (s *Store) QueryEvents(ctx context.Context, filter EventFilter) ([]*Event, error) {
+	query := `
+		SELECT
+			event_id,
+			event_type,
+			schema_version,
+			ts_event,
+			ts_ingest,
+			origin_kind,
+			origin_id,
+			writer_id,
+			agent_id,
+			identity_id,
+			workload_id,
+			scope_id,
+			correlation_id,
+			causation_id,
+			payload
+		FROM events
+		WHERE 1=1
+	`
+
+	args := []interface{}{}
+
+	if !filter.From.IsZero() {
+		query += " AND ts_event >= ?"
+		args = append(args, filter.From)
+	}
+
+	if !filter.To.IsZero() {
+		query += " AND ts_event < ?"
+		args = append(args, filter.To)
+	}
+
+	if len(filter.EventTypes) > 0 {
+		placeholders := make([]string, len(filter.EventTypes))
+		for i := range placeholders {
+			placeholders[i] = "?"
+		}
+		query += fmt.Sprintf(" AND event_type IN (%s)", strings.Join(placeholders, ","))
+		for _, et := range filter.EventTypes {
+			args = append(args, et)
+		}
+	}
+
+	if filter.IdentityID != "" {
+		query += " AND identity_id = ?"
+		args = append(args, filter.IdentityID)
+	}
+
+	if filter.ScopeID != "" {
+		query += " AND scope_id = ?"
+		args = append(args, filter.ScopeID)
+	}
+
+	query += " ORDER BY ts_event ASC"
+
+	limit := filter.Limit
+	if limit == 0 {
+		limit = 1000
+	}
+	query += " LIMIT ?"
+	args = append(args, limit)
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query events: %w", err)
 	}
 	defer rows.Close()
 

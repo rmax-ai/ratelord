@@ -63,3 +63,4 @@
 
 ## 2026-02-07
 - [x] **Epic 39: Model Context Protocol (MCP) Integration** (Epic 39) - Implemented `pkg/mcp` with `Server` adapting `ratelord` to MCP protocol. Implemented `ratelord://events` and `ratelord://usage` resources, `ask_intent` tool, and `ratelord-aware` prompt. Extended `pkg/client` to support fetching events and trends. Integrated into `ratelord` CLI as `ratelord mcp` command.
+- [x] **M37.2: Compliance Reports** (Epic 37) - Implemented `pkg/reports` engine with CSV generation support. Implemented `AccessLogReport` (for `intent_decided` audit trail) and `UsageReport` (for aggregated usage statistics). Added `QueryEvents` capability to Store for flexible filtering. Exposed via `GET /v1/reports` endpoint with filtering parameters (time range, identity, scope, etc.).
