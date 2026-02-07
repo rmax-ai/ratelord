@@ -15,6 +15,14 @@ These variables control the daemon's runtime environment, storage, and network s
 | `RATELORD_TLS_CERT` | Path to TLS certificate for HTTPS. | (Disabled) | No |
 | `RATELORD_TLS_KEY` | Path to TLS private key for HTTPS. | (Disabled) | No |
 | `RATELORD_REDIS_URL` | Connection string for Redis (if using distributed mode). | (Disabled) | No |
+| `RATELORD_WEB_DIR` | Directory containing the web UI assets (for `--web` flag). | (None) | No |
+| `RATELORD_MODE` | Operating mode: `leader`, `follower`, or `standalone`. | `leader` | No |
+| `RATELORD_LEADER_URL` | URL of the Leader node (only for followers). | `http://localhost:8090` | No |
+| `RATELORD_FOLLOWER_ID` | Unique ID for this node when in follower mode. | `hostname` | No |
+| `RATELORD_ADVERTISED_URL` | Public URL this node broadcasts to the cluster. | `http://localhost:{port}` | No |
+| `RATELORD_ARCHIVE_ENABLED` | Enable cold storage archiving of events. | `false` | No |
+| `RATELORD_ARCHIVE_RETENTION` | Retention period for hot events before archiving (e.g., `720h`). | `720h` | No |
+| `RATELORD_BLOB_PATH` | Local filesystem path for blob storage (if using local blob store). | `./blobs` | No |
 
 ## Policy Configuration
 
@@ -22,9 +30,11 @@ The policy file (JSON or YAML) defines the "brain" of Ratelord: which providers 
 
 ### Structure
 
-The configuration file has two main sections:
+The configuration file has four main sections:
 1.  **`providers`**: Defines external services to monitor (e.g., GitHub, OpenAI).
 2.  **`policies`**: Defines the governance rules applied to intents.
+3.  **`pricing`**: (Optional) Defines cost models for financial governance.
+4.  **`retention`**: (Optional) Defines data lifecycle rules for events.
 
 ### Example: `policy.json`
 
@@ -117,3 +127,4 @@ Tracks Request-Per-Minute (RPM) and Token-Per-Minute (TPM) limits.
 
 -   `api_key_env_var`: The environment variable containing the API Key.
 -   `org_id`: (Optional) Organization ID for usage tracking.
+-   `base_url`: (Optional) Custom API endpoint (e.g. for Azure OpenAI or proxies).

@@ -91,5 +91,5 @@ If the CLI or TUI cannot connect:
 
 ### Identity Not Found
 If an agent receives "Identity not found" errors:
-1.  Run `ratelord identity list` (if available) or check the TUI to see registered identities.
+1.  Check the TUI or query `GET /v1/identities` to see registered identities.
 2.  Ensure the `IdentityID` in the SDK `Intent` matches exactly what was registered via CLI.

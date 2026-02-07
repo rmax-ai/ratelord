@@ -9,6 +9,7 @@
 Requires Go 1.23+.
 
 ```bash
+go install github.com/rmax-ai/ratelord/cmd/ratelord@latest
 go install github.com/rmax-ai/ratelord/cmd/ratelord-d@latest
 go install github.com/rmax-ai/ratelord/cmd/ratelord-tui@latest
 ```
@@ -34,10 +35,9 @@ To run Ratelord locally for development:
 
 3.  **Register an Identity**:
     ```bash
-    # (Assuming you have the ratelord CLI tool built, or use CURL)
-    # Note: ratelord-d itself is the daemon. The CLI is currently bundled or accessed via API.
-    # See the CLI Guide for details.
+    ratelord identity add pat:my-user user
     ```
+    *This creates a new identity and prints the access token.*
 
 ## 3. Production Deployment
 

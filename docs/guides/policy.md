@@ -15,17 +15,19 @@ Policies exist in a strict hierarchy. A lower-level policy cannot permit what a 
 3.  **Pool / Resource** (Provider constraints): manage specific API quotas.
 4.  **Identity / Agent** (Local optimization): Ensure fairness among agents.
 
-### Actions
+### Actions vs. Decisions
 
-When a rule matches, the engine outputs one of the following decisions:
+A **Rule Action** describes what to do when a specific rule matches (e.g., "shape traffic"). The **Policy Engine Decision** is the final outcome returned to the agent after evaluating all rules.
 
-| Action | Description | Behavior |
+| Rule Action | Description | Behavior |
 | :--- | :--- | :--- |
-| **APPROVE** | Risk is acceptable. | Agent proceeds immediately. |
-| **SHAPE** | Risk is elevated. | Agent must wait `wait_seconds` (throttle) before proceeding. |
-| **DEFER** | Risk is high, but transient. | Agent must wait until **after** the next reset. |
-| **DENY** | Risk is critical or rule violated. | Agent must abort the action completely. |
-| **SWITCH** | Pool is exhausted/risky. | Agent must retry using a different `identity_id` (fallback). |
+| **approve** | Risk is acceptable. | Agent proceeds immediately. |
+| **shape** | Risk is elevated. | Agent must wait `wait_seconds` (throttle) before proceeding. Result: `approve_with_modifications`. |
+| **defer** | Risk is high, but transient. | Agent must wait until **after** the next reset. Result: `approve_with_modifications`. |
+| **deny** | Risk is critical or rule violated. | Agent must abort the action completely. Result: `deny_with_reason`. |
+| **switch** | Pool is exhausted/risky. | Agent must retry using a different `identity_id` (fallback). |
+
+Note: Code uses lowercase strings for actions (e.g., `"shape"`, `"deny"`).
 
 ## 2. Policy Structure
 
@@ -40,6 +42,7 @@ Each rule contains:
 
 *   **Condition**: A logic expression based on Forecasts, Metadata, or Time.
 *   **Action**: What to do if the condition matches.
+*   **TimeWindow**: (Optional) specific days/hours when this rule applies.
 *   **Priority**: Precedence order (higher numbers evaluated first).
 
 ## 3. Writing Policy Rules
@@ -60,6 +63,19 @@ Prevent the system from hitting a hard limit.
 - name: "prevent-exhaustion"
   condition: "risk.p_exhaustion > 0.99"
   action: "deny"
+```
+
+#### Temporal Rules
+Apply limits only during business hours.
+
+```yaml
+- name: "business-hours-only"
+  action: "deny"
+  time_window:
+    start_time: "09:00"
+    end_time: "17:00"
+    days: ["Mon", "Tue", "Wed", "Thu", "Fri"]
+    timezone: "UTC"
 ```
 
 #### Soft Throttling (Business Logic)

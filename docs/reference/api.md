@@ -163,3 +163,27 @@ Standard HTTP status codes are used:
 - **503 Service Unavailable**: Daemon is initializing or overloaded.
 
 **Note**: A "Deny" decision is a successful HTTP 200 response, not an error. It represents a valid policy enforcement.
+
+### Observability
+
+#### `GET /metrics`
+Returns Prometheus-formatted metrics for system usage, including:
+- `ratelord_usage`: Current usage per pool.
+- `ratelord_limit`: Current limit per pool.
+- `ratelord_intent_total`: Total number of processed intents.
+- `ratelord_forecast_seconds`: Predicted time to exhaustion.
+
+### Debugging
+
+#### `POST /debug/provider/inject`
+**Internal use only.** Inject fake usage or limit data into a provider poller for testing.
+
+**Request:**
+```json
+{
+  "provider_id": "github-mock",
+  "pool_id": "core",
+  "usage": 4500,
+  "limit": 5000
+}
+```
