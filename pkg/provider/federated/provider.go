@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rmax-ai/ratelord/pkg/api"
+	"github.com/rmax-ai/ratelord/pkg/protocol"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 	"github.com/rmax-ai/ratelord/pkg/version"
 )
@@ -100,7 +100,7 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 			// Simple start: Ask for 1000 or 2x used.
 			askAmount := int64(1000)
 
-			req := api.GrantRequest{
+			req := protocol.GrantRequest{
 				FollowerID: p.followerID,
 				ProviderID: string(p.id),
 				PoolID:     poolID,
@@ -151,7 +151,7 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 	return result, nil
 }
 
-func (p *FederatedProvider) requestGrant(ctx context.Context, req api.GrantRequest) (int64, time.Time, error) {
+func (p *FederatedProvider) requestGrant(ctx context.Context, req protocol.GrantRequest) (int64, time.Time, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		return 0, time.Time{}, err
@@ -174,7 +174,7 @@ func (p *FederatedProvider) requestGrant(ctx context.Context, req api.GrantReque
 		return 0, time.Time{}, fmt.Errorf("leader returned status %d", resp.StatusCode)
 	}
 
-	var grantResp api.GrantResponse
+	var grantResp protocol.GrantResponse
 	if err := json.NewDecoder(resp.Body).Decode(&grantResp); err != nil {
 		return 0, time.Time{}, err
 	}

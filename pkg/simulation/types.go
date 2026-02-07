@@ -1,8 +1,39 @@
-package main
+package simulation
 
 import (
 	"time"
 )
+
+// SimulationResult captures the final state of the simulation for reporting
+type SimulationResult struct {
+	ScenarioName  string                 `json:"scenario_name"`
+	Duration      time.Duration          `json:"duration"`
+	TotalRequests uint64                 `json:"total_requests"`
+	TotalApproved uint64                 `json:"total_approved"`
+	TotalDenied   uint64                 `json:"total_denied"`
+	TotalModified uint64                 `json:"total_modified"`
+	TotalErrors   uint64                 `json:"total_errors"`
+	TotalInjected uint64                 `json:"total_injected"`
+	AgentStats    map[string]*AgentStats `json:"agent_stats"`
+	Invariants    []InvariantResult      `json:"invariants"`
+	Success       bool                   `json:"success"`
+}
+
+type AgentStats struct {
+	Requests uint64 `json:"requests"`
+	Approved uint64 `json:"approved"`
+	Denied   uint64 `json:"denied"`
+	Modified uint64 `json:"modified"`
+	Errors   uint64 `json:"errors"`
+}
+
+type InvariantResult struct {
+	Metric   string `json:"metric"`
+	Scope    string `json:"scope"`
+	Expected string `json:"expected"` // e.g. "> 0.95"
+	Actual   string `json:"actual"`   // e.g. "0.98"
+	Passed   bool   `json:"passed"`
+}
 
 type Scenario struct {
 	Name        string          `json:"name" yaml:"name"`

@@ -23,7 +23,8 @@
 - [x] **Fix Web Build**: Resolve duplicate keys error in `src/features/graph/GraphView.tsx`.
 - [x] **M43.5 (Final Validation)**: Run full simulation and acceptance suite before final sign-off (Fixed auth bug in `ratelord-sim`).
 - [x] **M45.1 (Web UI)**: Implement simulation UI in modern typescript (Simulation tab).
-- [ ] **Phase 16 Continues**: Final pre-release validation and debt paydown.
+- [x] **M45.2 (Integration)**: Connect UI to simulation backend (Implemented `pkg/simulation` and `/v1/simulation`).
+- [x] **Phase 16 Continues**: Final pre-release validation and debt paydown. (Fixed: Test imports, Web UI unused imports).
 
 ## Phase History
 - [x] **M42.1, M42.2, M42.3**: User Documentation (Concepts, API Ref, Guides).

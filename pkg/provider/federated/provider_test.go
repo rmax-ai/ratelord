@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rmax-ai/ratelord/pkg/api"
+	"github.com/rmax-ai/ratelord/pkg/protocol"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 )
 
@@ -22,7 +22,7 @@ func TestFederatedProvider_Poll(t *testing.T) {
 			http.Error(w, "not found", http.StatusNotFound)
 			return
 		}
-		var req api.GrantRequest
+		var req protocol.GrantRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
@@ -33,7 +33,7 @@ func TestFederatedProvider_Poll(t *testing.T) {
 			return
 		}
 
-		resp := api.GrantResponse{
+		resp := protocol.GrantResponse{
 			Granted:    1000,
 			ValidUntil: time.Now().Add(1 * time.Minute),
 		}

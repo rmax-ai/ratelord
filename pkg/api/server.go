@@ -18,6 +18,7 @@ import (
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/graph"
+	"github.com/rmax-ai/ratelord/pkg/protocol"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 	"github.com/rmax-ai/ratelord/pkg/reports"
 	"github.com/rmax-ai/ratelord/pkg/store"
@@ -133,6 +134,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	mux.HandleFunc("/v1/federation/grant", s.withLeaderCheck(s.handleGrant))
 	mux.HandleFunc("/v1/cluster/nodes", s.handleClusterNodes)
 	mux.HandleFunc("/v1/admin/prune", s.withLeaderCheck(s.withAuth(s.handlePrune)))
+	mux.HandleFunc("/v1/simulation", s.withLeaderCheck(s.handleSimulation))
 
 	// Debug endpoints
 	if poller != nil {
@@ -222,7 +224,7 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req IntentRequest
+	var req protocol.IntentRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"error":"invalid_json_body"}`, http.StatusBadRequest)
 		return
@@ -320,7 +322,7 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		trace = append(trace, t)
 	}
 
-	resp := DecisionResponse{
+	resp := protocol.DecisionResponse{
 		IntentID:      intent.IntentID,
 		Decision:      string(result.Decision),
 		Reason:        result.Reason,
@@ -472,7 +474,7 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req IdentityRegistration
+	var req protocol.IdentityRegistration
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"error":"invalid_json_body"}`, http.StatusBadRequest)
 		return
@@ -541,7 +543,7 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Response
-	resp := IdentityResponse{
+	resp := protocol.IdentityResponse{
 		IdentityID: req.IdentityID,
 		Status:     "registered",
 		EventID:    string(evt.EventID),

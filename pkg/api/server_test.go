@@ -12,6 +12,7 @@ import (
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/graph"
+	"github.com/rmax-ai/ratelord/pkg/protocol"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -267,7 +268,7 @@ func TestHandleIntent(t *testing.T) {
 
 	server := createServerWithMocks(mockStore, mockIdentities, mockUsage, mockPolicy, mockGraph, nil)
 
-	reqBody := IntentRequest{
+	reqBody := protocol.IntentRequest{
 		AgentID:    "agent1",
 		IdentityID: "identity1",
 		ScopeID:    "scope1",
@@ -284,7 +285,7 @@ func TestHandleIntent(t *testing.T) {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
 
-	var resp DecisionResponse
+	var resp protocol.DecisionResponse
 	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
@@ -303,7 +304,7 @@ func TestHandleIdentity_Register(t *testing.T) {
 
 	server := createServerWithMocks(mockStore, mockIdentities, mockUsage, mockPolicy, mockGraph, nil)
 
-	reqBody := IdentityRegistration{
+	reqBody := protocol.IdentityRegistration{
 		IdentityID: "test-id",
 		Kind:       "agent",
 		Metadata:   map[string]interface{}{"key": "value"},
@@ -319,7 +320,7 @@ func TestHandleIdentity_Register(t *testing.T) {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
 
-	var resp IdentityResponse
+	var resp protocol.IdentityResponse
 	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
@@ -601,7 +602,7 @@ func TestHandleIntent_Policy(t *testing.T) {
 	mockIdentities := &MockIdentityProjection{}
 	mockGraph := &MockGraph{}
 
-	reqBody := IntentRequest{
+	reqBody := protocol.IntentRequest{
 		AgentID:    "agent1",
 		IdentityID: "identity1",
 		ScopeID:    "scope1",
@@ -663,7 +664,7 @@ func TestHandleIntent_Policy(t *testing.T) {
 				t.Errorf("Expected status 200, got %d", w.Code)
 			}
 
-			var resp DecisionResponse
+			var resp protocol.DecisionResponse
 			if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
 				t.Fatalf("Failed to decode response: %v", err)
 			}

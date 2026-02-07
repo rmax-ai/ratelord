@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
+	"github.com/rmax-ai/ratelord/pkg/protocol"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -17,7 +18,7 @@ func (s *Server) handleGrant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req GrantRequest
+	var req protocol.GrantRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"error":"invalid_json_body"}`, http.StatusBadRequest)
 		return
@@ -70,7 +71,7 @@ func (s *Server) handleGrant(w http.ResponseWriter, r *http.Request) {
 		remaining = poolState.Remaining
 	}
 
-	resp := GrantResponse{
+	resp := protocol.GrantResponse{
 		Granted:         granted,
 		ValidUntil:      validUntil,
 		RemainingGlobal: remaining,

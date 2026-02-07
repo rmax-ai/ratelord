@@ -653,7 +653,7 @@ Focus: Bring the simulation capabilities into the visual domain.
     - Create "Simulation" tab in Web UI.
     - Implement frontend for configuring scenarios (Agents, Policies, Bursts).
     - Run `ratelord-sim` (wasm or server-side) and visualize results.
-- [ ] **M45.2: Simulation Integration**
+- [x] **M45.2: Simulation Integration**
     - Connect UI to `ratelord-sim` backend (or wasm).
     - Visualize real-time results.
 

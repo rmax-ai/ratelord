@@ -12,6 +12,7 @@ import (
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/graph"
+	"github.com/rmax-ai/ratelord/pkg/protocol"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
@@ -65,7 +66,7 @@ func TestHandleGrant(t *testing.T) {
 	defer ts.Close()
 
 	// Create Request
-	reqBody := GrantRequest{
+	reqBody := protocol.GrantRequest{
 		FollowerID: "follower-123",
 		ProviderID: "provider-xyz",
 		PoolID:     "pool-abc",
@@ -86,7 +87,7 @@ func TestHandleGrant(t *testing.T) {
 	}
 
 	// Assert Response
-	var grantResp GrantResponse
+	var grantResp protocol.GrantResponse
 	if err := json.NewDecoder(resp.Body).Decode(&grantResp); err != nil {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
@@ -132,7 +133,7 @@ func TestHandleClusterNodes(t *testing.T) {
 	defer cleanup()
 
 	// Pre-populate topology via Grant
-	reqBody := GrantRequest{
+	reqBody := protocol.GrantRequest{
 		FollowerID: "node-1",
 		ProviderID: "provider-1",
 		PoolID:     "pool-1",

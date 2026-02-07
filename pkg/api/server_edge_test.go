@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
+	"github.com/rmax-ai/ratelord/pkg/protocol"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
@@ -53,7 +54,7 @@ func TestHandleIntent_StoreError(t *testing.T) {
 
 	server := createServerWithMocks(mockStore, mockIdentities, mockUsage, mockPolicy, mockGraph, nil)
 
-	reqBody := IntentRequest{
+	reqBody := protocol.IntentRequest{
 		AgentID:    "agent1",
 		IdentityID: "identity1",
 		ScopeID:    "scope1",
@@ -475,7 +476,7 @@ func TestHandleIntent_UsageTracking(t *testing.T) {
 	server.SetUsageTracker(tracker)
 
 	// Request that approves
-	reqBody := IntentRequest{AgentID: "a", IdentityID: "i", ScopeID: "s", WorkloadID: "w"}
+	reqBody := protocol.IntentRequest{AgentID: "a", IdentityID: "i", ScopeID: "s", WorkloadID: "w"}
 	body, _ := json.Marshal(reqBody)
 	req := httptest.NewRequest("POST", "/v1/intent", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -520,7 +521,7 @@ func TestHandleIntent_WithEpoch(t *testing.T) {
 	}
 	server := createServerWithMocks(mockStore, &MockIdentityProjection{}, &MockUsageProjection{}, &MockPolicyEngine{}, &MockGraph{}, mockElection)
 
-	reqBody := IntentRequest{AgentID: "a", IdentityID: "i", ScopeID: "s", WorkloadID: "w"}
+	reqBody := protocol.IntentRequest{AgentID: "a", IdentityID: "i", ScopeID: "s", WorkloadID: "w"}
 	body, _ := json.Marshal(reqBody)
 	req := httptest.NewRequest("POST", "/v1/intent", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -546,7 +547,7 @@ func TestHandleIntent_UsageEventError(t *testing.T) {
 
 	server := createServerWithMocks(mockStore, &MockIdentityProjection{}, mockUsage, &MockPolicyEngine{}, &MockGraph{}, nil)
 
-	reqBody := IntentRequest{AgentID: "a", IdentityID: "i", ScopeID: "s", WorkloadID: "w"}
+	reqBody := protocol.IntentRequest{AgentID: "a", IdentityID: "i", ScopeID: "s", WorkloadID: "w"}
 	body, _ := json.Marshal(reqBody)
 	req := httptest.NewRequest("POST", "/v1/intent", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
