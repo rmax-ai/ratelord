@@ -633,6 +633,9 @@ Focus: Address technical debt, stubbed features, and missing tests identified du
     - [x] `pkg/provider/federated/provider.go`: Fix TODOs (error reporting, pre-seeding note).
     - [x] `pkg/engine/poller.go`: Verified configurable units implementation.
     - [x] `pkg/api/federation.go`: Verified `RemainingGlobal` lookup.
+    - [ ] **M43.5: Final Validation**
+    - [ ] Execute `ratelord-sim` full suite.
+    - [ ] Verify acceptance criteria from `ACCEPTANCE.md`.
 
 
 

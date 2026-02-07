@@ -4,38 +4,38 @@
 ## Assessor: Orchestrator
 
 ### Status Summary
-The project is in **Epic 43: Final Polish & Debt Paydown**. Most core functionality for Phase 1-15 is complete. Reporting (M43.1) is verified complete. However, a deep code scan has revealed several TODOs and potential gaps that need addressing before 1.0.
+The project is in **Epic 43: Final Polish & Debt Paydown**. All planned code tasks for Phase 1-15 (M43.1, M43.2, M43.3, M43.4) have been verified as **COMPLETE**. The only remaining step is the final simulation/acceptance run (M43.5).
 
-### Critical Gaps (Must Fix for 1.0)
+### Verification of Critical Gaps (from previous scan)
 1.  **Event-Sourced Policy Updates (M43.2)**:
-    *   [x] `pkg/graph/projection.go`: `PolicyUpdated` event handling is stubbed. (Implemented)
-    *   `pkg/graph/projection.go`: `ProviderObserved` event handling is stubbed.
-    *   [x] Currently, policy updates bypass the event log, violating the core "Event Sourcing" non-negotiable. (Fixed: EventTypePolicyUpdated added and handled)
+    *   [x] `pkg/graph/projection.go`: `EventTypePolicyUpdated` is handled.
+    *   [x] `pkg/graph/projection.go`: `EventTypeProviderPollObserved` is handled.
 2.  **Hardcoded Forecast Parameters (M43.3)**:
-    *   `pkg/engine/forecast/service.go`: `resetAt` is hardcoded to 24 hours. Needs to be derived from pool config.
+    *   [x] `pkg/engine/forecast/service.go`: `resetAt` is now dynamically fetched via `ResetTimeProvider`, falling back to 24h only if unavailable.
 3.  **Graph Performance (M43.2)**:
-    *   [x] `pkg/graph/projection.go`: Uses O(E) linear search. Needs adjacency list index for performance. (Implemented)
+    *   [x] `pkg/graph/projection.go`: Adjacency index (`scopeConstraints`) implemented for O(1) lookup.
 4.  **Pool Identification Bug (M43.3)**:
-    *   `pkg/api/server.go`: TODO "Use the correct pool ID". This suggests the API might be logging the wrong pool ID in events.
+    *   [x] `pkg/api/server.go`: Pool ID handling logic corrected in recent updates.
+5.  **Federation & Poller (M43.4)**:
+    *   [x] `pkg/api/federation.go`: `RemainingGlobal` now fetches from `usage.GetPoolState`.
+    *   [x] `pkg/engine/poller.go`: Emits `EventTypeProviderError`.
+    *   [x] `pkg/engine/poller.go`: Units are configurable via `PolicyConfig`.
+6.  **Tests (M43.3)**:
+    *   [x] `pkg/mcp` tests exist (`pkg/mcp/server_test.go`).
+    *   [x] `pkg/blob` tests exist (`pkg/blob/local_store_test.go`).
 
-### Moderate Gaps (Should Fix)
-1.  **Federation Logic**:
-    *   `pkg/api/federation.go`: `RemainingGlobal` is hardcoded to 0. This might break federation decisions.
-2.  **Poller Improvements**:
-    *   `pkg/engine/poller.go`: Missing `provider_error` event emission.
-    *   `pkg/engine/poller.go`: Units are not configurable (hardcoded "requests").
-3.  **Provider Metadata**:
-    *   `pkg/provider/federated/provider.go`: Version hardcoded to "1.0.0".
-
-### Missing Tests (M43.3)
-1.  `pkg/mcp`: No tests.
-2.  `pkg/blob`: No tests.
-
-### Recommendations
-1.  **Prioritize M43.2**: Finish the Graph Projection work to ensure Event Sourcing compliance. (DONE)
-2.  **Prioritize M43.3**: Fix the hardcoded `resetAt` and the API pool ID TODO.
-3.  **New Task M43.4**: Address Federation and Poller TODOs (RemainingGlobal, configurable units).
-4.  **Tests**: Ensure `pkg/mcp` and `pkg/blob` get at least basic coverage.
+### Remaining Missing Features / Improvements
+1.  **Provider Metadata Version**:
+    *   `pkg/provider/federated/provider.go` has `ProviderVersion = "1.0.0"` hardcoded.
+    *   *Improvement*: Inject this at build time or derive from `version` package.
+2.  **Graph Concurrency**:
+    *   `pkg/graph/projection.go`: `GetGraph` performs a shallow-ish copy. While safe for now, a Copy-On-Write or deep clone mechanism might be needed for high-concurrency read patterns in the future.
+3.  **Federation Global State**:
+    *   `pkg/api/federation.go` uses local `poolState.Remaining` for `RemainingGlobal`. In a pure follower node, this is correct (it sees what it has). In a leader node, this should reflect the aggregated cluster state. The current implementation assumes the daemon's local usage state *is* the authoritative state for the leader, which is consistent with the architecture.
 
 ### Next Actions
-Execute `M43.3` immediately.
+1.  **Execute M43.5**: Run the full simulation suite (`ratelord-sim`) to validate end-to-end behavior.
+2.  **Release**: Proceed to 1.0 release tagging after M43.5 passes.
+
+### Conclusion
+The codebase is **feature complete** for the 1.0 scope defined in `PROJECT_CONTEXT.md`. All "Must Fix" items are resolved.
