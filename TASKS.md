@@ -548,9 +548,9 @@ Focus: Answering "Why?" for every decision.
     - [x] **M37.2.3: Access Log Report**: Implement `AccessLogReport` (Date, Identity, Intent, Decision, RuleTrace).
     - [x] **M37.2.4: Usage Report**: Implement `UsageReport` (Date, Pool, Usage, Limit, Cost).
     - [x] **M37.2.5: API Endpoint**: Implement `GET /v1/reports` with `type` and `format` params.
-- [ ] **M37.3: Policy Debugging**
+- [x] **M37.3: Policy Debugging**
     - [x] Implement "Trace Mode" for Policy Engine (logs every rule result).
-    - [ ] Web UI: Visualize Policy Evaluation Tree.
+    - [x] Web UI: Visualize Policy Evaluation Tree.
 
 ## Epic 38: Architecture Convergence
 Focus: Unifying subsystems and paying down technical debt.

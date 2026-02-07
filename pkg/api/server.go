@@ -217,8 +217,44 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 	engine.RatelordIntentTotal.WithLabelValues(intent.IdentityID, string(result.Decision)).Inc()
 
 	// Persist the decision
-	// TODO: Write intent_submitted and intent_decided events to store.
-	// For M5.2, we just return the result.
+	// Create payload
+	decPayload, _ := json.Marshal(map[string]interface{}{
+		"decision":      result.Decision,
+		"reason":        result.Reason,
+		"modifications": result.Modifications,
+		"warnings":      result.Warnings,
+		"trace":         result.Trace,
+	})
+
+	now := time.Now()
+	decEvent := store.Event{
+		EventID:       store.EventID(fmt.Sprintf("dec_%s", intent.IntentID)),
+		EventType:     store.EventTypeIntentDecided,
+		SchemaVersion: 1,
+		TsEvent:       now,
+		TsIngest:      now,
+		Epoch:         s.getEpoch(),
+		Source: store.EventSource{
+			OriginKind: "daemon",
+			OriginID:   "api",
+			WriterID:   "ratelord-d",
+		},
+		Dimensions: store.EventDimensions{
+			AgentID:    intent.IdentityID, // Using IdentityID as AgentID proxy for now if AgentID not explicit
+			IdentityID: intent.IdentityID,
+			WorkloadID: intent.WorkloadID,
+			ScopeID:    intent.ScopeID,
+		},
+		Correlation: store.EventCorrelation{
+			CorrelationID: fmt.Sprintf("intent_%s", intent.IntentID),
+			CausationID:   store.SentinelUnknown,
+		},
+		Payload: decPayload,
+	}
+
+	if err := s.store.AppendEvent(r.Context(), &decEvent); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_append_decision_event","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+	}
 
 	// Convert trace to []interface{} for JSON serialization
 	var trace []interface{}

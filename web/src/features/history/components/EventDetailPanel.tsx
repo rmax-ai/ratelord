@@ -80,6 +80,40 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
           </div>
         </div>
 
+        {/* Policy Trace */}
+        {event.event_type === 'intent_decided' && Array.isArray(event.payload?.trace) && (
+          <div>
+            <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2 block">Policy Evaluation Trace</span>
+            <div className="bg-slate-950 rounded-lg border border-slate-800 overflow-hidden">
+              <div className="grid grid-cols-1 divide-y divide-slate-800">
+                {event.payload.trace.map((step: any, idx: number) => (
+                  <div key={idx} className={`p-3 flex items-start gap-3 ${step.result ? 'bg-indigo-950/20' : ''}`}>
+                    <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      step.result ? 'bg-green-500/20 text-green-400' : 'bg-slate-800 text-slate-500'
+                    }`}>
+                      {step.result ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-medium text-slate-200 font-mono">{step.policy_id}</span>
+                        <span className="text-xs text-slate-500 font-mono">Rule #{step.rule_index}</span>
+                      </div>
+                      <div className="mt-1 text-xs font-mono text-indigo-300 bg-slate-900/50 rounded px-2 py-1 inline-block">
+                        {step.condition}
+                      </div>
+                      {step.reason && (
+                        <div className="mt-1 text-xs text-slate-400 italic">
+                          {step.reason}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* JSON Payload */}
         <div>
           <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2 block">Payload</span>

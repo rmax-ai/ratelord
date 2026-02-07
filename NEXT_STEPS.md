@@ -13,15 +13,12 @@
 
 ## Immediate Actions
 
- 1. **M37.3: Policy Debugging** (`TASKS.md`):
-       - [x] Implement "Trace Mode" for Policy Engine.
-       - [ ] Web UI: Visualize Policy Evaluation Tree.
-
- 2. **M31.3: Documentation & Changelog** (`TASKS.md`):
+ 1. **M31.3: Documentation & Changelog** (`TASKS.md`):
        - [ ] Configure changelog generation.
        - [ ] Auto-update `RELEASE_NOTES.md`.
 
 ## Phase History
+- [x] **M37.3**: Policy Debugging (Trace Mode & UI).
 - [x] **M36.3**: Compliance & Deletion (GDPR support).
 - [x] **M36.2**: Cold Storage Offload (ArchiveWorker + LocalBlobStore).
 - [x] **Epic 40**: Client Resilience (M40.1, M40.2, M40.3).
