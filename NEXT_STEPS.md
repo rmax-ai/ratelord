@@ -9,16 +9,11 @@
 
 ## Immediate Actions
 
- 1. **Epic 37: Explainability & Audit** (`TASKS.md`):
-       - [x] **M37.1: Decision Explainability** (Completed).
-       - [x] **M37.2: Compliance Reports** (Completed).
-       - [ ] **M37.3: Policy Debugging**.
+ 1. **Epic 40: Client Resilience Library** (`TASKS.md`):
+       - [x] **M40.1: Go SDK Resilience**: Implement Backoff & Jitter.
 
- 2. **Epic 38: Architecture Convergence** (`TASKS.md`):
-       - [ ] **M38.2: Unified Store Audit**: Verify Redis/SQLite parity.
-
- 3. **Epic 33: High Availability** (`TASKS.md`):
-       - [ ] **M33.1: Leader Election**.
+ 2. **Epic 33: High Availability** (`TASKS.md`):
+       - [ ] **M33.1: Leader Election**: Verify Redis implementation status.
 
 ## Phase History
 - [x] **Epic 35**: Canonical Constraint Graph.

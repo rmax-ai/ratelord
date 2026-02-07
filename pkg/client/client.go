@@ -14,6 +14,8 @@ import (
 type Client struct {
 	endpoint string
 	http     *http.Client
+	backoff  BackoffStrategy
+	retries  int
 }
 
 // NewClient creates a new ratelord client.
@@ -27,66 +29,111 @@ func NewClient(endpoint string) *Client {
 		http: &http.Client{
 			Timeout: 10 * time.Second,
 		},
+		backoff: DefaultBackoff(),
+		retries: 3,
 	}
+}
+
+// SetBackoff configures the retry strategy.
+func (c *Client) SetBackoff(strategy BackoffStrategy, maxRetries int) {
+	c.backoff = strategy
+	c.retries = maxRetries
 }
 
 // Ask sends an intent to the daemon and returns a decision.
 // It implements the "Ask-Wait-Act" pattern by automatically sleeping if required.
-// It is fail-closed: network errors return a Denied decision.
+// It performs retries on network errors or 5xx responses using the configured backoff strategy.
+// It is fail-closed: final failure returns a Denied decision.
 func (c *Client) Ask(ctx context.Context, intent Intent) (Decision, error) {
 	// 1. Validate mandatory fields
 	if intent.AgentID == "" || intent.IdentityID == "" || intent.WorkloadID == "" || intent.ScopeID == "" {
 		return Decision{}, fmt.Errorf("invalid intent: missing required fields")
 	}
 
-	// 2. Serialize Intent
+	// 2. Serialize Intent (once)
 	body, err := json.Marshal(intent)
 	if err != nil {
 		return Decision{}, fmt.Errorf("failed to marshal intent: %w", err)
 	}
 
-	// 3. Create Request
-	req, err := http.NewRequestWithContext(ctx, "POST", c.endpoint+"/v1/intent", bytes.NewReader(body))
-	if err != nil {
-		return failClosed("request_creation_failed"), nil // Fail-closed, return denied decision
-	}
-	req.Header.Set("Content-Type", "application/json")
+	var lastErr error
+	var lastStatus int
 
-	// 4. Send Request (Handle Network Errors as Fail-Closed)
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return failClosed("daemon_unreachable"), nil
-	}
-	defer resp.Body.Close()
-
-	// 5. Handle HTTP Status Codes
-	if resp.StatusCode >= 500 {
-		return failClosed("upstream_error"), nil
-	}
-	if resp.StatusCode == 400 {
-		return Decision{}, fmt.Errorf("invalid_intent: bad request from daemon")
-	}
-	if resp.StatusCode != 200 {
-		return failClosed(fmt.Sprintf("unexpected_status_%d", resp.StatusCode)), nil
-	}
-
-	// 6. Parse Response
-	var decision Decision
-	if err := json.NewDecoder(resp.Body).Decode(&decision); err != nil {
-		return failClosed("response_parsing_failed"), nil
-	}
-
-	// 7. Auto-Wait
-	if decision.Modifications.WaitSeconds > 0 {
-		select {
-		case <-time.After(time.Duration(decision.Modifications.WaitSeconds * float64(time.Second))):
-			// Wait completed
-		case <-ctx.Done():
-			return failClosed("context_canceled_during_wait"), ctx.Err()
+	// Retry Loop
+	for attempt := 0; attempt <= c.retries; attempt++ {
+		if attempt > 0 {
+			// Wait before retry
+			waitDuration := c.backoff.Next(attempt - 1)
+			select {
+			case <-time.After(waitDuration):
+			case <-ctx.Done():
+				return failClosed("context_canceled_during_retry"), ctx.Err()
+			}
 		}
+
+		// 3. Create Request (must be fresh for each attempt if Body is read? No, bytes.NewReader is seekable but http.NewRequest might need care.
+		// Actually, bytes.NewReader is efficient. We can recreate the request.)
+		req, err := http.NewRequestWithContext(ctx, "POST", c.endpoint+"/v1/intent", bytes.NewReader(body))
+		if err != nil {
+			return failClosed("request_creation_failed"), nil
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		// 4. Send Request
+		resp, err := c.http.Do(req)
+		if err != nil {
+			lastErr = err
+			continue // Network error -> Retry
+		}
+
+		// 5. Handle HTTP Status Codes
+		lastStatus = resp.StatusCode
+		if resp.StatusCode >= 500 {
+			resp.Body.Close()
+			continue // Server error -> Retry
+		}
+
+		// Non-retryable status codes
+		defer resp.Body.Close()
+
+		if resp.StatusCode == 400 {
+			return Decision{}, fmt.Errorf("invalid_intent: bad request from daemon")
+		}
+		if resp.StatusCode != 200 {
+			return failClosed(fmt.Sprintf("unexpected_status_%d", resp.StatusCode)), nil
+		}
+
+		// 6. Parse Response (Success)
+		var decision Decision
+		if err := json.NewDecoder(resp.Body).Decode(&decision); err != nil {
+			// If JSON is malformed, maybe we shouldn't retry? Or maybe we should?
+			// Let's assume malformed 200 OK is fatal or weird enough not to retry blindly.
+			return failClosed("response_parsing_failed"), nil
+		}
+
+		// 7. Auto-Wait (on the successful decision)
+		if decision.Modifications.WaitSeconds > 0 {
+			select {
+			case <-time.After(time.Duration(decision.Modifications.WaitSeconds * float64(time.Second))):
+				// Wait completed
+			case <-ctx.Done():
+				return failClosed("context_canceled_during_wait"), ctx.Err()
+			}
+		}
+
+		return decision, nil
 	}
 
-	return decision, nil
+	// If we exhausted retries
+	reason := "upstream_unavailable"
+	if lastErr != nil {
+		reason = "network_error" // simplified
+	} else if lastStatus >= 500 {
+		reason = "upstream_error"
+	}
+
+	// We could log lastErr here if we had a logger
+	return failClosed(reason), nil
 }
 
 // Ping checks the health of the daemon.
