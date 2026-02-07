@@ -10,6 +10,7 @@ type IntentRequest struct {
 	WorkloadID    string                 `json:"workload_id"`
 	Priority      string                 `json:"priority,omitempty"` // low, normal, critical
 	Description   string                 `json:"description,omitempty"`
+	Debug         bool                   `json:"debug,omitempty"` // Enable detailed tracing
 	ClientContext map[string]interface{} `json:"client_context,omitempty"`
 }
 

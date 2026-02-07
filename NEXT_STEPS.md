@@ -14,7 +14,7 @@
 ## Immediate Actions
 
  1. **M37.3: Policy Debugging** (`TASKS.md`):
-       - [ ] Implement "Trace Mode" for Policy Engine.
+       - [x] Implement "Trace Mode" for Policy Engine.
        - [ ] Web UI: Visualize Policy Evaluation Tree.
 
  2. **M31.3: Documentation & Changelog** (`TASKS.md`):

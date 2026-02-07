@@ -63,6 +63,7 @@
 | M39.4: Prompts | COMPLETED | Implement | 2026-02-07 |
 | M39.5: Advanced Tools (CheckUsage, Config) | COMPLETED | Implement | 2026-02-07 |
 | M37.1: Decision Explainability (Structs, Trace, API) | COMPLETED | Implement | 2026-02-07 |
+| M37.3.1: Trace Mode (Backend) | COMPLETED | Implement | 2026-02-07 |
 | M37.2: Compliance Reports (Engine, AccessLog, Usage, API) | COMPLETED | Implement | 2026-02-07 |
 | M40.1: Go SDK Resilience (Backoff & Jitter) | COMPLETED | Implement | 2026-02-07 |
 | M40.2: JS SDK Resilience (Backoff & Jitter) | COMPLETED | Implement | 2026-02-07 |

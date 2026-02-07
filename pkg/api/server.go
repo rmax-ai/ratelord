@@ -207,6 +207,7 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 		ProviderID:   "mock-provider-1",
 		PoolID:       "default",
 		ExpectedCost: 1, // Default cost
+		Debug:        req.Debug,
 	}
 
 	// Evaluate

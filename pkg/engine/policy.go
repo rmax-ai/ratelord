@@ -29,6 +29,7 @@ type Intent struct {
 	ProviderID   string // Target provider (optional/inferred)
 	PoolID       string // Target pool (optional/inferred)
 	ExpectedCost int64  // Estimated consumption
+	Debug        bool   // Enable verbose logging
 }
 
 // PolicyEvaluationResult captures the output of the policy engine
@@ -168,6 +169,13 @@ func (pe *PolicyEngine) evaluateDynamic(intent Intent, policyMap map[string]Poli
 			}
 
 			result, reason := pe.checkCondition(rule.Condition, intent, policy.Limit, poolState, exists)
+
+			// Trace Mode Logging
+			if intent.Debug {
+				fmt.Printf(`{"level":"debug","msg":"policy_rule_eval","intent_id":"%s","policy_id":"%s","rule_index":%d,"condition":"%q","result":%v,"reason":"%q"}`+"\n",
+					intent.IntentID, policy.ID, ruleIndex, rule.Condition, result, reason)
+			}
+
 			trace = append(trace, RuleTrace{
 				PolicyID:  policy.ID,
 				RuleIndex: ruleIndex,

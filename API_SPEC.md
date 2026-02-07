@@ -37,6 +37,7 @@ The core "Ask-Wait-Act" primitive. This endpoint blocks until a decision is reac
   "urgency": "string",        // "high" | "normal" | "background"
   "expected_cost": number,    // Optional: Estimated consumption units
   "duration_hint": number,    // Optional: Expected runtime in seconds
+  "debug": boolean,           // Optional: Enable detailed tracing logs
   "client_context": object    // Optional: arbitrary metadata for logs
 }
 ```
@@ -51,6 +52,15 @@ The core "Ask-Wait-Act" primitive. This endpoint blocks until a decision is reac
     "identity_switch": "string" // Optional: Alternate identity to use
   },
   "reason": "string",         // Present if denied (human-readable)
+  "trace": [                  // Present if debug=true or configured
+    {
+      "policy_id": "string",
+      "rule_index": number,
+      "condition": "string",
+      "result": boolean,
+      "reason": "string"
+    }
+  ],
   "evaluation": {
     "as_of_ts": "string",     // ISO8601 timestamp of decision
     "risk_summary": "string"  // Why this decision was made
