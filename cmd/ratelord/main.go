@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/rmax-ai/ratelord/pkg/mcp"
 )
 
 var (
@@ -38,6 +40,8 @@ func main() {
 		handleIdentity(os.Args[2:])
 	case "admin":
 		handleAdmin(os.Args[2:])
+	case "mcp":
+		handleMCP(os.Args[2:])
 	default:
 		printUsage()
 		os.Exit(1)
@@ -48,6 +52,24 @@ func printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  ratelord identity add <name> <kind> [token]  Register a new identity")
 	fmt.Println("  ratelord admin prune <retention>             Prune old events (e.g. 720h)")
+	fmt.Println("  ratelord mcp [--url <url>]                   Run MCP server (stdio)")
+}
+
+func handleMCP(args []string) {
+	apiURL := "http://127.0.0.1:8090"
+	for i, arg := range args {
+		if arg == "--url" && i+1 < len(args) {
+			apiURL = args[i+1]
+		}
+	}
+
+	srv := mcp.NewServer(apiURL)
+	// Log to stderr because stdout is used for MCP protocol
+	fmt.Fprintf(os.Stderr, "Starting MCP server connected to %s\n", apiURL)
+	if err := srv.Serve(); err != nil {
+		fmt.Fprintf(os.Stderr, "MCP Server Error: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func handleAdmin(args []string) {

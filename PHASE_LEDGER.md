@@ -60,3 +60,6 @@
 - [x] **M32.3: Atomic Operations** (Epic 32) - Refactored `RedisUsageStore` to use Redis Hashes for storing PoolState fields. Implemented atomic increments using Lua scripts for `Increment` method. Updated `UsageStore` interface and `MemoryUsageStore` accordingly.
 - [x] **M33.1: Leader Election Stores** (Epic 33) - Implemented `LeaseStore` interface and `Lease` struct in `pkg/store/types.go`. Implemented `RedisLeaseStore` using `SETNX` and Lua scripts for renewal. Implemented `SQLiteLeaseStore` (on main Store) using atomic SQL operations.
 - [x] **M33.2: Election Manager** (Epic 33) - Implemented `ElectionManager` in `pkg/engine/election.go` to handle background leader election loop (Acquire/Renew). Integrated into `cmd/ratelord-d/main.go` to dynamically start/stop leader services (Poller, Rollup, Snapshot, Dispatcher) based on election status. Verified with unit tests `pkg/engine/election_test.go`.
+
+## 2026-02-07
+- [x] **Epic 39: Model Context Protocol (MCP) Integration** (Epic 39) - Implemented `pkg/mcp` with `Server` adapting `ratelord` to MCP protocol. Implemented `ratelord://events` and `ratelord://usage` resources, `ask_intent` tool, and `ratelord-aware` prompt. Extended `pkg/client` to support fetching events and trends. Integrated into `ratelord` CLI as `ratelord mcp` command.

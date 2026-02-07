@@ -13,9 +13,11 @@
        - [x] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
 
  2. **Epic 39: Model Context Protocol (MCP) Integration** (`TASKS.md`):
-       - [ ] **M39.1**: Implement MCP Server Core.
-       - [ ] **M39.2**: Resource Exporter.
-       - [ ] **M39.3**: Tool Exporter.
+       - [x] **M39.1**: Implement MCP Server Core.
+       - [x] **M39.2**: Resource Exporter (Events/Usage).
+       - [x] **M39.3**: Tool Exporter (AskIntent).
+       - [x] **M39.4**: Prompts (Ratelord-Aware).
+       - [ ] **M39.5**: Advanced Tools (CheckUsage, Config).
 
  3. **Epic 38: Architecture Convergence** (`TASKS.md`):
        - [x] **M38.1: Constraint Graph Integration**: Refactor Policy Engine to use Graph.

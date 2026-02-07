@@ -113,6 +113,80 @@ func (c *Client) Ping(ctx context.Context) (Status, error) {
 	return status, nil
 }
 
+// GetEvents fetches recent events from the daemon.
+func (c *Client) GetEvents(ctx context.Context, limit int) ([]Event, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+	url := fmt.Sprintf("%s/v1/events?limit=%d", c.endpoint, limit)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	var events []Event
+	if err := json.NewDecoder(resp.Body).Decode(&events); err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+// GetTrends fetches usage stats based on filters.
+func (c *Client) GetTrends(ctx context.Context, opts TrendsOptions) ([]UsageStat, error) {
+	url := fmt.Sprintf("%s/v1/trends?bucket=%s", c.endpoint, opts.Bucket)
+	if !opts.From.IsZero() {
+		url += fmt.Sprintf("&from=%s", opts.From.Format(time.RFC3339))
+	}
+	if !opts.To.IsZero() {
+		url += fmt.Sprintf("&to=%s", opts.To.Format(time.RFC3339))
+	}
+	if opts.ProviderID != "" {
+		url += fmt.Sprintf("&provider_id=%s", opts.ProviderID)
+	}
+	if opts.PoolID != "" {
+		url += fmt.Sprintf("&pool_id=%s", opts.PoolID)
+	}
+	if opts.IdentityID != "" {
+		url += fmt.Sprintf("&identity_id=%s", opts.IdentityID)
+	}
+	if opts.ScopeID != "" {
+		url += fmt.Sprintf("&scope_id=%s", opts.ScopeID)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	var stats []UsageStat
+	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
+}
+
 // failClosed returns a denied decision with a specific reason.
 func failClosed(reason string) Decision {
 	return Decision{

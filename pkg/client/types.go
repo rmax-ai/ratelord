@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // Intent represents the agent's request to perform an action.
@@ -66,4 +67,61 @@ func (d *Decision) UnmarshalJSON(data []byte) error {
 	// Derive Allowed based on Status
 	d.Allowed = d.Status == "approve" || d.Status == "approve_with_modifications"
 	return nil
+}
+
+// --- M39: MCP Support Types ---
+
+// Event represents a system event.
+type Event struct {
+	EventID       string           `json:"event_id"`
+	EventType     string           `json:"event_type"`
+	SchemaVersion int              `json:"schema_version"`
+	TsEvent       time.Time        `json:"ts_event"`
+	TsIngest      time.Time        `json:"ts_ingest"`
+	Source        EventSource      `json:"source"`
+	Dimensions    EventDimensions  `json:"dimensions"`
+	Correlation   EventCorrelation `json:"correlation"`
+	Payload       json.RawMessage  `json:"payload"`
+}
+
+type EventSource struct {
+	OriginKind string `json:"origin_kind"`
+	OriginID   string `json:"origin_id"`
+	WriterID   string `json:"writer_id"`
+}
+
+type EventDimensions struct {
+	AgentID    string `json:"agent_id"`
+	IdentityID string `json:"identity_id"`
+	WorkloadID string `json:"workload_id"`
+	ScopeID    string `json:"scope_id"`
+}
+
+type EventCorrelation struct {
+	CorrelationID string `json:"correlation_id"`
+	CausationID   string `json:"causation_id"`
+}
+
+// UsageStat represents aggregated usage statistics.
+type UsageStat struct {
+	BucketTs   time.Time `json:"bucket_ts"`
+	ProviderID string    `json:"provider_id"`
+	PoolID     string    `json:"pool_id"`
+	IdentityID string    `json:"identity_id"`
+	ScopeID    string    `json:"scope_id"`
+	TotalUsage int       `json:"total_usage"`
+	MinUsage   int       `json:"min_usage"`
+	MaxUsage   int       `json:"max_usage"`
+	EventCount int       `json:"event_count"`
+}
+
+// TrendsOptions defines filters for GetTrends.
+type TrendsOptions struct {
+	From       time.Time
+	To         time.Time
+	Bucket     string // "hour" or "day"
+	ProviderID string
+	PoolID     string
+	IdentityID string
+	ScopeID    string
 }

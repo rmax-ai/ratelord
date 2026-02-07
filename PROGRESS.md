@@ -56,4 +56,8 @@
 | M36.1: Retention Policy Engine | COMPLETED | Implement | 2026-02-07 |
 | Epic 36: Advanced Retention & Compaction | IN PROGRESS | Docs | 2026-02-07 |
 | Epic 34: Federation UI | IN PROGRESS | Docs | 2026-02-07 |
-| M34.2: Node Diagnostics | COMPLETED | Docs | 2026-02-07 |
+| Epic 39: MCP Integration | IN PROGRESS | Orchestrator | 2026-02-07 |
+| M39.1: MCP Server Core | COMPLETED | Implement | 2026-02-07 |
+| M39.2: Resource Exporter (Events/Usage) | COMPLETED | Implement | 2026-02-07 |
+| M39.3: Tool Exporter (AskIntent) | COMPLETED | Implement | 2026-02-07 |
+| M39.4: Prompts | COMPLETED | Implement | 2026-02-07 |

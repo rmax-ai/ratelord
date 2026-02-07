@@ -557,14 +557,20 @@ Focus: Unifying subsystems and paying down technical debt.
 
 ## Epic 39: Model Context Protocol (MCP) Integration
 Focus: Allow LLMs (Claude, Gemini, etc.) to natively discover and query Ratelord constraints.
-- [ ] **M39.1: MCP Server Core**
-    - [ ] Implement MCP Server using `github.com/mark3labs/mcp-go` (or similar standard lib).
-- [ ] **M39.2: Resource Exporter**
-    - [ ] Map `events` and `usage` to MCP Resources.
-- [ ] **M39.3: Tool Exporter**
-    - [ ] Expose `ask_intent` and `check_usage` as MCP Tools.
-- [ ] **M39.4: Prompts**
-    - [ ] Add `ratelord-aware` system prompt.
+- [x] **M39.1: MCP Server Core**
+    - [x] **M39.1.1: Dependency**: Run `go get github.com/mark3labs/mcp-go`.
+    - [x] **M39.1.2: Package Structure**: Create `pkg/mcp` and implementation stub.
+    - [x] **M39.1.3: CLI Integration**: Update `cmd/ratelord/main.go` to add `mcp` subcommand (supports `--url` and `--token` flags).
+    - [x] **M39.1.4: Client Wrapper**: Create a simple internal HTTP client helper in `pkg/mcp/client.go` to standardise API calls.
+- [x] **M39.2: Resource Exporter**
+    - [x] **M39.2.1: Events Resource**: Implement `ratelord://events` fetching from `GET /v1/events` (limit 50).
+    - [x] **M39.2.2: Usage Resource**: Implement `ratelord://usage` fetching from `GET /v1/trends` (or `GET /v1/graph` for structure).
+    - [ ] **M39.2.3: Config Resource**: Implement `ratelord://config` to expose current policy rules (read-only).
+- [x] **M39.3: Tool Exporter**
+    - [x] **M39.3.1: Ask Intent Tool**: Implement `ask_intent` tool wrapping `POST /v1/intent`.
+    - [ ] **M39.3.2: Check Usage Tool**: Implement `check_usage` tool that allows querying specific pools/identities.
+- [x] **M39.4: Prompts**
+    - [x] **M39.4.1: System Prompt**: Implement `ratelord-aware` MCP prompt.
 
 ## Epic 40: Client Resilience Library
 Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
