@@ -615,4 +615,17 @@ Focus: Create user-facing documentation to explain concepts and usage.
     - [x] Update `docs/guides/web-ui.md` (Graph, Cluster, Reports).
     - [x] Create `docs/guides/mcp.md` (MCP Integration).
 
+## Epic 43: Final Polish & Debt Paydown
+Focus: Address technical debt, stubbed features, and missing tests identified during final assessment.
+- [ ] **M43.1: Complete Reporting Engine**
+    - [ ] Implement actual CSV generation logic in `pkg/reports/csv.go`.
+    - [ ] Add unit tests for `pkg/reports`.
+- [ ] **M43.2: Complete Graph Projection**
+    - [ ] Handle `PolicyUpdated` events in `pkg/graph/projection.go`.
+    - [ ] Optimize graph traversal (Index for O(1) lookup).
+- [ ] **M43.3: Hardening & Configuration**
+    - [ ] Remove hardcoded `resetAt` in `pkg/engine/forecast/service.go`.
+    - [ ] Add unit tests for `pkg/mcp` (Server and Handlers).
+    - [ ] Add unit tests for `pkg/blob` (Local Store).
+
 

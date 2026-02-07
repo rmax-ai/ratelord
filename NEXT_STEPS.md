@@ -14,7 +14,11 @@
 - [x] **M42.5+**: Refined Policy Guide (Shared vs Isolated) and Configuration Guide (Defaults).
 - [x] **MCP Guide**: Created `docs/guides/mcp.md` and linked from index.
 - [x] **Docs Polish**: Added Financial Governance to Policy Guide and Cluster Federation to Deployment Guide.
-- [ ] **Phase 16 Continues**: Focus on Release Prep (Epic 13/31) and final pre-release validation.
+- [x] **Project Assessment**: Verified test coverage and identified missing features (Reports stub, Graph updates, hardcoded forecast).
+- [ ] **M43.1 (Reports)**: Implement real CSV generation in `pkg/reports/csv.go` and add tests.
+- [ ] **M43.2 (Graph)**: Implement `PolicyUpdated` handling in `pkg/graph/projection.go`.
+- [ ] **M43.3 (Hardening)**: Fix hardcoded `resetAt` and add tests for `pkg/mcp` and `pkg/blob`.
+- [ ] **Phase 16 Continues**: Final pre-release validation and debt paydown.
 
 ## Phase History
 - [x] **M42.1, M42.2, M42.3**: User Documentation (Concepts, API Ref, Guides).

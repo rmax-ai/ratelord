@@ -86,3 +86,5 @@
 | M42.3++: SDK Documentation Refresh (JS/Py/Go) | COMPLETED | Docs | 2026-02-07 |
 | M42.5+: User Docs Refinement (Shared vs Isolated, Config Defaults) | COMPLETED | Orchestrator | 2026-02-07 |
 | docs/guides/mcp.md | DRAFTED | Docs | 2026-02-07 |
+| Project Assessment (Test Run & Code Review) | COMPLETED | Orchestrator | 2026-02-07 |
+| Epic 43: Final Polish & Debt Paydown | PLANNED | Orchestrator | 2026-02-07 |
