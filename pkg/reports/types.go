@@ -13,6 +13,7 @@ type ReportType string
 const (
 	ReportTypeAccessLog ReportType = "access_log"
 	ReportTypeUsage     ReportType = "usage"
+	ReportTypeEvents    ReportType = "events"
 )
 
 type ReportFormat string

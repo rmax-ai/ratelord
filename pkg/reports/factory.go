@@ -11,6 +11,8 @@ func NewReportGenerator(reportType ReportType, s ReportStore) (Generator, error)
 		return NewAccessLogReport(s), nil
 	case ReportTypeUsage:
 		return NewUsageReport(s), nil
+	case ReportTypeEvents:
+		return NewEventReport(s), nil
 	default:
 		return nil, fmt.Errorf("unknown report type: %s", reportType)
 	}
