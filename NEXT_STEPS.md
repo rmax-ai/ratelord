@@ -25,6 +25,8 @@
 - [x] **M45.1 (Web UI)**: Implement simulation UI in modern typescript (Simulation tab).
 - [x] **M45.2 (Integration)**: Connect UI to simulation backend (Implemented `pkg/simulation` and `/v1/simulation`).
 - [x] **Phase 16 Continues**: Final pre-release validation and debt paydown. (Fixed: Test imports, Web UI unused imports).
+- [x] **M48.1 (Docker)**: Create `Dockerfile` and `docker-compose.yml` for full system stack.
+- [x] **M48.2 (E2E)**: Implement `tests/e2e` suite and run it against the docker stack.
 
 ## Phase History
 - [x] **M42.1, M42.2, M42.3**: User Documentation (Concepts, API Ref, Guides).

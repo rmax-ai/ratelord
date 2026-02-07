@@ -603,6 +603,16 @@ Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
     - [x] Target: `pkg/engine` > 80% coverage.
     - [x] Improve tests for policy evaluation and state management.
 
+## Epic 48: Deployment Verification
+Focus: Ensure the system runs correctly in containerized environments.
+- [x] **M48.1: Docker Composition**
+    - Create `Dockerfile` for multi-stage build (Web + Go).
+    - Create `docker-compose.yml` for local stack (Daemon + Redis).
+- [x] **M48.2: End-to-End Testing**
+    - Create `tests/e2e` suite.
+    - Verify full flow: Identity -> Policy -> Intent -> Decision.
+    - Verify Web UI availability.
+
 ## Epic 42: User Documentation
 Focus: Create user-facing documentation to explain concepts and usage.
 - [x] **M42.1: Concept Guides**

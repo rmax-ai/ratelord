@@ -1,0 +1,22 @@
+# Multi-stage Dockerfile for ratelord
+
+# Stage 1: Build the web UI
+FROM node:20-alpine AS ui-build
+WORKDIR /app
+COPY web/ ./web/
+WORKDIR /app/web
+RUN npm install
+RUN npm run build
+
+# Stage 2: Build the Go binary
+FROM golang:1.23-alpine AS go-build
+WORKDIR /app
+COPY . .
+COPY --from=ui-build /app/web/dist ./web/dist
+RUN go build -o ratelord-d ./cmd/ratelord-d
+
+# Stage 3: Final runtime image
+FROM alpine:latest
+COPY --from=go-build /app/ratelord-d /usr/local/bin/ratelord-d
+EXPOSE 8090
+ENTRYPOINT ["ratelord-d"]
