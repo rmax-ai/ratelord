@@ -753,11 +753,11 @@ func (s *Store) SaveSnapshot(ctx context.Context, snap *Snapshot) error {
 // Returns nil, nil if no snapshot exists.
 func (s *Store) GetLatestSnapshot(ctx context.Context) (*Snapshot, error) {
 	query := `
-	SELECT snapshot_id, schema_version, ts_snapshot, last_event_id, payload
-	FROM snapshots
-	ORDER BY ts_snapshot DESC
-	LIMIT 1;
-	`
+		SELECT snapshot_id, schema_version, ts_snapshot, last_event_id, payload
+		FROM snapshots
+		ORDER BY ts_snapshot DESC
+		LIMIT 1;
+		`
 	row := s.db.QueryRowContext(ctx, query)
 	var snap Snapshot
 	err := row.Scan(
@@ -774,6 +774,26 @@ func (s *Store) GetLatestSnapshot(ctx context.Context) (*Snapshot, error) {
 		return nil, fmt.Errorf("failed to get latest snapshot: %w", err)
 	}
 	return &snap, nil
+}
+
+// GetLatestSnapshotTime retrieves the timestamp of the most recent snapshot.
+// Returns zero time if no snapshot exists.
+func (s *Store) GetLatestSnapshotTime(ctx context.Context) (time.Time, error) {
+	query := `
+		SELECT ts_snapshot
+		FROM snapshots
+		ORDER BY ts_snapshot DESC
+		LIMIT 1;
+		`
+	var ts time.Time
+	err := s.db.QueryRowContext(ctx, query).Scan(&ts)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return time.Time{}, nil
+		}
+		return time.Time{}, fmt.Errorf("failed to get latest snapshot time: %w", err)
+	}
+	return ts, nil
 }
 
 // GetEvent retrieves a single event by ID.
@@ -886,4 +906,110 @@ func (s *Store) PruneEvents(ctx context.Context, retention time.Duration, includ
 	}
 
 	return rows, nil
+}
+
+// ReadCandidateEvents fetches events older than a specific time, limited by batch size.
+// Used for archiving old events to cold storage.
+func (s *Store) ReadCandidateEvents(ctx context.Context, before time.Time, limit int) ([]*Event, error) {
+	query := `
+		SELECT
+			event_id,
+			event_type,
+			schema_version,
+			ts_event,
+			ts_ingest,
+			origin_kind,
+			origin_id,
+			writer_id,
+			agent_id,
+			identity_id,
+			workload_id,
+			scope_id,
+			correlation_id,
+			causation_id,
+			payload,
+			epoch
+		FROM events
+		WHERE ts_ingest < ?
+		ORDER BY ts_ingest ASC
+		LIMIT ?;
+		`
+
+	rows, err := s.db.QueryContext(ctx, query, before, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query candidate events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []*Event
+
+	for rows.Next() {
+		var evt Event
+		var payload []byte
+
+		err := rows.Scan(
+			&evt.EventID,
+			&evt.EventType,
+			&evt.SchemaVersion,
+			&evt.TsEvent,
+			&evt.TsIngest,
+			&evt.Source.OriginKind,
+			&evt.Source.OriginID,
+			&evt.Source.WriterID,
+			&evt.Dimensions.AgentID,
+			&evt.Dimensions.IdentityID,
+			&evt.Dimensions.WorkloadID,
+			&evt.Dimensions.ScopeID,
+			&evt.Correlation.CorrelationID,
+			&evt.Correlation.CausationID,
+			&payload,
+			&evt.Epoch,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan event row: %w", err)
+		}
+
+		evt.Payload = json.RawMessage(payload)
+		events = append(events, &evt)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return events, nil
+}
+
+// DeleteEvents deletes a specific set of events by ID.
+// Used after archiving events to cold storage.
+func (s *Store) DeleteEvents(ctx context.Context, eventIDs []string) error {
+	if len(eventIDs) == 0 {
+		return nil
+	}
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	placeholders := make([]string, len(eventIDs))
+	args := make([]interface{}, len(eventIDs))
+	for i, id := range eventIDs {
+		placeholders[i] = "?"
+		args[i] = id
+	}
+
+	query := fmt.Sprintf("DELETE FROM events WHERE event_id IN (%s)", strings.Join(placeholders, ","))
+
+	_, err = tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to delete events: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
 }

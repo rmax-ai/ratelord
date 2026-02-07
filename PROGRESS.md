@@ -47,13 +47,13 @@
 | M34.1b: Cluster View UI | COMPLETED | Implement | 2026-02-07 |
 | M35.1: Graph Schema Definition | COMPLETED | Implement | 2026-02-07 |
 | M35.2: In-Memory Graph Projection | COMPLETED | Implement | 2026-02-07 |
-| M35.2.4: Policy Graph Population | COMPLETED | Implement | 2026-02-07 |
+| M36.2: ArchiveWorker Test | COMPLETED | Implement | 2026-02-07 |
 | M35.3.1: Traversal Logic (Partial) | COMPLETED | Implement | 2026-02-07 |
 | M35.3.2: Engine Integration (Graph Policy Lookup) | COMPLETED | Implement | 2026-02-07 |
 | M35.4: Graph Visualization | COMPLETED | Implement | 2026-02-07 |
 | Epic 38: Architecture Convergence (Scope Add) | COMPLETED | Orchestrator | 2026-02-07 |
 | M38.1: Constraint Graph Integration (Federation) | COMPLETED | Implement | 2026-02-07 |
-| M36.1: Retention Policy Engine | COMPLETED | Implement | 2026-02-07 |
+| M36.2: Cold Storage Offload | COMPLETED | Implement | 2026-02-07 |
 | Epic 36: Advanced Retention & Compaction | IN PROGRESS | Docs | 2026-02-07 |
 | Epic 34: Federation UI | IN PROGRESS | Docs | 2026-02-07 |
 | Epic 39: MCP Integration | IN PROGRESS | Orchestrator | 2026-02-07 |

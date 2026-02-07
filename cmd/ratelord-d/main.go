@@ -14,6 +14,7 @@ import (
 
 	redisclient "github.com/redis/go-redis/v9"
 	"github.com/rmax-ai/ratelord/pkg/api"
+	"github.com/rmax-ai/ratelord/pkg/blob"
 	"github.com/rmax-ai/ratelord/pkg/engine"
 	"github.com/rmax-ai/ratelord/pkg/engine/forecast"
 	"github.com/rmax-ai/ratelord/pkg/graph"
@@ -33,17 +34,20 @@ var (
 )
 
 type Config struct {
-	DBPath        string
-	PolicyPath    string
-	Port          int
-	WebDir        string
-	TLSCert       string
-	TLSKey        string
-	Mode          string
-	LeaderURL     string
-	FollowerID    string
-	RedisURL      string
-	AdvertisedURL string
+	DBPath           string
+	PolicyPath       string
+	Port             int
+	WebDir           string
+	TLSCert          string
+	TLSKey           string
+	Mode             string
+	LeaderURL        string
+	FollowerID       string
+	RedisURL         string
+	AdvertisedURL    string
+	ArchiveEnabled   bool
+	ArchiveRetention time.Duration
+	BlobPath         string
 }
 
 type LeaderServices struct {
@@ -57,11 +61,14 @@ type LeaderServices struct {
 	snapshotCancel   context.CancelFunc
 	pruneCtx         context.Context
 	pruneCancel      context.CancelFunc
+	archiveCtx       context.Context
+	archiveCancel    context.CancelFunc
 	poller           *engine.Poller
 	rollup           *engine.RollupWorker
 	dispatcher       *engine.Dispatcher
 	snapshotWorker   *engine.SnapshotWorker
 	pruneWorker      *engine.PruneWorker
+	archiveWorker    *engine.ArchiveWorker
 }
 
 func (ls *LeaderServices) Start() {
@@ -75,6 +82,10 @@ func (ls *LeaderServices) Start() {
 	go ls.snapshotWorker.Run(ls.snapshotCtx)
 	ls.pruneCtx, ls.pruneCancel = context.WithCancel(context.Background())
 	go ls.pruneWorker.Run(ls.pruneCtx)
+	if ls.archiveWorker != nil {
+		ls.archiveCtx, ls.archiveCancel = context.WithCancel(context.Background())
+		go ls.archiveWorker.Run(ls.archiveCtx)
+	}
 }
 
 func (ls *LeaderServices) Stop() {
@@ -93,6 +104,9 @@ func (ls *LeaderServices) Stop() {
 	if ls.pruneCancel != nil {
 		ls.pruneCancel()
 	}
+	if ls.archiveCancel != nil {
+		ls.archiveCancel()
+	}
 }
 
 func LoadConfig() Config {
@@ -100,12 +114,15 @@ func LoadConfig() Config {
 	cwd, _ := os.Getwd()
 	hostname, _ := os.Hostname()
 	cfg := Config{
-		DBPath:     filepath.Join(cwd, "ratelord.db"),
-		PolicyPath: filepath.Join(cwd, "policy.json"),
-		Port:       8090,
-		Mode:       "leader",
-		LeaderURL:  "http://localhost:8090",
-		FollowerID: hostname,
+		DBPath:           filepath.Join(cwd, "ratelord.db"),
+		PolicyPath:       filepath.Join(cwd, "policy.json"),
+		Port:             8090,
+		Mode:             "leader",
+		LeaderURL:        "http://localhost:8090",
+		FollowerID:       hostname,
+		ArchiveEnabled:   false,
+		ArchiveRetention: 720 * time.Hour, // 30 days
+		BlobPath:         filepath.Join(cwd, "blobs"),
 	}
 
 	// Env Vars
@@ -144,6 +161,17 @@ func LoadConfig() Config {
 	if val := os.Getenv("RATELORD_ADVERTISED_URL"); val != "" {
 		cfg.AdvertisedURL = val
 	}
+	if val := os.Getenv("RATELORD_ARCHIVE_ENABLED"); val != "" {
+		cfg.ArchiveEnabled = val == "true"
+	}
+	if val := os.Getenv("RATELORD_ARCHIVE_RETENTION"); val != "" {
+		if d, err := time.ParseDuration(val); err == nil {
+			cfg.ArchiveRetention = d
+		}
+	}
+	if val := os.Getenv("RATELORD_BLOB_PATH"); val != "" {
+		cfg.BlobPath = val
+	}
 
 	// Flags (override env vars)
 	flag.StringVar(&cfg.DBPath, "db", cfg.DBPath, "Path to SQLite database")
@@ -157,6 +185,9 @@ func LoadConfig() Config {
 	flag.StringVar(&cfg.FollowerID, "follower-id", cfg.FollowerID, "Unique ID for this follower")
 	flag.StringVar(&cfg.RedisURL, "redis-url", cfg.RedisURL, "Redis URL for usage storage")
 	flag.StringVar(&cfg.AdvertisedURL, "advertised-url", cfg.AdvertisedURL, "Public URL of this node (for leader redirection)")
+	flag.BoolVar(&cfg.ArchiveEnabled, "archive-enabled", cfg.ArchiveEnabled, "Enable cold storage archiving")
+	flag.DurationVar(&cfg.ArchiveRetention, "archive-retention", cfg.ArchiveRetention, "Retention period for archiving (default 720h)")
+	flag.StringVar(&cfg.BlobPath, "blob-path", cfg.BlobPath, "Path to blob storage directory")
 
 	flag.Parse()
 
@@ -389,12 +420,27 @@ func main() {
 	}
 	pruneWorker := engine.NewPruneWorker(st, retentionCfg)
 
+	// M36.2: Initialize Archive Worker
+	var archiveWorker *engine.ArchiveWorker
+	if cfg.ArchiveEnabled {
+		blobStore := blob.NewLocalBlobStore(cfg.BlobPath)
+		archiveConfig := engine.ArchiveConfig{
+			Enabled:       true,
+			Retention:     cfg.ArchiveRetention,
+			BatchSize:     1000,
+			CheckInterval: 1 * time.Hour,
+		}
+		archiveWorker = engine.NewArchiveWorker(st, blobStore, archiveConfig)
+		fmt.Printf(`{"level":"info","msg":"archive_worker_initialized","blob_path":"%s","retention":"%s"}`+"\n", cfg.BlobPath, cfg.ArchiveRetention)
+	}
+
 	leaderServices := &LeaderServices{
 		poller:         poller,
 		rollup:         rollup,
 		dispatcher:     dispatcher,
 		snapshotWorker: snapshotWorker,
 		pruneWorker:    pruneWorker,
+		archiveWorker:  archiveWorker,
 	}
 
 	var em *engine.ElectionManager

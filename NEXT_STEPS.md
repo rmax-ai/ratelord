@@ -1,25 +1,39 @@
-# NEXT_STEPS: Post-Release v1.0.0
+# NEXT_STEPS: Architecture Convergence (Phase 14)
 
 ## Current Context
-- **v1.0.0 Released**: The system has been tagged and released.
 - **Phase 14 In-Flight**: Architecture Convergence & Advanced Logic.
-- **Completed**: Phase 10-11, Epic 35, 36.1.
-- **Phase 12**: Release Engineering (Completed).
-- **Future**: Phase 13 (Scale - Leader Election), Phase 15 (Ecosystem).
+- **Completed**:
+    - Phase 12 (Release Engineering)
+    - Phase 13 (Scale - Leader Election)
+    - Epic 39 (MCP Integration)
+    - Epic 40 (Client Resilience)
+    - Epic 33 (High Availability)
+    - Epic 35 (Canonical Constraint Graph)
+    - M36.1 (Retention Policy)
 
 ## Immediate Actions
 
- 1. **Epic 40: Client Resilience Library** (`TASKS.md`):
-       - [x] **M40.1: Go SDK Resilience**: Implement Backoff & Jitter.
-       - [x] **M40.2: JS SDK Resilience**: Implement Backoff & Jitter.
-       - [x] **M40.3: Python SDK Resilience**: Add Tenacity Random Exponential Backoff.
+ 1. **M36.3: Compliance & Deletion** (`TASKS.md`):
+       - [ ] Implement `DeleteIdentity` (GDPR "Right to be Forgotten").
+       - [ ] Prune all events associated with a specific Identity ID.
 
- 2. **Epic 33: High Availability** (`TASKS.md`):
-       - [x] **M33.1: Leader Election**: Verify Redis implementation status.
-       - [x] **M33.4: Split-Brain Protection**: Implement Epochs and Fencing.
+ 2. **M37.3: Policy Debugging** (`TASKS.md`):
+       - [ ] Implement "Trace Mode" for Policy Engine.
+       - [ ] Web UI: Visualize Policy Evaluation Tree.
+
+ 3. **M31.3: Documentation & Changelog** (`TASKS.md`):
+       - [ ] Configure changelog generation.
+       - [ ] Auto-update `RELEASE_NOTES.md`.
 
 ## Phase History
+- [x] **M36.2**: Cold Storage Offload (ArchiveWorker + LocalBlobStore).
+- [x] **Epic 40**: Client Resilience (M40.1, M40.2, M40.3).
+- [x] **Epic 33**: High Availability (M33.1, M33.4).
 - [x] **Epic 35**: Canonical Constraint Graph.
+- [x] **Epic 39**: MCP Integration.
+- [x] **M36.1**: Retention Policy Engine.
+- [x] **M36.2**: Cold Storage Offload (ArchiveWorker implemented).
+
 - [x] **Epic 34**: Federation UI (M34.2 Done).
 - [x] **Epic 39**: MCP Integration.
 
