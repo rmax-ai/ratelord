@@ -36,39 +36,27 @@ The configuration file has four main sections:
 3.  **`pricing`**: (Optional) Defines cost models for financial governance.
 4.  **`retention`**: (Optional) Defines data lifecycle rules for events.
 
-### Example: `policy.json`
+### Example: `policy.yaml`
 
 This example tracks GitHub API limits and enforces a hard stop when the limit is exceeded.
 
-```json
-{
-  "policies": [
-    {
-      "id": "github-core-hard-limit",
-      "scope": "global",
-      "type": "hard",
-      "limit": 5000,
-      "rules": [
-        {
-          "name": "deny-exceeded-limit",
-          "condition": "remaining < 0",
-          "action": "deny",
-          "params": {
-            "reason": "hard limit exceeded for GitHub core requests"
-          }
-        }
-      ]
-    }
-  ],
-  "providers": {
-    "github": [
-      {
-        "id": "github-main",
-        "token_env_var": "GITHUB_TOKEN"
-      }
-    ]
-  }
-}
+```yaml
+policies:
+  - id: "github-core-hard-limit"
+    scope: "global"
+    type: "hard"
+    limit: 5000
+    rules:
+      - name: "deny-exceeded-limit"
+        condition: "remaining < 0"
+        action: "deny"
+        params:
+          reason: "hard limit exceeded for GitHub core requests"
+
+providers:
+  github:
+    - id: "github-main"
+      token_env_var: "GITHUB_TOKEN"
 ```
 
 ### Policy Rules
@@ -94,16 +82,12 @@ The `providers` section configures the "Ingestion Layer". It tells Ratelord how 
 
 Tracks `core`, `search`, and `graphql` rate limits.
 
-```json
-"providers": {
-  "github": [
-    {
-      "id": "my-org-github",
-      "token_env_var": "GITHUB_TOKEN",
-      "enterprise_url": "https://github.example.com/api/v3" 
-    }
-  ]
-}
+```yaml
+providers:
+  github:
+    - id: "my-org-github"
+      token_env_var: "GITHUB_TOKEN"
+      enterprise_url: "https://github.example.com/api/v3"
 ```
 
 -   `token_env_var`: The environment variable containing the Personal Access Token (PAT).
@@ -113,16 +97,12 @@ Tracks `core`, `search`, and `graphql` rate limits.
 
 Tracks Request-Per-Minute (RPM) and Token-Per-Minute (TPM) limits.
 
-```json
-"providers": {
-  "openai": [
-    {
-      "id": "openai-prod",
-      "api_key_env_var": "OPENAI_API_KEY",
-      "org_id": "org-12345"
-    }
-  ]
-}
+```yaml
+providers:
+  openai:
+    - id: "openai-prod"
+      api_key_env_var: "OPENAI_API_KEY"
+      org_id: "org-12345"
 ```
 
 -   `api_key_env_var`: The environment variable containing the API Key.

@@ -9,7 +9,7 @@ This guide covers deployment via Systemd, Docker, and Kubernetes.
 - **Binary**: `ratelord-d` is a standalone Go binary.
 - **State**: Persisted to `ratelord.db` (SQLite WAL mode). **Requires a persistent filesystem.**
 - **Configuration**:
-  - `policy.json` / `policy.yaml`: Defines pools, windows, and burst limits.
+  - `policy.yaml` / `policy.yaml`: Defines pools, windows, and burst limits.
   - Environment Variables: Store sensitive tokens (e.g., `GITHUB_TOKEN`, `OPENAI_API_KEY`).
 - **Network**: Exposes an HTTP API on port `8090`.
 - **Signals**:
@@ -41,7 +41,7 @@ sudo chown ratelord:ratelord /var/lib/ratelord
 
 # Place config
 sudo mkdir -p /etc/ratelord
-sudo cp policy.json /etc/ratelord/
+sudo cp policy.yaml /etc/ratelord/
 ```
 
 ### 3.2. Unit File (`/etc/systemd/system/ratelord.service`)
@@ -57,7 +57,7 @@ Type=simple
 User=ratelord
 Group=ratelord
 # Adjust path to binary
-ExecStart=/usr/local/bin/ratelord-d --config /etc/ratelord/policy.json --db /var/lib/ratelord/ratelord.db --addr 127.0.0.1:8090
+ExecStart=/usr/local/bin/ratelord-d --config /etc/ratelord/policy.yaml --db /var/lib/ratelord/ratelord.db --addr 127.0.0.1:8090
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
@@ -102,12 +102,12 @@ WORKDIR /app
 # Install ca-certificates if ratelord needs to make outbound TLS calls (e.g. to upstream APIs)
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/ratelord-d /usr/local/bin/
-COPY policy.json /etc/ratelord/policy.json
+COPY policy.yaml /etc/ratelord/policy.yaml
 
 # State volume
 VOLUME /data
 ENV RATELORD_DB_PATH=/data/ratelord.db
-ENV RATELORD_CONFIG_PATH=/etc/ratelord/policy.json
+ENV RATELORD_CONFIG_PATH=/etc/ratelord/policy.yaml
 ENV RATELORD_ADDR=0.0.0.0:8090
 
 CMD ["ratelord-d"]
@@ -124,7 +124,7 @@ services:
     restart: always
     volumes:
       - ratelord_data:/data
-      - ./policy.json:/etc/ratelord/policy.json:ro
+      - ./policy.yaml:/etc/ratelord/policy.yaml:ro
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -168,7 +168,7 @@ spec:
           args:
             - "--addr=127.0.0.1:8090"
             - "--db=/data/ratelord.db"
-            - "--config=/etc/config/policy.json"
+            - "--config=/etc/config/policy.yaml"
           volumeMounts:
             - name: ratelord-data
               mountPath: /data
@@ -194,20 +194,20 @@ spec:
 If you run multiple replicas of `ratelord` (e.g., 3 sidecars for 3 app replicas), **state is isolated per pod**.
 - **Pros**: Zero coordination latency.
 - **Cons**: Global limits (e.g., "1000 req/min across all pods") effectively become `N * Limit`.
-- **Mitigation**: Use `policy.json` to define *per-instance* limits, or divide your global quota by the expected replica count ($Limit_{local} = Limit_{global} / N$).
+- **Mitigation**: Use `policy.yaml` to define *per-instance* limits, or divide your global quota by the expected replica count ($Limit_{local} = Limit_{global} / N$).
 
 ---
 
 ## 6. Configuration & Secrets Management
 
-### Policy (`policy.json`)
+### Policy (`policy.yaml`)
 - Treat as code. Version control it.
 - **Updates**:
   - **K8s**: Update ConfigMap -> Wait for volume update -> Send `SIGHUP` to sidecar (or let K8s restart it).
   - **Systemd**: Update file -> `systemctl reload ratelord`.
 
 ### Secrets
-- **NEVER** put tokens in `policy.json`.
+- **NEVER** put tokens in `policy.yaml`.
 - `ratelord-d` reads tokens from environment variables referenced in the policy (if feature supported) or injects them directly if acting as a proxy.
 - Use Kubernetes Secrets or `.env` files.
 

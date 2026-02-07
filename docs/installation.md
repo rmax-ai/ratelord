@@ -14,9 +14,18 @@ go install github.com/rmax-ai/ratelord/cmd/ratelord-d@latest
 go install github.com/rmax-ai/ratelord/cmd/ratelord-tui@latest
 ```
 
+### Verification
+
+Verify the installation by checking the versions:
+
+```bash
+ratelord version
+ratelord-d --version
+```
+
 ### From Releases
 
-Download pre-compiled binaries from the [GitHub Releases](https://github.com/rmax-ai/ratelord/releases) page.
+Download pre-compiled binaries for your platform (macOS, Linux, Windows) from the [GitHub Releases](https://github.com/rmax-ai/ratelord/releases) page.
 
 ## 2. Quickstart (Local)
 
