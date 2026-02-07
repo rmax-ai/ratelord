@@ -77,8 +77,9 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 
 	// For each known pool, check if we need a grant
 	// Note: In a real implementation, we might need to know which pools *should* exist from config.
-	// For now, we only manage pools we've seen usage for or that are pre-seeded.
-	// TODO: Allow pre-seeding pools.
+	// For now, we only manage pools we've seen usage for or that are pre-seeded via RegisterPool.
+
+	var pollErrors []error
 
 	for poolID, state := range p.pools {
 		// Logic: If remaining is low (< 20%) or expired, ask for more.
@@ -115,8 +116,9 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 			granted, validUntil, err := p.requestGrant(ctx, req)
 			if err != nil {
 				// Log error but continue with other pools
-				// TODO: Add error to result
-				fmt.Printf("federated_provider: failed to get grant for %s: %v\n", poolID, err)
+				err = fmt.Errorf("failed to get grant for %s: %w", poolID, err)
+				pollErrors = append(pollErrors, err)
+				fmt.Printf("federated_provider: %v\n", err)
 			} else {
 				// Update State
 				// Strategy: New grant *adds* to existing? Or replaces?
@@ -140,6 +142,11 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 			ResetAt:   state.ValidUntil,
 		}
 		result.Usage = append(result.Usage, obs)
+	}
+
+	if len(pollErrors) > 0 {
+		result.Status = "partial"
+		result.Error = fmt.Errorf("encountered %d errors during poll: %v", len(pollErrors), pollErrors)
 	}
 
 	return result, nil

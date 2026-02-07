@@ -39,7 +39,39 @@ func (p *Projection) Apply(event store.Event) error {
 		return p.handleIdentityRegistered(event)
 	case store.EventTypePolicyUpdated:
 		return p.handlePolicyUpdated(event)
-		// TODO: Handle ProviderObserved to build provider nodes?
+	case store.EventTypeProviderPollObserved:
+		return p.handleProviderPollObserved(event)
+	}
+
+	return nil
+}
+
+func (p *Projection) handleProviderPollObserved(event store.Event) error {
+	var payload struct {
+		ProviderID string `json:"provider_id"`
+		Status     string `json:"status"`
+	}
+
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return err
+	}
+
+	if payload.ProviderID == "" {
+		return nil
+	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	// Ensure Provider Node exists
+	// We map ProviderID to a Node
+	if _, exists := p.graph.Nodes[payload.ProviderID]; !exists {
+		p.graph.Nodes[payload.ProviderID] = &Node{
+			ID:         payload.ProviderID,
+			Type:       NodeResource, // Providers are resources in our graph taxonomy
+			Label:      payload.ProviderID,
+			Properties: map[string]string{"type": "provider"},
+		}
 	}
 
 	return nil

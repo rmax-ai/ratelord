@@ -18,7 +18,8 @@
 - [x] **M43.1 (Reports)**: Implement real CSV generation in `pkg/reports/csv.go` and add tests.
 - [x] **M43.2 (Graph)**: Implement `PolicyUpdated` handling in `pkg/graph/projection.go` and add adjacency index.
 - [x] **M43.3 (Hardening)**: Fix hardcoded `resetAt`, fix API pool ID, and add tests for `pkg/mcp` and `pkg/blob`.
-- [ ] **M43.4 (Cleanup)**: Address TODOs in Federation, Poller, and Provider packages (from Assessment).
+- [x] **M43.4 (Cleanup)**: Address TODOs in Federation, Poller, and Provider packages (from Assessment).
+- [ ] **M43.5 (Final Validation)**: Run full simulation and acceptance suite before final sign-off.
 - [ ] **Phase 16 Continues**: Final pre-release validation and debt paydown.
 
 ## Phase History

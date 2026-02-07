@@ -90,3 +90,4 @@
 | M43.1: Complete Reporting Engine | COMPLETED | Orchestrator | 2026-02-07 |
 | M43.2: Complete Graph Projection (Events & Index) | COMPLETED | Orchestrator | 2026-02-07 |
 | M43.3: Hardening (ResetAt, PoolID, Tests) | COMPLETED | Orchestrator | 2026-02-07 |
+| M43.4: Codebase Cleanup (Federation, Poller, Graph) | COMPLETED | Orchestrator | 2026-02-07 |

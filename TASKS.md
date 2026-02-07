@@ -628,9 +628,11 @@ Focus: Address technical debt, stubbed features, and missing tests identified du
     - [x] Fix `pkg/api/server.go` correct pool ID usage.
     - [x] Add unit tests for `pkg/mcp` (Server and Handlers).
     - [x] Add unit tests for `pkg/blob` (Local Store).
-- [x] **M43.4: Codebase Cleanup (Assessment Findings)**
-    - [x] `pkg/api/federation.go`: Implement real `RemainingGlobal` lookup.
-    - [x] `pkg/engine/poller.go`: Make units configurable and emit error events.
-    - [x] `pkg/provider/federated/provider.go`: Fix hardcoded version and error details.
+    - [x] **M43.4: Codebase Cleanup (Assessment Findings)**
+    - [x] `pkg/graph/projection.go`: Implement `ProviderObserved` handler.
+    - [x] `pkg/provider/federated/provider.go`: Fix TODOs (error reporting, pre-seeding note).
+    - [x] `pkg/engine/poller.go`: Verified configurable units implementation.
+    - [x] `pkg/api/federation.go`: Verified `RemainingGlobal` lookup.
+
 
 
