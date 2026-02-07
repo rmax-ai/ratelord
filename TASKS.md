@@ -623,9 +623,14 @@ Focus: Address technical debt, stubbed features, and missing tests identified du
 - [ ] **M43.2: Complete Graph Projection**
     - [ ] Handle `PolicyUpdated` events in `pkg/graph/projection.go`.
     - [ ] Optimize graph traversal (Index for O(1) lookup).
-- [ ] **M43.3: Hardening & Configuration**
+    - [ ] **M43.3: Hardening & Configuration**
     - [ ] Remove hardcoded `resetAt` in `pkg/engine/forecast/service.go`.
+    - [ ] Fix `pkg/api/server.go` correct pool ID usage.
     - [ ] Add unit tests for `pkg/mcp` (Server and Handlers).
     - [ ] Add unit tests for `pkg/blob` (Local Store).
+- [ ] **M43.4: Codebase Cleanup (Assessment Findings)**
+    - [ ] `pkg/api/federation.go`: Implement real `RemainingGlobal` lookup.
+    - [ ] `pkg/engine/poller.go`: Make units configurable and emit error events.
+    - [ ] `pkg/provider/federated/provider.go`: Fix hardcoded version and error details.
 
 

@@ -4,27 +4,38 @@
 ## Assessor: Orchestrator
 
 ### Status Summary
-The project is in **Epic 43: Final Polish & Debt Paydown**. Most core functionality for Phase 1-15 is complete. Reporting (M43.1) is verified complete.
+The project is in **Epic 43: Final Polish & Debt Paydown**. Most core functionality for Phase 1-15 is complete. Reporting (M43.1) is verified complete. However, a deep code scan has revealed several TODOs and potential gaps that need addressing before 1.0.
 
-### Missing Features / Gaps
+### Critical Gaps (Must Fix for 1.0)
 1.  **Event-Sourced Policy Updates (M43.2)**:
-    *   `PolicyUpdated` event is not defined in `pkg/store`.
-    *   `pkg/graph/projection.go` has a TODO to handle this event.
-    *   Currently, policy updates are applied directly to the graph via `PolicyEngine.syncGraph`, bypassing the event log. This violates strict event sourcing.
+    *   `pkg/graph/projection.go`: `PolicyUpdated` event handling is stubbed.
+    *   `pkg/graph/projection.go`: `ProviderObserved` event handling is stubbed.
+    *   Currently, policy updates bypass the event log, violating the core "Event Sourcing" non-negotiable.
 2.  **Hardcoded Forecast Parameters (M43.3)**:
-    *   `pkg/engine/forecast/service.go` has a hardcoded `resetAt` (24 hours).
-    *   It should be derived from pool configuration.
-3.  **Missing Tests (M43.3)**:
-    *   `pkg/mcp` has no tests.
-    *   `pkg/blob` has no tests.
-4.  **Graph Optimization (M43.2)**:
-    *   `pkg/graph/projection.go` uses O(E) linear search for constraints. Needs adjacency list or index.
+    *   `pkg/engine/forecast/service.go`: `resetAt` is hardcoded to 24 hours. Needs to be derived from pool config.
+3.  **Graph Performance (M43.2)**:
+    *   `pkg/graph/projection.go`: Uses O(E) linear search. Needs adjacency list index for performance.
+4.  **Pool Identification Bug (M43.3)**:
+    *   `pkg/api/server.go`: TODO "Use the correct pool ID". This suggests the API might be logging the wrong pool ID in events.
 
-### Recommendations for Improvements
-1.  **Formalize Policy Events**: Define `EventTypePolicyUpdated` and ensure policy changes are recorded in the event log.
-2.  **Configuration-driven Forecasts**: Inject pool configuration into the forecaster to determine correct reset windows.
-3.  **Test Coverage**: Add unit tests for the missing packages.
-4.  **Graph Indexing**: Implement the adjacency list in `GraphProjection`.
+### Moderate Gaps (Should Fix)
+1.  **Federation Logic**:
+    *   `pkg/api/federation.go`: `RemainingGlobal` is hardcoded to 0. This might break federation decisions.
+2.  **Poller Improvements**:
+    *   `pkg/engine/poller.go`: Missing `provider_error` event emission.
+    *   `pkg/engine/poller.go`: Units are not configurable (hardcoded "requests").
+3.  **Provider Metadata**:
+    *   `pkg/provider/federated/provider.go`: Version hardcoded to "1.0.0".
+
+### Missing Tests (M43.3)
+1.  `pkg/mcp`: No tests.
+2.  `pkg/blob`: No tests.
+
+### Recommendations
+1.  **Prioritize M43.2**: Finish the Graph Projection work to ensure Event Sourcing compliance.
+2.  **Prioritize M43.3**: Fix the hardcoded `resetAt` and the API pool ID TODO.
+3.  **New Task M43.4**: Address Federation and Poller TODOs (RemainingGlobal, configurable units).
+4.  **Tests**: Ensure `pkg/mcp` and `pkg/blob` get at least basic coverage.
 
 ### Next Actions
-Execute `M43.2` and `M43.3` as planned in `TASKS.md`.
+Execute `M43.2` immediately.
