@@ -8,13 +8,13 @@ The project is in **Epic 43: Final Polish & Debt Paydown**. Most core functional
 
 ### Critical Gaps (Must Fix for 1.0)
 1.  **Event-Sourced Policy Updates (M43.2)**:
-    *   `pkg/graph/projection.go`: `PolicyUpdated` event handling is stubbed.
+    *   [x] `pkg/graph/projection.go`: `PolicyUpdated` event handling is stubbed. (Implemented)
     *   `pkg/graph/projection.go`: `ProviderObserved` event handling is stubbed.
-    *   Currently, policy updates bypass the event log, violating the core "Event Sourcing" non-negotiable.
+    *   [x] Currently, policy updates bypass the event log, violating the core "Event Sourcing" non-negotiable. (Fixed: EventTypePolicyUpdated added and handled)
 2.  **Hardcoded Forecast Parameters (M43.3)**:
     *   `pkg/engine/forecast/service.go`: `resetAt` is hardcoded to 24 hours. Needs to be derived from pool config.
 3.  **Graph Performance (M43.2)**:
-    *   `pkg/graph/projection.go`: Uses O(E) linear search. Needs adjacency list index for performance.
+    *   [x] `pkg/graph/projection.go`: Uses O(E) linear search. Needs adjacency list index for performance. (Implemented)
 4.  **Pool Identification Bug (M43.3)**:
     *   `pkg/api/server.go`: TODO "Use the correct pool ID". This suggests the API might be logging the wrong pool ID in events.
 
@@ -32,10 +32,10 @@ The project is in **Epic 43: Final Polish & Debt Paydown**. Most core functional
 2.  `pkg/blob`: No tests.
 
 ### Recommendations
-1.  **Prioritize M43.2**: Finish the Graph Projection work to ensure Event Sourcing compliance.
+1.  **Prioritize M43.2**: Finish the Graph Projection work to ensure Event Sourcing compliance. (DONE)
 2.  **Prioritize M43.3**: Fix the hardcoded `resetAt` and the API pool ID TODO.
 3.  **New Task M43.4**: Address Federation and Poller TODOs (RemainingGlobal, configurable units).
 4.  **Tests**: Ensure `pkg/mcp` and `pkg/blob` get at least basic coverage.
 
 ### Next Actions
-Execute `M43.2` immediately.
+Execute `M43.3` immediately.

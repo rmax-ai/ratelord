@@ -620,9 +620,9 @@ Focus: Address technical debt, stubbed features, and missing tests identified du
 - [ ] **M43.1: Complete Reporting Engine**
     - [x] Implement actual CSV generation logic in `pkg/reports/csv.go`.
     - [x] Add unit tests for `pkg/reports`.
-- [ ] **M43.2: Complete Graph Projection**
-    - [ ] Handle `PolicyUpdated` events in `pkg/graph/projection.go`.
-    - [ ] Optimize graph traversal (Index for O(1) lookup).
+- [x] **M43.2: Complete Graph Projection**
+    - [x] Handle `PolicyUpdated` events in `pkg/graph/projection.go`.
+    - [x] Optimize graph traversal (Index for O(1) lookup).
     - [ ] **M43.3: Hardening & Configuration**
     - [ ] Remove hardcoded `resetAt` in `pkg/engine/forecast/service.go`.
     - [ ] Fix `pkg/api/server.go` correct pool ID usage.

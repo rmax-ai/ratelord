@@ -102,3 +102,66 @@ func TestGraphProjection_FindConstraintsForScope(t *testing.T) {
 		t.Errorf("Expected 2 constraints, got %d", len(constraints))
 	}
 }
+
+func TestGraphProjection_Apply_PolicyUpdated(t *testing.T) {
+	proj := NewProjection()
+
+	payload := map[string]interface{}{
+		"policies": []map[string]interface{}{
+			{
+				"id":    "policy-1",
+				"scope": "global",
+				"type":  "hard",
+				"limit": 1000,
+			},
+			{
+				"id":    "policy-2",
+				"scope": "repo:123",
+				"type":  "soft",
+				"limit": 500,
+			},
+		},
+	}
+	payloadBytes, _ := json.Marshal(payload)
+
+	event := store.Event{
+		EventID:   "evt-policy-1",
+		EventType: store.EventTypePolicyUpdated,
+		TsIngest:  time.Now(),
+		Payload:   payloadBytes,
+	}
+
+	if err := proj.Apply(event); err != nil {
+		t.Fatalf("Apply failed: %v", err)
+	}
+
+	// Verify Graph Structure
+	g := proj.GetGraph()
+
+	// Check Constraints
+	if _, exists := g.Nodes["policy-1"]; !exists {
+		t.Error("policy-1 node missing")
+	}
+	if _, exists := g.Nodes["policy-2"]; !exists {
+		t.Error("policy-2 node missing")
+	}
+
+	// Check Scopes created
+	if _, exists := g.Nodes["global"]; !exists {
+		t.Error("global scope node missing")
+	}
+	if _, exists := g.Nodes["repo:123"]; !exists {
+		t.Error("repo:123 scope node missing")
+	}
+
+	// Check Edges
+	if len(g.Edges) != 2 {
+		t.Errorf("Expected 2 edges, got %d", len(g.Edges))
+	}
+
+	// Verify Index Lookup
+	constraints, _ := proj.FindConstraintsForScope("global")
+	if len(constraints) != 1 || constraints[0].ID != "policy-1" {
+		t.Errorf("Expected policy-1 for global, got %v", constraints)
+	}
+}

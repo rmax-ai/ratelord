@@ -16,7 +16,7 @@
 - [x] **Docs Polish**: Added Financial Governance to Policy Guide and Cluster Federation to Deployment Guide.
 - [x] **Project Assessment**: Verified test coverage and identified missing features. See `ASSESSMENT.md`.
 - [x] **M43.1 (Reports)**: Implement real CSV generation in `pkg/reports/csv.go` and add tests.
-- [ ] **M43.2 (Graph)**: Implement `PolicyUpdated` handling in `pkg/graph/projection.go` and add adjacency index.
+- [x] **M43.2 (Graph)**: Implement `PolicyUpdated` handling in `pkg/graph/projection.go` and add adjacency index.
 - [ ] **M43.3 (Hardening)**: Fix hardcoded `resetAt`, fix API pool ID, and add tests for `pkg/mcp` and `pkg/blob`.
 - [ ] **M43.4 (Cleanup)**: Address TODOs in Federation, Poller, and Provider packages (from Assessment).
 - [ ] **Phase 16 Continues**: Final pre-release validation and debt paydown.

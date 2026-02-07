@@ -2,6 +2,7 @@ package graph
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -10,16 +11,18 @@ import (
 
 // Projection maintains the in-memory constraint graph.
 type Projection struct {
-	mu             sync.RWMutex
-	graph          *Graph
-	lastEventID    string
-	lastIngestTime time.Time
+	mu               sync.RWMutex
+	graph            *Graph
+	lastEventID      string
+	lastIngestTime   time.Time
+	scopeConstraints map[string][]string // scopeID -> []constraintID
 }
 
 // NewProjection creates a new empty graph projection.
 func NewProjection() *Projection {
 	return &Projection{
-		graph: NewGraph(),
+		graph:            NewGraph(),
+		scopeConstraints: make(map[string][]string),
 	}
 }
 
@@ -34,8 +37,39 @@ func (p *Projection) Apply(event store.Event) error {
 	switch event.EventType {
 	case store.EventTypeIdentityRegistered:
 		return p.handleIdentityRegistered(event)
-		// TODO: Handle PolicyUpdated to build constraint/pool nodes
+	case store.EventTypePolicyUpdated:
+		return p.handlePolicyUpdated(event)
 		// TODO: Handle ProviderObserved to build provider nodes?
+	}
+
+	return nil
+}
+
+func (p *Projection) handlePolicyUpdated(event store.Event) error {
+	// Define a partial struct matching PolicyConfig to avoid cyclic dependency on pkg/engine
+	var payload struct {
+		Policies []struct {
+			ID    string `json:"id"`
+			Scope string `json:"scope"`
+			Type  string `json:"type"`
+			Limit int64  `json:"limit"`
+		} `json:"policies"`
+	}
+
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return err
+	}
+
+	for _, policy := range payload.Policies {
+		props := map[string]string{
+			"type":  policy.Type,
+			"limit": fmt.Sprintf("%d", policy.Limit),
+		}
+		// AddConstraint is internal, we can call it here but we are already holding the lock
+		// So we should refactor AddConstraint or call internal version.
+		// Since AddConstraint takes a lock, we can't call it from here (Apply holds lock).
+		// We need an internal helper.
+		p.addConstraintLocked(policy.ID, policy.Scope, props)
 	}
 
 	return nil
@@ -86,7 +120,12 @@ func (p *Projection) EnsureNode(id string, nodeType NodeType) {
 func (p *Projection) AddConstraint(id, scope string, props map[string]string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	p.addConstraintLocked(id, scope, props)
+}
 
+// addConstraintLocked performs the logic of AddConstraint without locking.
+// Must be called with p.mu held.
+func (p *Projection) addConstraintLocked(id, scope string, props map[string]string) {
 	// Add Constraint Node
 	cNode := &Node{
 		ID:         id,
@@ -104,6 +143,12 @@ func (p *Projection) AddConstraint(id, scope string, props map[string]string) {
 			Label: scope,
 		}
 	}
+
+	// Update Adjacency Index
+	// Check if already exists to avoid duplicates?
+	// For O(1) we trust the map, but let's check duplicates if we replay.
+	// Simple slice append for now.
+	p.scopeConstraints[scope] = append(p.scopeConstraints[scope], id)
 
 	// Link Constraint -> AppliesTo -> Scope
 	// Check if edge exists? For now just append, maybe dedupe later or allow multiples
@@ -136,16 +181,14 @@ func (p *Projection) FindConstraintsForScope(scopeID string) ([]*Node, error) {
 
 	var constraints []*Node
 
-	// Scan edges (O(E) - inefficient, but okay for in-memory graph MVP)
-	// TODO: Add adjacency list index for O(1) lookup
-	for _, edge := range p.graph.Edges {
-		if edge.ToID == scopeID && edge.Type == EdgeAppliesTo {
-			if node, exists := p.graph.Nodes[edge.FromID]; exists {
-				if node.Type == NodeConstraint {
-					constraints = append(constraints, node)
-				}
+	// Use Adjacency Index for O(1) lookup
+	if ids, ok := p.scopeConstraints[scopeID]; ok {
+		for _, id := range ids {
+			if node, exists := p.graph.Nodes[id]; exists {
+				constraints = append(constraints, node)
 			}
 		}
+		return constraints, nil
 	}
 
 	return constraints, nil
