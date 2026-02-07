@@ -50,3 +50,4 @@
 | M35.2.4: Policy Graph Population | COMPLETED | Implement | 2026-02-07 |
 | M35.3.1: Traversal Logic (Partial) | COMPLETED | Implement | 2026-02-07 |
 | M35.3.2: Engine Integration (Graph Policy Lookup) | COMPLETED | Implement | 2026-02-07 |
+| M35.4: Graph Visualization | COMPLETED | Implement | 2026-02-07 |

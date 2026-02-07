@@ -516,9 +516,9 @@ Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
 - [x] **M35.3: Policy Matcher on Graph**
     - [x] **M35.3.1: Traversal Logic**: Implement `GetConstraintsForIdentity(id)` (Implemented `FindConstraintsForScope`).
     - [x] **M35.3.2: Engine Integration**: Wire `GraphProjection` into `PolicyEngine` to replace linear search with graph traversal.
-- [ ] **M35.4: Graph Visualization**
-    - [ ] Add `GET /v1/graph` endpoint (JSON/Dot format).
-    - [ ] Visualize in Web UI (Force-directed graph).
+- [x] **M35.4: Graph Visualization**
+    - [x] Add `GET /v1/graph` endpoint (JSON/Dot format).
+    - [x] Visualize in Web UI (Force-directed graph).
 
 ## Epic 36: Advanced Retention & Compaction
 Focus: Managing long-term storage and compliance.

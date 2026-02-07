@@ -43,6 +43,24 @@ export interface ClusterTopology {
   nodes: ClusterNode[];
 }
 
+export interface GraphNode {
+  id: string;
+  type: string;
+  label: string;
+  properties?: Record<string, string>;
+}
+
+export interface GraphEdge {
+  from_id: string;
+  to_id: string;
+  type: string;
+}
+
+export interface GraphData {
+  nodes: Record<string, GraphNode>;
+  edges: GraphEdge[];
+}
+
 export interface Status {
   total_events: number;
   // Add more status fields as needed
@@ -78,6 +96,12 @@ export const api = {
   async fetchClusterNodes(): Promise<ClusterTopology> {
     const response = await fetch(`${API_BASE}/cluster/nodes`);
     if (!response.ok) throw new Error('Failed to fetch cluster nodes');
+    return response.json();
+  },
+
+  async fetchGraph(): Promise<GraphData> {
+    const response = await fetch(`${API_BASE}/graph`);
+    if (!response.ok) throw new Error('Failed to fetch graph');
     return response.json();
   },
 };

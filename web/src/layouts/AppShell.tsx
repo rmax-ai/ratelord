@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom';
-import { Home, History, Users, Play, Server } from 'lucide-react';
+import { Home, History, Users, Play, Server, Network } from 'lucide-react';
 
 const AppShell = () => {
   return (
@@ -44,6 +44,13 @@ const AppShell = () => {
            >
              <Server className="mr-2 h-5 w-5" />
              Cluster
+           </Link>
+           <Link
+             to="/graph"
+             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200"
+           >
+             <Network className="mr-2 h-5 w-5" />
+             Graph
            </Link>
         </nav>
       </div>

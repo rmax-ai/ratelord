@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import IdentitiesPage from './pages/Identities';
 import Cluster from './pages/Cluster';
+import GraphPage from './pages/GraphPage';
 
 function App() {
   const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ function App() {
             <Route path="history" element={<History />} />
             <Route path="identities" element={<IdentitiesPage />} />
             <Route path="cluster" element={<Cluster />} />
+            <Route path="graph" element={<GraphPage />} />
             {/* Add other routes here */}
           </Route>
         </Routes>

@@ -17,6 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/rmax-ai/ratelord/pkg/engine"
+	"github.com/rmax-ai/ratelord/pkg/graph"
 	"github.com/rmax-ai/ratelord/pkg/provider"
 	"github.com/rmax-ai/ratelord/pkg/store"
 )
@@ -37,6 +38,7 @@ type Server struct {
 	policy     *engine.PolicyEngine
 	poller     *engine.Poller
 	cluster    *engine.ClusterTopology
+	graph      *graph.Projection
 	staticFS   fs.FS
 
 	// TLS Config
@@ -56,12 +58,12 @@ type UsageTracker interface {
 }
 
 // NewServer creates a new API server instance
-func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, addr string) *Server {
-	return NewServerWithPoller(st, identities, usage, policy, cluster, nil, addr)
+func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, graphProj *graph.Projection, addr string) *Server {
+	return NewServerWithPoller(st, identities, usage, policy, cluster, graphProj, nil, addr)
 }
 
 // NewServerWithPoller creates a new API server instance with poller access (for debug endpoints)
-func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, poller *engine.Poller, addr string) *Server {
+func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, graphProj *graph.Projection, poller *engine.Poller, addr string) *Server {
 	mux := http.NewServeMux()
 
 	// Register routes
@@ -74,6 +76,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 		usage:      usage,
 		policy:     policy,
 		cluster:    cluster,
+		graph:      graphProj,
 		poller:     poller,
 	}
 
@@ -81,6 +84,7 @@ func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection,
 	mux.HandleFunc("/v1/identities", s.withLeaderCheck(s.handleIdentities)) // handleIdentities checks method inside
 	mux.HandleFunc("/v1/events", s.handleEvents)
 	mux.HandleFunc("/v1/trends", s.handleTrends)
+	mux.HandleFunc("/v1/graph", s.handleGraph)
 	mux.HandleFunc("/v1/webhooks", s.withLeaderCheck(s.withAuth(s.handleWebhooks)))
 	mux.HandleFunc("/v1/federation/grant", s.withLeaderCheck(s.handleGrant))
 	mux.HandleFunc("/v1/cluster/nodes", s.handleClusterNodes)
@@ -504,6 +508,27 @@ func (s *Server) handleTrends(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(stats); err != nil {
 		fmt.Printf(`{"level":"error","msg":"failed_to_encode_trends","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
+	}
+}
+
+// handleGraph returns the current constraint graph.
+func (s *Server) handleGraph(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, `{"error":"method_not_allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	if s.graph == nil {
+		http.Error(w, `{"error":"graph_not_available"}`, http.StatusServiceUnavailable)
+		return
+	}
+
+	g := s.graph.GetGraph()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(g); err != nil {
+		fmt.Printf(`{"level":"error","msg":"failed_to_encode_graph","trace_id":"%s","error":"%v"}`+"\n", getTraceID(r.Context()), err)
 	}
 }
 

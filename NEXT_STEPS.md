@@ -9,24 +9,25 @@
 
 ## Immediate Actions
 
- 1. **Epic 35: Canonical Constraint Graph** (`TASKS.md`):
-       - [x] **M35.1: Graph Schema Definition**: Define Nodes and Edges in `pkg/graph`.
-       - [x] **M35.2: Graph Projection**: Implement in-memory graph builder from events (and Policies).
-       - [x] **M35.3: Policy Matcher**: Use graph for policy lookups.
-           - [x] M35.3.1: Traversal Logic (FindConstraintsForScope).
-           - [x] M35.3.2: Engine Integration.
-       - [ ] **M35.4: Visualization**: API and UI.
-
- 2. **Epic 38: Architecture Convergence** (`TASKS.md`):
+ 1. **Epic 38: Architecture Convergence** (`TASKS.md`):
        - [ ] **M38.1: Constraint Graph Integration**: Refactor Policy Engine to use Graph.
            - [x] Refactor Policy Engine (Done in M35.3).
            - [ ] Ensure Federation respects Graph.
        - [ ] **M38.2: Unified Store Audit**: Verify Redis/SQLite parity.
 
- 3. **Epic 34: Federation UI** (`TASKS.md`):
+ 2. **Epic 34: Federation UI** (`TASKS.md`):
        - [ ] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
 
+ 3. **Epic 36: Advanced Retention & Compaction** (`TASKS.md`):
+       - [ ] **M36.1: Retention Policy Engine**: Configure TTL per Event Type.
+
 ## Phase History
+- [x] **Epic 35**: Canonical Constraint Graph.
+    - [x] M35.1: Graph Schema.
+    - [x] M35.2: Graph Projection.
+    - [x] M35.3: Policy Matcher.
+    - [x] M35.4: Visualization (API & UI).
+
 - [x] **M34.1**: Cluster View UI & API.
 - [x] **Phase 10**: Epics 24-27 Complete.
 
