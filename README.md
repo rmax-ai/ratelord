@@ -27,6 +27,13 @@ npm run preview
 
 Then open [http://localhost:3000/](http://localhost:3000/). (If you open `/docs/index.html` from a server rooted at the repo root, the page will render unstyled because `/_next/static/...` will 404.)
 
+## GitHub Pages (custom domain)
+
+The site is exported into `docs/`, and GitHub Pages should be configured to publish from the `gh-pages` branch with folder `/docs`.
+
+- Custom domain file: keep it in `public/CNAME` (it will be copied into `docs/CNAME` on every export).
+- Jekyll bypass: `public/.nojekyll` is included so GitHub Pages serves the `_next/` assets.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
