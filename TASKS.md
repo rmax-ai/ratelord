@@ -558,9 +558,9 @@ Focus: Unifying subsystems and paying down technical debt.
     - [x] Refactor Policy Engine to use Graph (Done in M35.3).
     - [x] Ensure Federation Grant logic respects Graph constraints.
     - [x] Ensure Usage Projection handles Grant consumption.
-- [ ] **M38.2: Unified Store Audit**
-    - [ ] Verify Redis/SQLite parity for Usage Store.
-    - [ ] Consolidate "TokenBucket" vs "UsageStore" abstractions if any diverge.
+- [x] **M38.2: Unified Store Audit**
+    - [x] Verify Redis/SQLite parity for Usage Store.
+    - [x] Consolidate "TokenBucket" vs "UsageStore" abstractions if any diverge.
 
 # Phase 15: Ecosystem & Interoperability
 

@@ -27,6 +27,7 @@
     - [x] M35.2: Graph Projection.
     - [x] M35.3: Policy Matcher.
     - [x] M35.4: Visualization (API & UI).
+    - [x] **M38.2**: Unified Store Audit (Redis/Memory Parity).
 
 - [x] **M34.1**: Cluster View UI & API.
 - [x] **Phase 10**: Epics 24-27 Complete.

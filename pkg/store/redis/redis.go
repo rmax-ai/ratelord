@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -147,11 +148,13 @@ func (s *RedisUsageStore) GetAll() []engine.PoolState {
 		}
 
 		// Parse providerID and poolID from key
-		var providerID, poolID string
-		if _, err := fmt.Sscanf(key, "ratelord:pool:%s:%s", &providerID, &poolID); err != nil {
-			log.Printf("Failed to parse key %s: %v", key, err)
+		parts := strings.Split(key, ":")
+		if len(parts) != 4 || parts[0] != "ratelord" || parts[1] != "pool" {
+			log.Printf("Failed to parse key %s: invalid format", key)
 			continue
 		}
+		providerID := parts[2]
+		poolID := parts[3]
 
 		state := engine.PoolState{
 			ProviderID: providerID,
@@ -217,19 +220,19 @@ func (s *RedisUsageStore) Increment(providerID, poolID string, usedDelta, remain
 	ctx := context.Background()
 	currentTime := time.Now().Format(time.RFC3339)
 
-	script := `
-		local key = KEYS[1]
-		local usedDelta = tonumber(ARGV[1])
-		local remainingDelta = tonumber(ARGV[2])
-		local costDelta = tonumber(ARGV[3])
-		local currentTime = ARGV[4]
-		redis.call('HINCRBY', key, 'used', usedDelta)
-		redis.call('HINCRBY', key, 'remaining', remainingDelta)
-		redis.call('HINCRBY', key, 'cost', costDelta)
-		redis.call('HSET', key, 'last_updated', currentTime)
-	`
-
-	if err := s.client.Eval(ctx, script, []string{key}, usedDelta, remainingDelta, int64(costDelta), currentTime).Err(); err != nil {
-		log.Printf("Failed to increment key %s: %v", key, err)
+	if err := s.client.HIncrBy(ctx, key, "used", usedDelta).Err(); err != nil {
+		log.Printf("Failed to HINCRBY used: %v", err)
+	}
+	if err := s.client.HIncrBy(ctx, key, "remaining", remainingDelta).Err(); err != nil {
+		log.Printf("Failed to HINCRBY remaining: %v", err)
+	}
+	if err := s.client.HIncrBy(ctx, key, "cost", int64(costDelta)).Err(); err != nil {
+		log.Printf("Failed to HINCRBY cost: %v", err)
+	}
+	if err := s.client.HSet(ctx, key, "last_updated", currentTime).Err(); err != nil {
+		log.Printf("Failed to HSET last_updated: %v", err)
+	}
+	if err := s.client.SAdd(ctx, poolsSet, key).Err(); err != nil {
+		log.Printf("Failed to SADD: %v", err)
 	}
 }
