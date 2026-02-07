@@ -11,7 +11,8 @@
 - [x] **M42.5 (Improvement)**: Enhanced `docs/installation.md`, switched to YAML in `docs/configuration.md` & `docs/guides/deployment.md`, and implemented YAML support in `pkg/engine`.
 - [x] **M42.3 (Refined)**: Added Policy Guide and moved/refined Deployment Guide.
 - [x] **SDK Docs**: Refreshed JS, Python, and Go SDK documentation to remove draft warnings and match implementation.
-- [ ] **Phase 16 Continues**: Run advanced simulation scenarios (Epic 28) or focus on release prep.
+- [x] **M42.5+**: Refined Policy Guide (Shared vs Isolated) and Configuration Guide (Defaults).
+- [ ] **Phase 16 Continues**: Focus on Release Prep (Epic 13/31) and final pre-release validation.
 
 ## Phase History
 - [x] **M42.1, M42.2, M42.3**: User Documentation (Concepts, API Ref, Guides).
