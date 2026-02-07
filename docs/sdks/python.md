@@ -1,44 +1,68 @@
 # Python SDK
 
-The official Python SDK for `ratelord` is currently under active development. This SDK will provide idiomatic Python bindings for the `ratelord` daemon, strictly enforcing the "Ask-Wait-Act" contract.
+The official Python SDK for `ratelord`. It provides idiomatic Python bindings for the `ratelord` daemon, strictly enforcing the "Ask-Wait-Act" contract.
 
-## Design Goals
+## Installation
 
-- **Fail-Closed**: Ensures safety by defaulting to a "Denied" state if the daemon is unreachable.
-- **Blocking**: Automatically handles wait times mandated by the daemon.
-- **Async Support**: Native `asyncio` support for high-performance applications.
-- **Type Hinting**: Full type coverage for `Intent`, `Decision`, and `Identity` objects.
+```bash
+pip install ratelord
+```
+*(Note: Ensure you have built/installed the package locally or from your private registry, as it may not be on PyPI yet.)*
 
-## Usage Preview (Conceptual)
+## Usage
+
+The SDK currently provides a synchronous client that handles retries (via `tenacity`) and automatic waiting/throttling.
 
 ```python
-import asyncio
-from ratelord import RatelordClient, Intent
+from ratelord import Client, Intent
 
-async def main():
-    client = RatelordClient(endpoint="http://localhost:8081")
-    
+def main():
+    # Initialize client (defaults to http://127.0.0.1:8090)
+    client = Client(endpoint="http://localhost:8090")
+
+    # Define the intent
     intent = Intent(
         agent_id="crawler-01",
         identity_id="pat:user",
         workload_id="repo_scan",
         scope_id="repo:owner/project",
-        urgency="normal" # "high" | "normal" | "background"
+        urgency="normal"  # "high" | "normal" | "background"
     )
 
-    # Ask() handles network errors and waits automatically
-    decision = await client.ask(intent)
+    # Ask for permission
+    # This call blocks if the daemon requires the agent to wait (throttle).
+    decision = client.ask(intent)
 
     if decision.allowed:
-        print(f"Proceeding (Token: {decision.token})")
-        # Perform action...
+        print(f"Proceeding (Intent ID: {decision.intent_id})")
+        # Perform your action...
     else:
         print(f"Denied: {decision.reason}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 ```
 
-## Implementation Status
+## API Reference
 
-Please refer to the [Client SDK Specification](../../CLIENT_SDK_SPEC.md) for the authoritative implementation guide.
+### `Client(endpoint)`
+
+*   `endpoint`: Base URL of the Ratelord daemon.
+
+### `client.ask(intent) -> Decision`
+
+Negotiates an intent with the daemon.
+
+*   **Behavior**:
+    *   **Fail-Closed**: If the daemon is unreachable after retries, returns a `Decision` with `allowed=False` (reason: `daemon_unreachable`).
+    *   **Blocking**: If the daemon returns a `wait_seconds` instruction (Shaping), this method **sleeps** automatically before returning `allowed=True`.
+    *   **Retries**: Uses exponential backoff for transient 5xx errors or connection issues.
+
+### `Intent` Data Class
+
+*   `agent_id` (str): Unique identifier for the agent.
+*   `identity_id` (str): Credential/User ID.
+*   `workload_id` (str): Logical task name.
+*   `scope_id` (str): Target resource scope.
+*   `urgency` (str): "high", "normal", or "background".
+*   `expected_cost` (float): Optional cost estimate.

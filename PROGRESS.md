@@ -83,3 +83,4 @@
 | docs/sdks/javascript.md | DRAFTED | Docs | 2026-02-07 |
 | M42.3: User Guides (CLI, Web UI, API Updates) | COMPLETED | Docs | 2026-02-07 |
 | M42.3+: Guides Refinement (Policy & Deployment) | COMPLETED | Docs | 2026-02-07 |
+| M42.3++: SDK Documentation Refresh (JS/Py/Go) | COMPLETED | Docs | 2026-02-07 |
