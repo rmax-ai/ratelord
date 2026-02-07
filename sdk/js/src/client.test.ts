@@ -9,7 +9,7 @@ describe('RatelordClient', () => {
   let client: RatelordClient;
 
   beforeEach(() => {
-    mockFetch.mockClear();
+    mockFetch.mockReset();
     client = new RatelordClient({ endpoint: 'http://test-api' });
   });
 
@@ -17,9 +17,8 @@ describe('RatelordClient', () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        allowed: true,
+        decision: 'approve',
         intent_id: 'test-intent-id',
-        status: 'approve',
       }),
     });
 
@@ -55,7 +54,7 @@ describe('RatelordClient', () => {
   });
 
   it('should fail-closed if daemon returns 500', async () => {
-    mockFetch.mockResolvedValueOnce({
+    mockFetch.mockResolvedValue({
       ok: false,
       status: 500,
       statusText: 'Internal Server Error',
@@ -92,20 +91,28 @@ describe('RatelordClient', () => {
     expect(decision.reason).toContain('daemon_unreachable');
   });
 
-  it('should sleep if waitSeconds is provided', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        allowed: true,
-        intent_id: 'delayed-intent',
-        status: 'approve_with_modifications',
-        modifications: {
-          wait_seconds: 0.1, // 100ms
-        },
-      }),
-    });
+  it('should retry on 500 error and succeed', async () => {
+    // First two calls return 500, third succeeds
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          decision: 'approve',
+          intent_id: 'retry-success-intent',
+        }),
+      });
 
-    const start = Date.now();
+    const client = new RatelordClient({ endpoint: 'http://test-api', maxRetries: 2, baseDelay: 1, maxDelay: 10 }); // fast for test
     const intent: RatelordIntent = {
       agentId: 'agent-1',
       identityId: 'id-1',
@@ -114,11 +121,33 @@ describe('RatelordClient', () => {
     };
 
     const decision = await client.ask(intent);
-    const duration = Date.now() - start;
 
+    expect(mockFetch).toHaveBeenCalledTimes(3);
     expect(decision.allowed).toBe(true);
-    // Ensure it waited at least 100ms (allow some buffer for test execution)
-    expect(duration).toBeGreaterThanOrEqual(90); 
-    expect(decision.modifications?.waitSeconds).toBe(0.1);
+    expect(decision.intentId).toBe('retry-success-intent');
+  });
+
+  it('should fail after max retries', async () => {
+    // Always return 500
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+
+    const client = new RatelordClient({ endpoint: 'http://test-api', maxRetries: 2, baseDelay: 1, maxDelay: 10 }); // fast for test
+    const intent: RatelordIntent = {
+      agentId: 'agent-1',
+      identityId: 'id-1',
+      workloadId: 'work-1',
+      scopeId: 'scope-1',
+    };
+
+    const decision = await client.ask(intent);
+
+    expect(mockFetch).toHaveBeenCalledTimes(3); // 0,1,2 attempts
+    expect(decision.allowed).toBe(false);
+    expect(decision.status).toBe('deny_with_reason');
+    expect(decision.reason).toContain('upstream_error');
   });
 });

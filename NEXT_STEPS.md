@@ -11,6 +11,7 @@
 
  1. **Epic 40: Client Resilience Library** (`TASKS.md`):
        - [x] **M40.1: Go SDK Resilience**: Implement Backoff & Jitter.
+       - [x] **M40.2: JS SDK Resilience**: Implement Backoff & Jitter.
 
  2. **Epic 33: High Availability** (`TASKS.md`):
        - [x] **M33.1: Leader Election**: Verify Redis implementation status.

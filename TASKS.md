@@ -585,8 +585,8 @@ Focus: Allow LLMs (Claude, Gemini, etc.) to natively discover and query Ratelord
 Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
 - [ ] **M40.1: Go SDK Resilience**
     - [x] Add Backoff & Jitter.
-- [ ] **M40.2: JS SDK Resilience**
-    - [ ] Add `bottleneck` or custom backoff.
+- [x] **M40.2: JS SDK Resilience**
+    - [x] Add `bottleneck` or custom backoff.
 - [ ] **M40.3: Python SDK Resilience**
     - [ ] Add `tenacity` integration.
 

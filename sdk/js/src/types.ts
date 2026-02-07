@@ -23,4 +23,7 @@ export interface RatelordDecision {
 export interface RatelordClientOptions {
   endpoint?: string; // default: http://127.0.0.1:8090
   timeout?: number;  // default: 1000ms
+  maxRetries?: number; // default: 3
+  baseDelay?: number; // default: 50ms
+  maxDelay?: number; // default: 1000ms
 }
