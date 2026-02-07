@@ -21,6 +21,7 @@ Verify the installation by checking the versions:
 ```bash
 ratelord version
 ratelord-d --version
+ratelord-tui --version
 ```
 
 ### From Releases

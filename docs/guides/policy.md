@@ -146,3 +146,31 @@ policies:
         action: "approve"
         priority: 60
 ```
+
+## 5. Shared vs. Isolated Pools
+
+One of the most powerful features of Ratelord is the ability to model both shared resources and isolated quotas using **Identities** and **Scopes**.
+
+### How it works
+
+*   **Shared Pool**: If multiple Agents use the **same** `identity_id` (e.g., they all sign requests with the same `gh-pat-team` credential), they will automatically share the rate limit pool associated with that credential. If Agent A burns 90% of the limit, Agent B only has 10% left.
+*   **Isolated Pool**: If each Agent uses a **unique** `identity_id` (e.g., `user:alice` vs `user:bob`), they each get their own tracking context. However, you can still enforce a shared "global" limit on top of them using a higher-level Policy Scope.
+
+### Example: Shared Organization Limit
+
+This policy tracks a shared resource (an Organization-wide API limit) regardless of which specific agent is making the call.
+
+```yaml
+- id: "shared-org-limit"
+  scope: "org:my-company"
+  type: "hard"
+  limit: 10000
+  rules:
+    - name: "enforce-shared-limit"
+      # This condition applies to the aggregate usage of ALL agents
+      # operating within the 'org:my-company' scope.
+      condition: "pool.remaining < 100"
+      action: "deny"
+      params:
+        reason: "Organization-wide limit exhausted"
+```

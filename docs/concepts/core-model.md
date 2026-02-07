@@ -23,9 +23,10 @@ A **Workload** describes the logical task being performed.
 
 ### 4. Pool ("The Budget")
 A **Pool** is a bucket of capacity. This is a critical concept for modeling **Shared vs. Isolated** resources.
-- **Shared Pool**: Multiple identities draw from the same pool. (e.g., An Organization API limit shared by all developers).
-- **Isolated Pool**: An identity has its own dedicated pool. (e.g., A personal Per-User rate limit).
-- **Rule**: Every constraint must resolve to exactly one Pool.
+
+-   **Shared Pool**: Multiple identities draw from the same pool. If two agents use the same `identity_id` (like a shared API key), they inherently share the underlying Pool. (e.g., An Organization API limit shared by all developers).
+-   **Isolated Pool**: An identity has its own dedicated pool. If agents use unique `identity_ids`, their usage is tracked separately. (e.g., A personal Per-User rate limit).
+-   **Rule**: Every constraint must resolve to exactly one Pool.
 
 ### 5. Constraint ("The Rule")
 A **Constraint** defines the limit and the reset window.

@@ -12,6 +12,9 @@ These variables control the daemon's runtime environment, storage, and network s
 | `RATELORD_DB_PATH` | Path to the SQLite database file (state store). | `./ratelord.db` | No |
 | `RATELORD_LOG_LEVEL` | Logging verbosity (`debug`, `info`, `warn`, `error`). | `info` | No |
 | `RATELORD_POLICY_PATH` | Path to the declarative policy file (`.json` or `.yaml`). | `./policy.json` | No |
+
+*Note: While `policy.json` is the default internal path, `policy.yaml` is fully supported and often preferred for human readability.*
+
 | `RATELORD_TLS_CERT` | Path to TLS certificate for HTTPS. | (Disabled) | No |
 | `RATELORD_TLS_KEY` | Path to TLS private key for HTTPS. | (Disabled) | No |
 | `RATELORD_REDIS_URL` | Connection string for Redis (if using distributed mode). | (Disabled) | No |
@@ -27,6 +30,12 @@ These variables control the daemon's runtime environment, storage, and network s
 ## Policy Configuration
 
 The policy file (JSON or YAML) defines the "brain" of Ratelord: which providers to track and what rules to enforce.
+
+To run the daemon with a specific YAML policy file:
+
+```bash
+ratelord-d --policy policy.yaml
+```
 
 ### Structure
 
