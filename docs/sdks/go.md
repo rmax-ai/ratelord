@@ -35,7 +35,7 @@ func main() {
 
 ### 2. Define an Intent
 
-An `Intent` describes *who* wants to do *what*, *where*, and using *which* identity.
+An `Intent` describes *who* wants to do *what*, *where*, using *which* identity, and with what *urgency* (which maps to the `urgency` field in the JSON payload).
 
 ```go
 intent := client.Intent{

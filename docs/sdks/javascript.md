@@ -1,8 +1,5 @@
 # JavaScript / TypeScript SDK
 
-> **Status**: In Development
-> **Specification**: [CLIENT_SDK_SPEC.md](../../CLIENT_SDK_SPEC.md)
-
 The official JavaScript/TypeScript SDK for `ratelord` is currently under active development. This SDK is designed for Node.js environments and strictly enforces the "Ask-Wait-Act" contract.
 
 ## Design Goals
@@ -15,7 +12,7 @@ The official JavaScript/TypeScript SDK for `ratelord` is currently under active 
 ## Usage Preview (Conceptual)
 
 ```typescript
-import { RatelordClient, Intent } from '@ratelord/sdk';
+import { RatelordClient, Intent } from '@ratelord/client';
 
 const client = new RatelordClient({
   endpoint: "http://localhost:8081"
@@ -23,9 +20,11 @@ const client = new RatelordClient({
 
 async function run() {
   const intent: Intent = {
-    verb: "scrape",
-    target: "example.com",
-    identity: "scraper-bot-01"
+    agentId: "crawler-01",
+    identityId: "pat:user",
+    workloadId: "repo_scan",
+    scopeId: "repo:owner/project",
+    urgency: "normal" // "high" | "normal" | "background"
   };
 
   // ask() handles network errors and waits automatically

@@ -31,23 +31,23 @@ Ratelord requires explicit registration of identities (API keys, tokens, users) 
 
 Use the `identity add` command to register a new actor. If no token is provided, one will be generated for you.
 
+To provide a specific token value, you must set the `RATELORD_NEW_TOKEN` environment variable before running the command. Passing the token as a CLI argument is not supported for security reasons.
+
 ```bash
-ratelord identity add <identity_id> [flags]
+ratelord identity add <name> <kind>
 ```
 
 **Arguments:**
-*   `<identity_id>`: A unique string identifier (e.g., `pat:github:my-token`, `oauth:google:user1`).
-
-**Flags:**
-*   `--scope`: The scope this identity belongs to (e.g., `org:acme`).
+*   `<name>`: A unique name for the identity (e.g., `pat:bot-01`).
+*   `<kind>`: The kind of identity (e.g., `user`, `service`).
 
 **Example:**
 ```bash
 # Register and auto-generate a token
-ratelord identity add pat:bot-01 --scope org:engineering
+ratelord identity add pat:bot-01 user
 
-# Register with an existing known token (if supported)
-ratelord identity add pat:bot-02 --scope org:engineering --token "existing-secret"
+# Register with an existing known token
+RATELORD_NEW_TOKEN=secret ratelord identity add pat:bot-02 service
 ```
 
 This event is recorded in the ledger, and the identity becomes immediately available for policy evaluation.

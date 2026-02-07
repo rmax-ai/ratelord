@@ -1,8 +1,5 @@
 # Python SDK
 
-> **Status**: In Development
-> **Specification**: [CLIENT_SDK_SPEC.md](../../CLIENT_SDK_SPEC.md)
-
 The official Python SDK for `ratelord` is currently under active development. This SDK will provide idiomatic Python bindings for the `ratelord` daemon, strictly enforcing the "Ask-Wait-Act" contract.
 
 ## Design Goals
@@ -22,9 +19,11 @@ async def main():
     client = RatelordClient(endpoint="http://localhost:8081")
     
     intent = Intent(
-        verb="scrape",
-        target="example.com",
-        identity="scraper-bot-01"
+        agent_id="crawler-01",
+        identity_id="pat:user",
+        workload_id="repo_scan",
+        scope_id="repo:owner/project",
+        urgency="normal" # "high" | "normal" | "background"
     )
 
     # Ask() handles network errors and waits automatically
