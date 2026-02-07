@@ -5,6 +5,7 @@
 
 ### Status Summary
 The project is in **Epic 43: Final Polish & Debt Paydown**. All planned code tasks for Phase 1-15 (M43.1, M43.2, M43.3, M43.4) have been verified as **COMPLETE**. The codebase is feature-complete for a **v1.0 Operational Release**, focusing on core constraint management, policy enforcement, and observability.
+*Verification Update (2026-02-07)*: Full unit test suite passes. `ratelord-sim` builds and runs.
 
 ### Vision Alignment Gaps (Post-1.0 Opportunities)
 While the core system is solid, some aspirational features mentioned in `PROJECT_CONTEXT.md` are not yet implemented:

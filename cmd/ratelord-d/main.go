@@ -471,7 +471,7 @@ func main() {
 
 	// M3.1: Start HTTP Server (in background)
 	// Use NewServerWithPoller to enable debug endpoints
-	addr := fmt.Sprintf(":%d", cfg.Port)
+	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Port)
 	srv := api.NewServerWithPoller(st, identityProj, usageProj, policyEngine, clusterProj, graphProj, poller, addr)
 
 	if em != nil {
