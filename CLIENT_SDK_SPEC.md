@@ -119,7 +119,7 @@ interface Client {
 ### 5.2 Usage Example (Go)
 
 ```go
-import "github.com/rmax/ratelord/sdk/go/ratelord"
+import "github.com/rmax-ai/ratelord/sdk/go/ratelord"
 
 func main() {
     client := ratelord.NewClient("http://localhost:8090")

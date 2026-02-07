@@ -593,15 +593,22 @@ Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
 # Phase 16: Quality Assurance & Hardening
 
 ## Epic 41: Test Coverage Improvement
-Focus: Increasing test coverage for critical packages to >80%.
-- [x] **M41.1: API Package Coverage**
+    - [x] **M41.1: API Package Coverage**
     - Target: `pkg/api` > 80% coverage.
     - Implement tests for handlers, middleware, and validation.
-- [x] **M41.2: Store Package Coverage**
+    - [x] **M41.2: Store Package Coverage**
     - [x] Target: `pkg/store` > 80% coverage.
     - [x] Implement tests for SQLite store, event reading/writing.
-- [x] **M41.3: Engine Package Coverage**
+    - [x] **M41.3: Engine Package Coverage**
     - [x] Target: `pkg/engine` > 80% coverage.
     - [x] Improve tests for policy evaluation and state management.
+
+## Epic 42: User Documentation
+Focus: Create user-facing documentation to explain concepts and usage.
+- [x] **M42.1: Concept Guides**
+    - [x] Draft `docs/concepts/architecture.md` (Simplified "How it works").
+    - [x] Draft `docs/concepts/core-model.md` (Identity, Scope, Pool, Constraint).
+- [x] **M42.2: API Reference**
+    - [x] Draft `docs/reference/api.md` (Endpoints and Client Behavior).
 
 

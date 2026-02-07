@@ -49,7 +49,7 @@ sudo cp policy.json /etc/ratelord/
 ```ini
 [Unit]
 Description=Ratelord Daemon
-Documentation=https://github.com/rmax/ratelord
+Documentation=https://github.com/rmax-ai/ratelord
 After=network.target
 
 [Service]

@@ -1,26 +1,17 @@
-# NEXT_STEPS: Architecture Convergence (Phase 14)
+# NEXT_STEPS: User Documentation & Quality Assurance
 
 ## Current Context
-- **Phase 14 In-Flight**: Architecture Convergence & Advanced Logic.
-- **Completed**:
-    - Phase 12 (Release Engineering)
-    - Phase 13 (Scale - Leader Election)
-    - Epic 39 (MCP Integration)
-    - Epic 40 (Client Resilience)
-    - Epic 33 (High Availability)
-    - Epic 35 (Canonical Constraint Graph)
-    - M36.1 (Retention Policy)
+- **Documentation**: Drafted core user guides (`concepts/architecture.md`, `concepts/core-model.md`, `reference/api.md`).
+- **Phase 16 (QA)**: Test coverage goals met for API/Store/Engine.
+- **Phase 14 & 15**: Complete.
 
 ## Immediate Actions
-
-- [x] **M41.2: Store Package Coverage**
-    - [x] Target: `pkg/store` > 80% coverage.
-    - [x] Implement tests for SQLite store, event reading/writing.
-- [x] **M41.3: Engine Package Coverage**
-    - [x] Target: `pkg/engine` > 80% coverage.
-    - [x] Improve tests for policy evaluation and state management.
+- [ ] **Review Documentation**: Verify the newly created user docs in `docs/` align with the implementation and are clear.
+- [ ] **M42.3 (Optional)**: Add more guides (CLI usage, Web UI tour) if needed.
+- [ ] **Phase 16 Continues**: Run advanced simulation scenarios (Epic 28) or focus on release prep.
 
 ## Phase History
+- [x] **M42.1 & M42.2**: User Documentation (Concepts & API Ref).
 - [x] **M41.3: Engine Package Coverage** (Achieved 80.9%).
 - [x] **M41.2: Store Package Coverage** (Achieved 80.8%).
 - [x] **M41.1: API Package Coverage** (Achieved 80.1%).
@@ -33,32 +24,6 @@
 - [x] **Epic 35**: Canonical Constraint Graph.
 - [x] **Epic 39**: MCP Integration.
 - [x] **M36.1**: Retention Policy Engine.
-- [x] **M36.2**: Cold Storage Offload (ArchiveWorker implemented).
-
-- [x] **Epic 34**: Federation UI (M34.2 Done).
-- [x] **Epic 39**: MCP Integration.
-
-    - [x] M35.1: Graph Schema.
-    - [x] M35.2: Graph Projection.
-    - [x] M35.3: Policy Matcher.
-    - [x] M35.4: Visualization (API & UI).
-    - [x] **M38.2**: Unified Store Audit (Redis/Memory Parity).
-
-- [x] **M34.1**: Cluster View UI & API.
-- [x] **Phase 10**: Epics 24-27 Complete.
-
-- [x] **Epic 24**: Adaptive Throttling.
-- [x] **Epic 25**: Trends.
-- [x] **Epic 26**: Webhooks.
-- [x] **Epic 27**: Snapshots.
-- [x] **Epic 28**: Advanced Simulation.
-- [x] **Epic 29**: Financial Governance.
-- [x] **Epic 30**: Cluster Federation.
-    - [x] M30.1: Protocol.
-    - [x] M30.2: Follower Mode.
-    - [x] M30.3: Leader Store (Refactored to M32.1).
-- [x] **Epic 31**: Release Automation.
-- [x] **Epic 32**: External State Stores.
 
 ## Reference
 - **Spec**: `CLIENT_SDK_SPEC.md`

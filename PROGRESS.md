@@ -79,3 +79,5 @@
 | docs/index.md | DRAFTED | Docs | 2026-02-07 |
 | docs/installation.md | DRAFTED | Docs | 2026-02-07 |
 | docs/configuration.md | DRAFTED | Docs | 2026-02-07 |
+| docs/sdks/python.md | DRAFTED | Docs | 2026-02-07 |
+| docs/sdks/javascript.md | DRAFTED | Docs | 2026-02-07 |
