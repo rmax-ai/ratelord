@@ -400,7 +400,9 @@ func main() {
 	var em *engine.ElectionManager
 
 	if cfg.Mode == "follower" {
-		leaderServices.Start()
+		// In follower mode, we do NOT start leader services (poller, rollup, etc.)
+		// We only run the API server which proxies requests to the leader.
+		fmt.Printf(`{"level":"info","msg":"follower_mode_active","waiting_for_requests":true}` + "\n")
 	} else {
 		// Use AdvertisedURL as the holder ID so clients can redirect to it
 		holderID := cfg.AdvertisedURL

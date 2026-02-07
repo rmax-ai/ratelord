@@ -22,36 +22,59 @@ func (s *RedisLeaseStore) makeKey(name string) string {
 	return fmt.Sprintf("ratelord:lease:%s", name)
 }
 
+func (s *RedisLeaseStore) makeEpochKey(name string) string {
+	return fmt.Sprintf("ratelord:epoch:%s", name)
+}
+
 func (s *RedisLeaseStore) Acquire(ctx context.Context, name, holderID string, ttl time.Duration) (bool, error) {
-	key := s.makeKey(name)
+	leaseKey := s.makeKey(name)
+	epochKey := s.makeEpochKey(name)
 
-	// NX: Only set if not exists
-	// Expiration: Set the TTL
-	success, err := s.client.SetNX(ctx, key, holderID, ttl).Result()
+	// Lua script to acquire lease and increment epoch if successful
+	script := `
+		local leaseKey = KEYS[1]
+		local epochKey = KEYS[2]
+		local holderID = ARGV[1]
+		local ttlMs = ARGV[2]
+
+		-- Check if lease exists
+		local currentHolder = redis.call("GET", leaseKey)
+
+		if currentHolder then
+			if currentHolder == holderID then
+				-- We already hold it, renew TTL
+				redis.call("PEXPIRE", leaseKey, ttlMs)
+				return 1
+			else
+				-- Someone else holds it
+				return 0
+			end
+		else
+			-- Lease is free, take it!
+			-- Increment epoch
+			redis.call("INCR", epochKey)
+			-- Set lease
+			redis.call("SET", leaseKey, holderID, "PX", ttlMs)
+			return 1
+		end
+	`
+
+	ttlMs := int64(ttl / time.Millisecond)
+	res, err := s.client.Eval(ctx, script, []string{leaseKey, epochKey}, holderID, ttlMs).Result()
 	if err != nil {
-		return false, fmt.Errorf("failed to acquire lease: %w", err)
+		return false, fmt.Errorf("failed to execute acquire script: %w", err)
 	}
 
-	if success {
-		return true, nil
+	success, ok := res.(int64)
+	if !ok {
+		return false, fmt.Errorf("unexpected return type from acquire script")
 	}
 
-	// If failed, check if we already hold it and just need to renew (idempotency)
-	val, err := s.client.Get(ctx, key).Result()
-	if err != nil {
-		return false, fmt.Errorf("failed to check existing lease: %w", err)
-	}
-
-	if val == holderID {
-		// We already hold it, renew it
-		return true, s.Renew(ctx, name, holderID, ttl)
-	}
-
-	return false, nil
+	return success == 1, nil
 }
 
 func (s *RedisLeaseStore) Renew(ctx context.Context, name, holderID string, ttl time.Duration) error {
-	key := s.makeKey(name)
+	leaseKey := s.makeKey(name)
 
 	// Lua script to check if holder matches before extending expiry
 	script := `
@@ -65,7 +88,7 @@ func (s *RedisLeaseStore) Renew(ctx context.Context, name, holderID string, ttl 
 	// PEXPIRE takes milliseconds
 	ttlMs := int64(ttl / time.Millisecond)
 
-	res, err := s.client.Eval(ctx, script, []string{key}, holderID, ttlMs).Result()
+	res, err := s.client.Eval(ctx, script, []string{leaseKey}, holderID, ttlMs).Result()
 	if err != nil {
 		return fmt.Errorf("failed to execute renew script: %w", err)
 	}
@@ -83,7 +106,7 @@ func (s *RedisLeaseStore) Renew(ctx context.Context, name, holderID string, ttl 
 }
 
 func (s *RedisLeaseStore) Release(ctx context.Context, name, holderID string) error {
-	key := s.makeKey(name)
+	leaseKey := s.makeKey(name)
 
 	// Lua script to check if holder matches before deleting
 	script := `
@@ -94,42 +117,51 @@ func (s *RedisLeaseStore) Release(ctx context.Context, name, holderID string) er
 		end
 	`
 
-	_, err := s.client.Eval(ctx, script, []string{key}, holderID).Result()
+	_, err := s.client.Eval(ctx, script, []string{leaseKey}, holderID).Result()
 	if err != nil {
 		return fmt.Errorf("failed to execute release script: %w", err)
 	}
-
-	// We don't necessarily error if we didn't hold it (idempotency),
-	// but strictly speaking Release() implies we thought we held it.
-	// The interface contract says "releases the lease if held".
-	// So returning nil is fine even if we didn't delete anything (already gone or stolen).
-	// However, for debugging it might be useful to know.
-	// Let's stick to the interface: no error means "operation completed",
-	// ensuring we don't hold it anymore (which is true if we didn't hold it).
 
 	return nil
 }
 
 func (s *RedisLeaseStore) Get(ctx context.Context, name string) (*store.Lease, error) {
-	key := s.makeKey(name)
+	leaseKey := s.makeKey(name)
+	epochKey := s.makeEpochKey(name)
 
-	val, err := s.client.Get(ctx, key).Result()
-	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			return nil, nil // No lease held
-		}
-		return nil, fmt.Errorf("failed to get lease: %w", err)
+	// Use pipeline to get both values
+	pipe := s.client.Pipeline()
+	holderCmd := pipe.Get(ctx, leaseKey)
+	ttlCmd := pipe.PTTL(ctx, leaseKey)
+	epochCmd := pipe.Get(ctx, epochKey)
+
+	_, _ = pipe.Exec(ctx) // Ignore errors here, check individual cmds
+
+	holder, err := holderCmd.Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return nil, fmt.Errorf("failed to get lease holder: %w", err)
 	}
 
-	ttl, err := s.client.PTTL(ctx, key).Result()
+	if errors.Is(err, redis.Nil) {
+		return nil, nil // No lease held
+	}
+
+	ttl, err := ttlCmd.Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get lease ttl: %w", err)
 	}
 
+	epochStr, err := epochCmd.Result()
+	var epoch int64
+	if err == nil {
+		fmt.Sscanf(epochStr, "%d", &epoch)
+	}
+	// If epoch key missing, default to 0
+
 	return &store.Lease{
 		Name:      name,
-		HolderID:  val,
+		HolderID:  holder,
 		ExpiresAt: time.Now().Add(ttl),
-		Version:   0, // Redis simplistic implementation doesn't strictly track version CAS
+		Version:   epoch,
 	}, nil
 }

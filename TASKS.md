@@ -475,13 +475,12 @@ Focus: Allow the Leader to persist state in shared storage (Redis/Etcd) for stat
 
 ## Epic 33: High Availability
 Focus: Automatic Leader Election for failover.
-- [ ] **M33.1: Leader Election**
-    - [ ] Define `LeaseStore` interface.
-    - [ ] Define `Lease` struct (HolderID, Expiry).
-    - [ ] Implement `RedisLeaseStore`.
-    - [ ] Implement `SqliteLeaseStore` (as fallback).
-    - [ ] Implement `AcquireLease(ctx, id)` in Store.
-    - [ ] Implement `RenewLease(ctx, id)` background loop.
+- [x] **M33.1: Leader Election**
+    - [x] Define `LeaseStore` interface.
+    - [x] Define `Lease` struct (HolderID, Expiry).
+    - [x] Implement `RedisLeaseStore`.
+    - [x] Implement `SqliteLeaseStore` (as fallback).
+    - [x] Implement `ElectionManager` with Acquire/Renew loop.
 - [x] **M33.2: Standby Mode**
     - [x] Implement `ElectionManager` struct.
     - [x] Implement `StandbyLoop` (Polls lease, if free -> Acquire).
@@ -491,7 +490,10 @@ Focus: Automatic Leader Election for failover.
     - [x] Implement `HTTP Middleware` to check Leader status.
     - [x] Proxy requests from Followers to Leader (or return 307 Redirect).
 - [ ] **M33.4: Split-Brain Protection**
-    - [ ] Use Fencing Tokens (Epochs) in Event Log writes.
+    - [ ] Add `Epoch` to `Lease` and `ElectionManager`.
+    - [ ] Include `Epoch` in `Event` metadata.
+    - [ ] Validate `Epoch` on critical state transitions.
+
 
 ## Epic 34: Federation UI
 Focus: Visualize the entire cluster.

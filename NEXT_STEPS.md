@@ -13,7 +13,8 @@
        - [x] **M40.1: Go SDK Resilience**: Implement Backoff & Jitter.
 
  2. **Epic 33: High Availability** (`TASKS.md`):
-       - [ ] **M33.1: Leader Election**: Verify Redis implementation status.
+       - [x] **M33.1: Leader Election**: Verify Redis implementation status.
+       - [ ] **M33.4: Split-Brain Protection**: Implement Epochs and Fencing.
 
 ## Phase History
 - [x] **Epic 35**: Canonical Constraint Graph.
