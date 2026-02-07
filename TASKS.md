@@ -649,10 +649,13 @@ Focus: Implement the sophisticated shaping behaviors from the original vision.
 
 ## Epic 45: Enhanced Simulation & UI
 Focus: Bring the simulation capabilities into the visual domain.
-- [ ] **M45.1: Web UI Simulation Lab**
+- [x] **M45.1: Web UI Simulation Lab**
     - Create "Simulation" tab in Web UI.
     - Implement frontend for configuring scenarios (Agents, Policies, Bursts).
     - Run `ratelord-sim` (wasm or server-side) and visualize results.
+- [ ] **M45.2: Simulation Integration**
+    - Connect UI to `ratelord-sim` backend (or wasm).
+    - Visualize real-time results.
 
 ## Epic 46: Distributed Consistency
     Focus: Hardening the distributed system guarantees.
