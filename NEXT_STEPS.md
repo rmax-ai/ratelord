@@ -7,7 +7,7 @@
 
 ## Immediate Actions
 - [x] **Review Documentation**: Verify the newly created user docs in `docs/` align with the implementation and are clear.
-- [x] **M42.3 (Optional)**: Add more guides (CLI usage, Web UI tour) if needed.
+- [x] **M42.3 (Refined)**: Added Policy Guide and moved/refined Deployment Guide.
 - [ ] **Phase 16 Continues**: Run advanced simulation scenarios (Epic 28) or focus on release prep.
 
 ## Phase History

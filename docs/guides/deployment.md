@@ -9,12 +9,12 @@ This guide covers deployment via Systemd, Docker, and Kubernetes.
 - **Binary**: `ratelord-d` is a standalone Go binary.
 - **State**: Persisted to `ratelord.db` (SQLite WAL mode). **Requires a persistent filesystem.**
 - **Configuration**:
-  - `policy.json`: Defines pools, windows, and burst limits.
+  - `policy.json` / `policy.yaml`: Defines pools, windows, and burst limits.
   - Environment Variables: Store sensitive tokens (e.g., `GITHUB_TOKEN`, `OPENAI_API_KEY`).
 - **Network**: Exposes an HTTP API on port `8090`.
 - **Signals**:
   - `SIGINT` / `SIGTERM`: Graceful shutdown (checkpoints state).
-  - `SIGHUP`: Hot-reload `policy.json`.
+  - `SIGHUP`: Hot-reload policy config.
 
 ## 2. Prerequisites
 

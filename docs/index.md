@@ -70,4 +70,9 @@ A single action might consume from a local repo limit, an org-wide budget, and a
 
 ## Getting Started
 
-Check out the [Installation Guide](installation.md) or explore the [Architecture](architecture.md) to understand how Ratelord works under the hood.
+Check out the [Installation Guide](installation.md) or explore the [Architecture](concepts/architecture.md) to understand how Ratelord works under the hood.
+
+### Guides
+
+*   [Policy Guide](guides/policy.md): Learn how to write effective rate limit policies.
+*   [Deployment Guide](guides/deployment.md): Best practices for deploying `ratelord-d`.
