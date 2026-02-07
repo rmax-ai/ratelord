@@ -20,6 +20,7 @@ type ElectionManager struct {
 	onDemote  func()
 
 	isLeader bool
+	epoch    int64
 	mu       sync.RWMutex
 
 	ticker *time.Ticker
@@ -88,6 +89,13 @@ func (em *ElectionManager) IsLeader() bool {
 	return em.isLeader
 }
 
+// GetEpoch returns the current leadership epoch.
+func (em *ElectionManager) GetEpoch() int64 {
+	em.mu.RLock()
+	defer em.mu.RUnlock()
+	return em.epoch
+}
+
 // GetLeader returns the current leader's holder ID (address) and true if known.
 func (em *ElectionManager) GetLeader(ctx context.Context) (string, bool, error) {
 	// First check if we are leader (fast path)
@@ -140,6 +148,16 @@ func (em *ElectionManager) attemptElection(ctx context.Context) {
 
 	em.mu.Lock()
 	em.isLeader = newLeader
+	if newLeader && !wasLeader {
+		// We just became leader (or recovered). Fetch the official epoch.
+		// Note: Acquire() might have incremented it.
+		l, err := em.store.Get(ctx, em.leaseName)
+		if err == nil && l != nil {
+			em.epoch = l.Epoch
+		} else {
+			slog.Error("Failed to fetch lease epoch after acquisition", "error", err)
+		}
+	}
 	em.mu.Unlock()
 
 	// Call callbacks on transition

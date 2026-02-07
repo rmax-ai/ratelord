@@ -15,7 +15,7 @@
 
  2. **Epic 33: High Availability** (`TASKS.md`):
        - [x] **M33.1: Leader Election**: Verify Redis implementation status.
-       - [ ] **M33.4: Split-Brain Protection**: Implement Epochs and Fencing.
+       - [x] **M33.4: Split-Brain Protection**: Implement Epochs and Fencing.
 
 ## Phase History
 - [x] **Epic 35**: Canonical Constraint Graph.

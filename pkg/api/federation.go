@@ -88,6 +88,7 @@ func (s *Server) handleGrant(w http.ResponseWriter, r *http.Request) {
 			SchemaVersion: 1,
 			TsEvent:       now,
 			TsIngest:      now,
+			Epoch:         s.getEpoch(),
 			Source: store.EventSource{
 				OriginKind: "daemon",
 				OriginID:   "api",

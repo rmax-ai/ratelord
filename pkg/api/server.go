@@ -142,6 +142,14 @@ func (s *Server) SetElectionManager(em *engine.ElectionManager) {
 	s.election = em
 }
 
+// getEpoch returns the current leadership epoch.
+func (s *Server) getEpoch() int64 {
+	if s.election != nil {
+		return s.election.GetEpoch()
+	}
+	return 0
+}
+
 // Start runs the HTTP server (blocking)
 func (s *Server) Start() error {
 	if s.tlsCertFile != "" && s.tlsKeyFile != "" {
@@ -262,6 +270,7 @@ func (s *Server) handleIntent(w http.ResponseWriter, r *http.Request) {
 				SchemaVersion: 1,
 				TsEvent:       now,
 				TsIngest:      now,
+				Epoch:         s.getEpoch(),
 				Source: store.EventSource{
 					OriginKind: "daemon",
 					OriginID:   "api",
@@ -341,6 +350,7 @@ func (s *Server) handleIdentities(w http.ResponseWriter, r *http.Request) {
 		SchemaVersion: 1,
 		TsEvent:       now,
 		TsIngest:      now,
+		Epoch:         s.getEpoch(),
 		Source: store.EventSource{
 			OriginKind: "client",
 			OriginID:   "api", // In a real system, we might get this from context

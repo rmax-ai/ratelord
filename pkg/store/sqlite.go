@@ -84,7 +84,10 @@ func (s *Store) migrate() error {
 		causation_id TEXT,
 
 		-- Payload
-		payload JSON NOT NULL
+		payload JSON NOT NULL,
+
+		-- Epoch (Cluster term)
+		epoch INTEGER DEFAULT 0
 	);
 	
 	-- Index for replay by ingestion order (implicit rowid is efficient, but ingest time is explicit)
@@ -176,13 +179,19 @@ func (s *Store) migrate() error {
 		name TEXT PRIMARY KEY,
 		holder_id TEXT NOT NULL,
 		expires_at DATETIME NOT NULL,
-		version INTEGER NOT NULL DEFAULT 1
+		version INTEGER NOT NULL DEFAULT 1,
+		epoch INTEGER NOT NULL DEFAULT 0
 	);
 	`
 
 	if _, err := s.db.Exec(query); err != nil {
 		return fmt.Errorf("failed to create events table: %w", err)
 	}
+
+	// Migrations for existing tables
+	// Ignore errors (duplicate column)
+	s.db.Exec("ALTER TABLE events ADD COLUMN epoch INTEGER DEFAULT 0;")
+	s.db.Exec("ALTER TABLE leases ADD COLUMN epoch INTEGER DEFAULT 0;")
 
 	return nil
 }
@@ -206,8 +215,9 @@ func (s *Store) AppendEvent(ctx context.Context, evt *Event) error {
 		scope_id,
 		correlation_id,
 		causation_id,
-		payload
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		payload,
+		epoch
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 	`
 
 	// Ensure ts_ingest is set. If zero, default to current time.
@@ -242,6 +252,7 @@ func (s *Store) AppendEvent(ctx context.Context, evt *Event) error {
 		evt.Correlation.CorrelationID,
 		evt.Correlation.CausationID,
 		payload,
+		evt.Epoch,
 	)
 
 	if err != nil {
@@ -270,7 +281,8 @@ func (s *Store) ReadEvents(ctx context.Context, since time.Time, limit int) ([]*
 		scope_id,
 		correlation_id,
 		causation_id,
-		payload
+		payload,
+		epoch
 	FROM events
 	WHERE ts_ingest > ?
 	ORDER BY ts_ingest ASC
@@ -305,6 +317,7 @@ func (s *Store) ReadEvents(ctx context.Context, since time.Time, limit int) ([]*
 			&evt.Correlation.CorrelationID,
 			&evt.Correlation.CausationID,
 			&payload,
+			&evt.Epoch,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan event row: %w", err)
@@ -344,7 +357,8 @@ func (s *Store) ReadRecentEvents(ctx context.Context, limit int) ([]*Event, erro
 		scope_id,
 		correlation_id,
 		causation_id,
-		payload
+		payload,
+		epoch
 	FROM events
 	ORDER BY ts_ingest DESC
 	LIMIT ?;
@@ -378,6 +392,7 @@ func (s *Store) ReadRecentEvents(ctx context.Context, limit int) ([]*Event, erro
 			&evt.Correlation.CorrelationID,
 			&evt.Correlation.CausationID,
 			&payload,
+			&evt.Epoch,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan event row: %w", err)
@@ -412,7 +427,8 @@ func (s *Store) QueryEvents(ctx context.Context, filter EventFilter) ([]*Event, 
 			scope_id,
 			correlation_id,
 			causation_id,
-			payload
+			payload,
+			epoch
 		FROM events
 		WHERE 1=1
 	`
@@ -487,6 +503,7 @@ func (s *Store) QueryEvents(ctx context.Context, filter EventFilter) ([]*Event, 
 			&evt.Correlation.CorrelationID,
 			&evt.Correlation.CausationID,
 			&payload,
+			&evt.Epoch,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan event row: %w", err)
@@ -777,7 +794,8 @@ func (s *Store) GetEvent(ctx context.Context, eventID EventID) (*Event, error) {
 		scope_id,
 		correlation_id,
 		causation_id,
-		payload
+		payload,
+		epoch
 	FROM events
 	WHERE event_id = ?;
 	`
@@ -802,6 +820,7 @@ func (s *Store) GetEvent(ctx context.Context, eventID EventID) (*Event, error) {
 		&evt.Correlation.CorrelationID,
 		&evt.Correlation.CausationID,
 		&payload,
+		&evt.Epoch,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

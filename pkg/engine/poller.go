@@ -21,6 +21,7 @@ type Poller struct {
 	forecaster *forecast.Forecaster
 	policyCfg  *PolicyConfig
 	mu         sync.RWMutex
+	epochFunc  func() int64
 }
 
 // NewPoller creates a new poller instance
@@ -32,6 +33,19 @@ func NewPoller(store *store.Store, interval time.Duration, forecaster *forecast.
 		forecaster: forecaster,
 		policyCfg:  policyCfg,
 	}
+}
+
+// SetEpochFunc sets the function to retrieve the current epoch.
+func (p *Poller) SetEpochFunc(f func() int64) {
+	p.epochFunc = f
+}
+
+// getEpoch returns the current epoch or 0 if not configured.
+func (p *Poller) getEpoch() int64 {
+	if p.epochFunc != nil {
+		return p.epochFunc()
+	}
+	return 0
 }
 
 // UpdateConfig updates the policy configuration for pricing lookup
@@ -129,6 +143,7 @@ func (p *Poller) poll(ctx context.Context, prov provider.Provider) {
 		SchemaVersion: 1,
 		TsEvent:       result.Timestamp,
 		TsIngest:      now,
+		Epoch:         p.getEpoch(),
 		Source: store.EventSource{
 			OriginKind: "daemon",
 			OriginID:   "poller",
@@ -170,6 +185,7 @@ func (p *Poller) poll(ctx context.Context, prov provider.Provider) {
 			SchemaVersion: 1,
 			TsEvent:       result.Timestamp,
 			TsIngest:      now,
+			Epoch:         p.getEpoch(),
 			Source: store.EventSource{
 				OriginKind: "daemon",
 				OriginID:   "poller",

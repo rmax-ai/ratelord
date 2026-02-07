@@ -18,8 +18,8 @@ func (s *Store) Acquire(ctx context.Context, name, holderID string, ttl time.Dur
 
 	// 1. Try to insert (if it doesn't exist)
 	_, err := s.db.ExecContext(ctx, `
-		INSERT INTO leases (name, holder_id, expires_at, version) 
-		VALUES (?, ?, ?, 1)
+		INSERT INTO leases (name, holder_id, expires_at, version, epoch) 
+		VALUES (?, ?, ?, 1, 1)
 	`, name, holderID, expiry)
 
 	if err == nil {
@@ -28,11 +28,16 @@ func (s *Store) Acquire(ctx context.Context, name, holderID string, ttl time.Dur
 
 	// If unique constraint violation (already exists), try to take over if expired or if we own it.
 	// We do this in a single atomic UPDATE to avoid race conditions.
+	// epoch logic: if holder_id changes (takeover), increment epoch. Else (renew), keep same.
 	res, err := s.db.ExecContext(ctx, `
 		UPDATE leases 
-		SET holder_id = ?, expires_at = ?, version = version + 1
+		SET 
+			holder_id = ?, 
+			expires_at = ?, 
+			version = version + 1,
+			epoch = CASE WHEN holder_id != ? THEN epoch + 1 ELSE epoch END
 		WHERE name = ? AND (holder_id = ? OR expires_at < ?)
-	`, holderID, expiry, name, holderID, now)
+	`, holderID, expiry, holderID, name, holderID, now)
 
 	if err != nil {
 		return false, fmt.Errorf("failed to update lease: %w", err)
@@ -93,9 +98,9 @@ func (s *Store) Release(ctx context.Context, name, holderID string) error {
 func (s *Store) Get(ctx context.Context, name string) (*Lease, error) {
 	var l Lease
 	err := s.db.QueryRowContext(ctx, `
-		SELECT name, holder_id, expires_at, version 
+		SELECT name, holder_id, expires_at, version, epoch
 		FROM leases WHERE name = ?
-	`, name).Scan(&l.Name, &l.HolderID, &l.ExpiresAt, &l.Version)
+	`, name).Scan(&l.Name, &l.HolderID, &l.ExpiresAt, &l.Version, &l.Epoch)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

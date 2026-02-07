@@ -163,5 +163,6 @@ func (s *RedisLeaseStore) Get(ctx context.Context, name string) (*store.Lease, e
 		HolderID:  holder,
 		ExpiresAt: time.Now().Add(ttl),
 		Version:   epoch,
+		Epoch:     epoch,
 	}, nil
 }

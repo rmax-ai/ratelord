@@ -15,6 +15,7 @@ type Forecaster struct {
 	store      *store.Store
 	projection *ForecastProjection
 	model      Model
+	epochFunc  func() int64
 }
 
 // NewForecaster creates a new forecaster instance
@@ -24,6 +25,19 @@ func NewForecaster(store *store.Store, projection *ForecastProjection, model Mod
 		projection: projection,
 		model:      model,
 	}
+}
+
+// SetEpochFunc sets the function to retrieve the current epoch.
+func (f *Forecaster) SetEpochFunc(funcVal func() int64) {
+	f.epochFunc = funcVal
+}
+
+// getEpoch returns the current epoch or 0 if not configured.
+func (f *Forecaster) getEpoch() int64 {
+	if f.epochFunc != nil {
+		return f.epochFunc()
+	}
+	return 0
 }
 
 // OnUsageObserved is called when a usage_observed event occurs
@@ -74,6 +88,7 @@ func (f *Forecaster) emitForecastComputed(ctx context.Context, providerID, poolI
 		SchemaVersion: 1,
 		TsEvent:       now,
 		TsIngest:      now,
+		Epoch:         f.getEpoch(),
 		Source: store.EventSource{
 			OriginKind: "daemon",
 			OriginID:   "forecaster",

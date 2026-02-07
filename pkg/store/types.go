@@ -30,6 +30,7 @@ type Lease struct {
 	HolderID  string    `json:"holder_id"`
 	ExpiresAt time.Time `json:"expires_at"`
 	Version   int64     `json:"version"` // For CAS (Compare-And-Swap) logic
+	Epoch     int64     `json:"epoch"`   // Monotonically increasing election term
 }
 
 // LeaseStore defines the interface for acquiring and renewing leases.
@@ -60,6 +61,7 @@ type Event struct {
 	SchemaVersion int              `json:"schema_version"`
 	TsEvent       time.Time        `json:"ts_event"`
 	TsIngest      time.Time        `json:"ts_ingest"`
+	Epoch         int64            `json:"epoch,omitempty"` // Leadership epoch at generation time
 	Source        EventSource      `json:"source"`
 	Dimensions    EventDimensions  `json:"dimensions"`
 	Correlation   EventCorrelation `json:"correlation"`

@@ -489,10 +489,10 @@ Focus: Automatic Leader Election for failover.
 - [x] **M33.3: Client Routing**
     - [x] Implement `HTTP Middleware` to check Leader status.
     - [x] Proxy requests from Followers to Leader (or return 307 Redirect).
-- [ ] **M33.4: Split-Brain Protection**
-    - [ ] Add `Epoch` to `Lease` and `ElectionManager`.
-    - [ ] Include `Epoch` in `Event` metadata.
-    - [ ] Validate `Epoch` on critical state transitions.
+- [x] **M33.4: Split-Brain Protection**
+    - [x] Add `Epoch` to `Lease` and `ElectionManager`.
+    - [x] Include `Epoch` in `Event` metadata.
+    - [x] Validate `Epoch` on critical state transitions.
 
 
 ## Epic 34: Federation UI

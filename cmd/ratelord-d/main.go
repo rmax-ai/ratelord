@@ -417,6 +417,10 @@ func main() {
 		go em.Start(emCtx)
 		defer emCancel()
 		defer em.Stop(context.Background())
+
+		// Wire up Epoch source
+		poller.SetEpochFunc(em.GetEpoch)
+		forecaster.SetEpochFunc(em.GetEpoch)
 	}
 
 	// M3.1: Start HTTP Server (in background)
