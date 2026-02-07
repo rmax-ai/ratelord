@@ -24,23 +24,39 @@ const Cluster = () => {
           <thead>
             <tr className="bg-gray-50 dark:bg-gray-700">
               <th className="px-4 py-2 text-left">Node ID</th>
-              <th className="px-4 py-2 text-left">Address</th>
               <th className="px-4 py-2 text-left">Role</th>
-              <th className="px-4 py-2 text-left">State</th>
+              <th className="px-4 py-2 text-left">Status</th>
+              <th className="px-4 py-2 text-left">Version</th>
+              <th className="px-4 py-2 text-left">Uptime</th>
               <th className="px-4 py-2 text-left">Last Seen</th>
             </tr>
           </thead>
           <tbody>
             {topology?.nodes.map((node) => (
               <tr
-                key={node.id}
-                className={`border-t ${node.id === topology.leader_id ? 'bg-yellow-50 dark:bg-yellow-900' : ''}`}
+                key={node.node_id}
+                className={`border-t ${node.node_id === topology.leader_id ? 'bg-yellow-50 dark:bg-yellow-900' : ''}`}
               >
-                <td className="px-4 py-2">{node.id}</td>
-                <td className="px-4 py-2">{node.addr}</td>
-                <td className="px-4 py-2">{node.id === topology.leader_id ? 'Leader' : 'Follower'}</td>
-                <td className="px-4 py-2">{node.state}</td>
-                <td className="px-4 py-2">{formatLastSeen(node.last_seen)}</td>
+                <td className="px-4 py-2">{node.node_id}</td>
+                <td className="px-4 py-2">
+                  {node.node_id === topology.leader_id ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Leader
+                    </span>
+                  ) : (
+                    <span className="text-gray-500">Follower</span>
+                  )}
+                </td>
+                <td className="px-4 py-2">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    node.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {node.status}
+                  </span>
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-500">{node.metadata?.version || '-'}</td>
+                <td className="px-4 py-2 text-sm text-gray-500">{node.metadata?.uptime || '-'}</td>
+                <td className="px-4 py-2 text-sm text-gray-500">{formatLastSeen(node.last_seen)}</td>
               </tr>
             ))}
           </tbody>

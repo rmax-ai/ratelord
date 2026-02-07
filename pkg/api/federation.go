@@ -79,6 +79,7 @@ func (s *Server) handleGrant(w http.ResponseWriter, r *http.Request) {
 			"provider_id": req.ProviderID, // Added M38.1
 			"pool_id":     req.PoolID,
 			"amount":      granted,
+			"metadata":    req.Metadata,
 		})
 
 		evt := store.Event{

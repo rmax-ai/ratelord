@@ -31,11 +31,10 @@ export interface Identity {
 }
 
 export interface ClusterNode {
-  id: string;
-  addr: string;
+  node_id: string;
   last_seen: string; // RFC3339
-  state: string;
-  labels: Record<string, string>;
+  status: string;
+  metadata?: Record<string, any>;
 }
 
 export interface ClusterTopology {

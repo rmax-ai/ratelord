@@ -11,9 +11,10 @@ import (
 
 // ClusterNode represents a known node in the cluster
 type ClusterNode struct {
-	NodeID   string    `json:"node_id"`
-	LastSeen time.Time `json:"last_seen"`
-	Status   string    `json:"status"` // "active" | "offline"
+	NodeID   string                 `json:"node_id"`
+	LastSeen time.Time              `json:"last_seen"`
+	Status   string                 `json:"status"` // "active" | "offline"
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // ClusterTopology maintains the state of the cluster based on grant heartbeats
@@ -42,9 +43,10 @@ func (c *ClusterTopology) Apply(event store.Event) error {
 	}
 
 	var payload struct {
-		FollowerID string `json:"follower_id"`
-		PoolID     string `json:"pool_id"`
-		Amount     int    `json:"amount"`
+		FollowerID string                 `json:"follower_id"`
+		PoolID     string                 `json:"pool_id"`
+		Amount     int                    `json:"amount"`
+		Metadata   map[string]interface{} `json:"metadata,omitempty"`
 	}
 
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -65,6 +67,9 @@ func (c *ClusterTopology) Apply(event store.Event) error {
 	}
 	node.LastSeen = event.TsEvent
 	node.Status = "active" // Assumed active if we see an event
+	if payload.Metadata != nil {
+		node.Metadata = payload.Metadata
+	}
 
 	return nil
 }
@@ -101,6 +106,7 @@ func (c *ClusterTopology) GetNodes(ttl time.Duration) []ClusterNode {
 			NodeID:   node.NodeID,
 			LastSeen: node.LastSeen,
 			Status:   status,
+			Metadata: node.Metadata,
 		})
 	}
 	return list

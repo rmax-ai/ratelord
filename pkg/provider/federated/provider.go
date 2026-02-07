@@ -22,6 +22,7 @@ type FederatedProvider struct {
 	mu          sync.RWMutex
 	pools       map[string]*PoolState // poolID -> State
 	defaultPoll time.Duration
+	startTime   time.Time
 }
 
 type PoolState struct {
@@ -39,6 +40,7 @@ func NewFederatedProvider(id string, leaderURL string, followerID string) *Feder
 		client:      &http.Client{Timeout: 5 * time.Second},
 		pools:       make(map[string]*PoolState),
 		defaultPoll: 10 * time.Second,
+		startTime:   time.Now(),
 	}
 }
 
@@ -101,6 +103,10 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 				ProviderID: string(p.id),
 				PoolID:     poolID,
 				Amount:     askAmount,
+				Metadata: map[string]interface{}{
+					"uptime":  time.Since(p.startTime).String(),
+					"version": "1.0.0", // TODO: Get from build info
+				},
 			}
 
 			// Call Leader
