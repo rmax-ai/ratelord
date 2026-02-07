@@ -587,6 +587,6 @@ Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
     - [x] Add Backoff & Jitter.
 - [x] **M40.2: JS SDK Resilience**
     - [x] Add `bottleneck` or custom backoff.
-- [ ] **M40.3: Python SDK Resilience**
-    - [ ] Add `tenacity` integration.
+- [x] **M40.3: Python SDK Resilience**
+    - [x] Add `tenacity` integration.
 

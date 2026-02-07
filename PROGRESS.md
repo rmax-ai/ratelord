@@ -67,3 +67,4 @@
 | M40.1: Go SDK Resilience (Backoff & Jitter) | COMPLETED | Implement | 2026-02-07 |
 | M40.2: JS SDK Resilience (Backoff & Jitter) | COMPLETED | Implement | 2026-02-07 |
 | M33.4: Split-Brain Protection (Epochs) | COMPLETED | Implement | 2026-02-07 |
+| M40.3: Python SDK Resilience (Jitter) | COMPLETED | Implement | 2026-02-07 |
