@@ -16,6 +16,17 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Previewing the static export
+
+This repo is configured with `output: 'export'` and emits the static site into the `docs/` folder (GitHub Pages-style). To preview that export locally with correct styling (so `/_next/static/...` resolves), serve `docs/` as your web root:
+
+```bash
+npm run build
+npm run preview
+```
+
+Then open [http://localhost:3000/](http://localhost:3000/). (If you open `/docs/index.html` from a server rooted at the repo root, the page will render unstyled because `/_next/static/...` will 404.)
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
