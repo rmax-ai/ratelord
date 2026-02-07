@@ -85,3 +85,4 @@
 | M42.3+: Guides Refinement (Policy & Deployment) | COMPLETED | Docs | 2026-02-07 |
 | M42.3++: SDK Documentation Refresh (JS/Py/Go) | COMPLETED | Docs | 2026-02-07 |
 | M42.5+: User Docs Refinement (Shared vs Isolated, Config Defaults) | COMPLETED | Orchestrator | 2026-02-07 |
+| docs/guides/mcp.md | DRAFTED | Docs | 2026-02-07 |

@@ -613,5 +613,6 @@ Focus: Create user-facing documentation to explain concepts and usage.
 - [x] **M42.3: User Guides**
     - [x] Update `docs/guides/cli.md` (MCP, Identity, Mode).
     - [x] Update `docs/guides/web-ui.md` (Graph, Cluster, Reports).
+    - [x] Create `docs/guides/mcp.md` (MCP Integration).
 
 

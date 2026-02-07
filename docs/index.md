@@ -78,3 +78,4 @@ Check out the [Installation Guide](installation.md) or explore the [Architecture
 *   [Deployment Guide](guides/deployment.md): Best practices for deploying `ratelord-d`.
 *   [CLI Guide](guides/cli.md): Manage identities and the daemon via the command line.
 *   [Web UI Guide](guides/web-ui.md): Explore historical data and system topology visually.
+*   [MCP Guide](guides/mcp.md): Connect LLMs directly to Ratelord via Model Context Protocol.

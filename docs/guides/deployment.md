@@ -198,7 +198,46 @@ If you run multiple replicas of `ratelord` (e.g., 3 sidecars for 3 app replicas)
 
 ---
 
-## 6. Configuration & Secrets Management
+## 6. Cluster Federation (High Availability)
+
+For high-volume production environments, Ratelord supports a **Leader-Follower** architecture (Federation) to scale horizontally while maintaining a consistent global rate limit state.
+
+### Architecture
+
+- **Leader**: The single source of truth. Manages the global token buckets and policy state. It must be backed by a persistent store like **Redis** (recommended for HA) or SQLite (for single-leader setups).
+- **Followers**: Stateless nodes that proxy intents to the Leader. They maintain a small local cache of grants to reduce latency but do not persist authoritative state.
+
+### Deployment Flags
+
+#### Leader Mode (Default)
+The standard deployment is implicitly a Leader.
+```bash
+ratelord-d --mode=leader --db=/data/ratelord.db
+```
+
+#### Follower Mode
+Followers connect to the Leader's API.
+```bash
+ratelord-d \
+  --mode=follower \
+  --leader-url="http://ratelord-leader:8090" \
+  --follower-id="pod-xyz"
+```
+
+### Shared State (Redis)
+
+To enable automatic failover (Leader Election), you must use Redis for shared state storage instead of local SQLite.
+
+```bash
+export RATELORD_REDIS_URL="redis://user:pass@redis-cluster:6379/0"
+ratelord-d --store=redis ...
+```
+
+When multiple nodes start with `--store=redis` and no explicit mode, they will perform a **Leader Election**. One will become the Leader, and the others will stand by or act as Followers (depending on configuration).
+
+---
+
+## 7. Configuration & Secrets Management
 
 ### Policy (`policy.yaml`)
 - Treat as code. Version control it.

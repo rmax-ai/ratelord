@@ -98,7 +98,43 @@ Prevent one agent from hogging the pool.
   action: "shape"
 ```
 
-## 4. Complete Policy Example
+## 4. Financial Governance
+
+Beyond simple request counting, Ratelord can govern **Cost**. This is critical for paid APIs (OpenAI, Anthropic, Cloud Infrastructure) where a rate limit might be respecting the provider's TPS quota, but ignoring the financial budget.
+
+### Currency Units
+
+Ratelord tracks cost in `MicroUSD` (1/1,000,000th of a USD).
+- $1.00 = 1,000,000 MicroUSD
+- $0.01 = 10,000 MicroUSD
+
+### Budget Cap Rules
+
+You can deny intents based on the accumulated cost of a pool or identity.
+
+```yaml
+- name: "monthly-budget-cap"
+  # Deny if cost exceeds $0.50 (500,000 MicroUSD)
+  condition: "cost.accumulated > 500000"
+  action: "deny"
+  params:
+    reason: "Monthly budget exceeded"
+```
+
+### Cost Efficiency
+
+You can also write rules to prefer cheaper models or routes, or warn when expensive routes are used unnecessarily.
+
+```yaml
+- name: "warn-expensive-usage"
+  # Warn if using GPT-4 for simple tasks (cost > $0.03 per request estimated)
+  condition: "intent.estimated_cost > 30000"
+  action: "approve"
+  params:
+    warning: "Consider using a cheaper model for this task class"
+```
+
+## 5. Complete Policy Example
 
 Here is a comprehensive `policy.yaml` example demonstrating different levels of control.
 
@@ -147,7 +183,7 @@ policies:
         priority: 60
 ```
 
-## 5. Shared vs. Isolated Pools
+## 6. Shared vs. Isolated Pools
 
 One of the most powerful features of Ratelord is the ability to model both shared resources and isolated quotas using **Identities** and **Scopes**.
 

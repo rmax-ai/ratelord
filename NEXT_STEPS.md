@@ -1,7 +1,7 @@
 # NEXT_STEPS: User Documentation & Quality Assurance
 
 ## Current Context
-- **Documentation**: Drafted core user guides (`concepts/architecture.md`, `concepts/core-model.md`, `reference/api.md`).
+- **Documentation**: Drafted core user guides (`concepts/architecture.md`, `concepts/core-model.md`, `reference/api.md`, `guides/mcp.md`).
 - **Phase 16 (QA)**: Test coverage goals met for API/Store/Engine.
 - **Phase 14 & 15**: Complete.
 
@@ -12,6 +12,8 @@
 - [x] **M42.3 (Refined)**: Added Policy Guide and moved/refined Deployment Guide.
 - [x] **SDK Docs**: Refreshed JS, Python, and Go SDK documentation to remove draft warnings and match implementation.
 - [x] **M42.5+**: Refined Policy Guide (Shared vs Isolated) and Configuration Guide (Defaults).
+- [x] **MCP Guide**: Created `docs/guides/mcp.md` and linked from index.
+- [x] **Docs Polish**: Added Financial Governance to Policy Guide and Cluster Federation to Deployment Guide.
 - [ ] **Phase 16 Continues**: Focus on Release Prep (Epic 13/31) and final pre-release validation.
 
 ## Phase History
