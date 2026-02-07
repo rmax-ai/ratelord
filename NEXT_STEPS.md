@@ -14,7 +14,7 @@
 - [x] **M42.5+**: Refined Policy Guide (Shared vs Isolated) and Configuration Guide (Defaults).
 - [x] **MCP Guide**: Created `docs/guides/mcp.md` and linked from index.
 - [x] **Docs Polish**: Added Financial Governance to Policy Guide and Cluster Federation to Deployment Guide.
-- [x] **Project Assessment**: Verified test coverage and identified missing features (Reports stub, Graph updates, hardcoded forecast).
+- [x] **Project Assessment**: Verified test coverage and identified missing features (Reports stub, Graph updates, hardcoded forecast). See `ASSESSMENT.md`.
 - [x] **M43.1 (Reports)**: Implement real CSV generation in `pkg/reports/csv.go` and add tests.
 - [ ] **M43.2 (Graph)**: Implement `PolicyUpdated` handling in `pkg/graph/projection.go`.
 - [ ] **M43.3 (Hardening)**: Fix hardcoded `resetAt` and add tests for `pkg/mcp` and `pkg/blob`.
