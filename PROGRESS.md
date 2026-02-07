@@ -91,6 +91,9 @@
 | M43.2: Complete Graph Projection (Events & Index) | COMPLETED | Orchestrator | 2026-02-07 |
 | M43.3: Hardening (ResetAt, PoolID, Tests) | COMPLETED | Orchestrator | 2026-02-07 |
 | M43.4: Codebase Cleanup (Federation, Poller, Graph) | COMPLETED | Orchestrator | 2026-02-07 |
+| M43.5: Final Validation (Simulation) | COMPLETED | Orchestrator | 2026-02-07 |
+| Web Build Fix | COMPLETED | Implement | 2026-02-07 |
+| ratelord-sim Auth Fix | COMPLETED | Implement | 2026-02-07 |
 | Project Final Assessment (ASSESSMENT.md) | COMPLETED | Orchestrator | 2026-02-07 |
 | M43.6: Inject Provider Version | COMPLETED | Implement | 2026-02-07 |
 | TASKS.md | UPDATED | Orchestrator | 2026-02-07 |

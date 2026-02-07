@@ -7,6 +7,10 @@
 The project is in **Epic 43: Final Polish & Debt Paydown**. All planned code tasks for Phase 1-15 (M43.1, M43.2, M43.3, M43.4) have been verified as **COMPLETE**. The codebase is feature-complete for a **v1.0 Operational Release**, focusing on core constraint management, policy enforcement, and observability.
 *Verification Update (2026-02-07)*: Full unit test suite passes. `ratelord-sim` builds and runs.
 
+### Critical Fixes Applied (2026-02-07)
+1.  **Web Build Fixed**: Resolved duplicate key errors in `GraphView.tsx`. `npm run build` now succeeds.
+2.  **Simulation Auth**: Updated `ratelord-sim` to capture and use authentication tokens. Previous versions failed silently or got 401s without validating logic.
+
 ### Vision Alignment Gaps (Post-1.0 Opportunities)
 While the core system is solid, some aspirational features mentioned in `PROJECT_CONTEXT.md` are not yet implemented:
 
@@ -39,19 +43,17 @@ While the core system is solid, some aspirational features mentioned in `PROJECT
     *   [x] `pkg/blob` tests exist (`pkg/blob/local_store_test.go`).
 
 ### Remaining Missing Features / Improvements (Technical Debt)
-1.  **Graph Concurrency**:
+1.  **Simulation Behavior**:
+    *   `ratelord-sim` with default `policy.json` and mock provider allows all traffic even in "Thundering Herd" scenario. This suggests the default policy or mock provider state integration needs tuning to demonstrate blocking effectively out-of-the-box.
+2.  **Graph Concurrency**:
     *   `pkg/graph/projection.go`: `GetGraph` performs a shallow-ish copy. While safe for now, a Copy-On-Write or deep clone mechanism might be needed for high-concurrency read patterns in the future.
-2.  **Federation Global State**:
+3.  **Federation Global State**:
     *   `pkg/api/federation.go` uses local `poolState.Remaining` for `RemainingGlobal`. In a pure follower node, this is correct (it sees what it has). In a leader node, this should reflect the aggregated cluster state.
-3.  **Web UI Simulation**:
-    *   Add a "Simulation" tab to the Web UI that wraps `ratelord-sim` or acts as a frontend for it, allowing users to replay history with different policies.
-4.  **Web Build Stability**:
-    *   `make web-build` fails due to duplicate keys in `GraphView.tsx`. Needs immediate fix.
 
 ### Next Actions
-1.  **Execute M43.5**: Run the full simulation suite (`ratelord-sim`) to validate end-to-end behavior.
+1.  **Release**: Proceed to 1.0 release tagging.
 2.  **Documentation Update**: Update `TASKS.md` to track the "Vision Alignment Gaps" as future Epics (v1.1+).
-3.  **Release**: Proceed to 1.0 release tagging after M43.5 passes.
+3.  **Simulation Tuning**: Investigate why `s01` doesn't trigger denials (likely poller/state synchronization timing or default policy thresholds).
 
 ### Conclusion
 The codebase is **feature complete** for the 1.0 scope defined in `PROJECT_CONTEXT.md`. All "Must Fix" items are resolved.

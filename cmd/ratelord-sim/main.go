@@ -195,7 +195,8 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 	rng := rand.New(rand.NewSource(seed))
 
 	// Register
-	if err := registerIdentity(apiURL, cfg.IdentityID); err != nil {
+	token, err := registerIdentity(apiURL, cfg.IdentityID)
+	if err != nil {
 		log.Printf("[%s] Failed to register: %v", agentID, err)
 		return
 	}
@@ -244,7 +245,7 @@ func runAgent(ctx context.Context, apiURL, agentID string, cfg AgentConfig, seed
 			},
 		}
 
-		resp, err := sendIntent(apiURL, req)
+		resp, err := sendIntent(apiURL, req, token)
 		if err != nil {
 			track("", err)
 			return
@@ -463,7 +464,7 @@ func injectUsage(baseURL, providerID, poolID string, amount int64) error {
 	return nil
 }
 
-func registerIdentity(baseURL, identityID string) error {
+func registerIdentity(baseURL, identityID string) (string, error) {
 	reg := api.IdentityRegistration{
 		IdentityID: identityID,
 		Kind:       "simulated-service",
@@ -472,18 +473,33 @@ func registerIdentity(baseURL, identityID string) error {
 	body, _ := json.Marshal(reg)
 	resp, err := http.Post(baseURL+"/v1/identities", "application/json", bytes.NewReader(body))
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("bad status: %d", resp.StatusCode)
+		return "", fmt.Errorf("bad status: %d", resp.StatusCode)
 	}
-	return nil
+
+	var identityResp api.IdentityResponse
+	if err := json.NewDecoder(resp.Body).Decode(&identityResp); err != nil {
+		return "", fmt.Errorf("failed to decode response: %v", err)
+	}
+
+	return identityResp.Token, nil
 }
 
-func sendIntent(baseURL string, req api.IntentRequest) (*api.DecisionResponse, error) {
+func sendIntent(baseURL string, req api.IntentRequest, token string) (*api.DecisionResponse, error) {
 	body, _ := json.Marshal(req)
-	resp, err := http.Post(baseURL+"/v1/intent", "application/json", bytes.NewReader(body))
+	r, err := http.NewRequest(http.MethodPost, baseURL+"/v1/intent", bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	r.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		r.Header.Set("Authorization", "Bearer "+token)
+	}
+
+	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return nil, err
 	}

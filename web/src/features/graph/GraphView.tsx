@@ -30,11 +30,10 @@ export default function GraphView({ data }: GraphViewProps) {
     if (!data || !data.nodes) return { nodes: [], links: [] };
     
     const nodes = Object.values(data.nodes).map(n => ({
-      id: n.id,
+      ...n,
       group: n.type,
       label: n.label || n.id,
       val: n.type === 'identity' ? 2 : 1, // Size
-      ...n
     }));
     
     const links = data.edges.map(e => ({
