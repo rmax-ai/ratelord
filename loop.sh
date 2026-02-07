@@ -154,6 +154,10 @@ for ((i = 1; i <= MAX_ITERATIONS; i++)); do
   ((DURATION > MAX_DURATION)) && MAX_DURATION=$DURATION
 
   echo -e "${GREEN}Iteration $i complete (${DURATION}s). Continuing...${NC}"
+
+  # Push changes
+  echo -e "${BLUE}Pushing changes to git...${NC}"
+  git push
 done
 
 END_TIME=$(date +%s)
