@@ -628,8 +628,8 @@ Focus: Address technical debt, stubbed features, and missing tests identified du
     - [x] Fix `pkg/api/server.go` correct pool ID usage.
     - [x] Add unit tests for `pkg/mcp` (Server and Handlers).
     - [x] Add unit tests for `pkg/blob` (Local Store).
-    - [ ] **M43.6 (Quick Fixes): Inject Provider Version**
-    - [ ] Inject `ProviderVersion` at build time (ldflags) or derive from package.
+    - [x] **M43.6: Inject Provider Version**
+    - [x] Inject `ProviderVersion` at build time (ldflags) or derive from package.
     - [x] **M43.4: Codebase Cleanup (Assessment Findings)**
     - [x] `pkg/graph/projection.go`: Implement `ProviderObserved` handler.
     - [x] `pkg/provider/federated/provider.go`: Fix TODOs (error reporting, pre-seeding note).

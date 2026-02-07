@@ -11,6 +11,7 @@ import (
 
 	"github.com/rmax-ai/ratelord/pkg/api"
 	"github.com/rmax-ai/ratelord/pkg/provider"
+	"github.com/rmax-ai/ratelord/pkg/version"
 )
 
 // FederatedProvider implements the Provider interface but sources limits from a Leader
@@ -24,8 +25,6 @@ type FederatedProvider struct {
 	defaultPoll time.Duration
 	startTime   time.Time
 }
-
-const ProviderVersion = "1.0.0"
 
 type PoolState struct {
 	Granted    int64
@@ -108,7 +107,7 @@ func (p *FederatedProvider) Poll(ctx context.Context) (provider.PollResult, erro
 				Amount:     askAmount,
 				Metadata: map[string]interface{}{
 					"uptime":  time.Since(p.startTime).String(),
-					"version": ProviderVersion,
+					"version": version.Version,
 				},
 			}
 

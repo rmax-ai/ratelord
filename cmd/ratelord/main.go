@@ -11,12 +11,6 @@ import (
 	"github.com/rmax-ai/ratelord/pkg/mcp"
 )
 
-var (
-	Version   = "v1.0.0"
-	Commit    = "unknown"
-	BuildTime = "unknown"
-)
-
 // IdentityRegistration matches the payload for POST /v1/identities
 
 // IdentityRegistration matches the payload for POST /v1/identities

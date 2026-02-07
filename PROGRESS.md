@@ -92,7 +92,7 @@
 | M43.3: Hardening (ResetAt, PoolID, Tests) | COMPLETED | Orchestrator | 2026-02-07 |
 | M43.4: Codebase Cleanup (Federation, Poller, Graph) | COMPLETED | Orchestrator | 2026-02-07 |
 | Project Final Assessment (ASSESSMENT.md) | COMPLETED | Orchestrator | 2026-02-07 |
-| M43.6: Inject Provider Version | PLANNED | Orchestrator | 2026-02-07 |
+| M43.6: Inject Provider Version | COMPLETED | Implement | 2026-02-07 |
 | TASKS.md | UPDATED | Orchestrator | 2026-02-07 |
 | ASSESSMENT.md | UPDATED | Orchestrator | 2026-02-07 |
 | Project Verification & Future Improvements | COMPLETED | Orchestrator | 2026-02-07 |

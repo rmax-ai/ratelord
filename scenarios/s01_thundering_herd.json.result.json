@@ -1,0 +1,21 @@
+{
+  "scenario_name": "S-01: Thundering Herd",
+  "duration": 30000000000,
+  "total_requests": 0,
+  "total_approved": 0,
+  "total_denied": 0,
+  "total_modified": 0,
+  "total_errors": 0,
+  "total_injected": 0,
+  "agent_stats": {
+    "cron-worker": {
+      "requests": 0,
+      "approved": 0,
+      "denied": 0,
+      "modified": 0,
+      "errors": 0
+    }
+  },
+  "invariants": null,
+  "success": true
+}

@@ -39,15 +39,14 @@ While the core system is solid, some aspirational features mentioned in `PROJECT
     *   [x] `pkg/blob` tests exist (`pkg/blob/local_store_test.go`).
 
 ### Remaining Missing Features / Improvements (Technical Debt)
-1.  **Provider Metadata Version**:
-    *   `pkg/provider/federated/provider.go` has `ProviderVersion = "1.0.0"` hardcoded.
-    *   *Improvement*: Inject this at build time or derive from `version` package.
-2.  **Graph Concurrency**:
+1.  **Graph Concurrency**:
     *   `pkg/graph/projection.go`: `GetGraph` performs a shallow-ish copy. While safe for now, a Copy-On-Write or deep clone mechanism might be needed for high-concurrency read patterns in the future.
-3.  **Federation Global State**:
+2.  **Federation Global State**:
     *   `pkg/api/federation.go` uses local `poolState.Remaining` for `RemainingGlobal`. In a pure follower node, this is correct (it sees what it has). In a leader node, this should reflect the aggregated cluster state.
-4.  **Web UI Simulation**:
+3.  **Web UI Simulation**:
     *   Add a "Simulation" tab to the Web UI that wraps `ratelord-sim` or acts as a frontend for it, allowing users to replay history with different policies.
+4.  **Web Build Stability**:
+    *   `make web-build` fails due to duplicate keys in `GraphView.tsx`. Needs immediate fix.
 
 ### Next Actions
 1.  **Execute M43.5**: Run the full simulation suite (`ratelord-sim`) to validate end-to-end behavior.

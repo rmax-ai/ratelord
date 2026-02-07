@@ -27,12 +27,6 @@ import (
 	"github.com/rmax-ai/ratelord/web"
 )
 
-var (
-	Version   = "v1.0.0"
-	Commit    = "unknown"
-	BuildTime = "unknown"
-)
-
 type Config struct {
 	DBPath           string
 	PolicyPath       string
