@@ -33,3 +33,5 @@ bun.lock
 /ratelord-tui
 /ratelord-sim
 daemon_pid.txt
+
+*.out

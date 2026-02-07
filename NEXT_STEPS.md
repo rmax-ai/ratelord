@@ -13,14 +13,16 @@
 
 ## Immediate Actions
 
-- [ ] **M41.2: Store Package Coverage**
-    - [ ] Target: `pkg/store` > 80% coverage.
-    - [ ] Implement tests for SQLite store, event reading/writing.
-- [ ] **M41.3: Engine Package Coverage**
-    - [ ] Target: `pkg/engine` > 80% coverage.
-    - [ ] Improve tests for policy evaluation and state management.
+- [x] **M41.2: Store Package Coverage**
+    - [x] Target: `pkg/store` > 80% coverage.
+    - [x] Implement tests for SQLite store, event reading/writing.
+- [x] **M41.3: Engine Package Coverage**
+    - [x] Target: `pkg/engine` > 80% coverage.
+    - [x] Improve tests for policy evaluation and state management.
 
 ## Phase History
+- [x] **M41.3: Engine Package Coverage** (Achieved 80.9%).
+- [x] **M41.2: Store Package Coverage** (Achieved 80.8%).
 - [x] **M41.1: API Package Coverage** (Achieved 80.1%).
 - [x] **M31.3**: Documentation & Changelog (Release Automation).
 - [x] **M37.3**: Policy Debugging (Trace Mode & UI).

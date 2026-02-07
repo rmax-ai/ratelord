@@ -2,12 +2,10 @@ package reports
 
 import (
 	"fmt"
-
-	"github.com/rmax-ai/ratelord/pkg/store"
 )
 
 // NewReportGenerator creates a report generator based on the report type.
-func NewReportGenerator(reportType ReportType, s *store.Store) (Generator, error) {
+func NewReportGenerator(reportType ReportType, s ReportStore) (Generator, error) {
 	switch reportType {
 	case ReportTypeAccessLog:
 		return NewAccessLogReport(s), nil

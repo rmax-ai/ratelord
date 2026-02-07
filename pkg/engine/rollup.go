@@ -122,6 +122,7 @@ func (r *RollupWorker) ProcessBatch(ctx context.Context) error {
 			stat.TotalUsage += value
 		} else if payload.Used != nil {
 			value = *payload.Used
+			stat.TotalUsage += value
 		} else {
 			continue
 		}

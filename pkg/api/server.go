@@ -28,18 +28,60 @@ type contextKey string
 
 const traceIDKey contextKey = "trace_id"
 
+// Interfaces for dependencies to enable mocking
+
+type StoreInterface interface {
+	AppendEvent(ctx context.Context, event *store.Event) error
+	ReadRecentEvents(ctx context.Context, limit int) ([]*store.Event, error)
+	DeleteIdentityData(ctx context.Context, id string) error
+	PruneEvents(ctx context.Context, retention time.Duration, includeType string, excludeTypes []string) (int64, error)
+	GetUsageStats(ctx context.Context, filter store.UsageFilter) ([]store.UsageStat, error)
+	QueryEvents(ctx context.Context, filter store.EventFilter) ([]*store.Event, error)
+
+	// Webhooks
+	RegisterWebhook(ctx context.Context, cfg *store.WebhookConfig) error
+	ListWebhooks(ctx context.Context) ([]*store.WebhookConfig, error)
+	DeleteWebhook(ctx context.Context, webhookID string) error
+}
+
+type IdentityProjectionInterface interface {
+	GetByTokenHash(hash string) (engine.Identity, bool)
+	Apply(event store.Event) error
+	GetAll() []engine.Identity
+}
+
+type UsageProjectionInterface interface {
+	GetPoolState(providerID, poolID string) (engine.PoolState, bool)
+	Apply(event store.Event) error
+}
+
+type GraphProjectionInterface interface {
+	GetGraph() *graph.Graph
+}
+
+type ElectionManagerInterface interface {
+	IsLeader() bool
+	GetLeader(ctx context.Context) (string, bool, error)
+	GetEpoch() int64
+}
+
+// PolicyEngineInterface defines the interface for policy engine
+type PolicyEngineInterface interface {
+	Evaluate(intent engine.Intent) engine.PolicyEvaluationResult
+}
+
 // API Request/Response Structs
 
 // Server encapsulates the HTTP API server
 type Server struct {
-	store      *store.Store
+	store      StoreInterface
 	server     *http.Server
-	identities *engine.IdentityProjection
-	usage      *engine.UsageProjection
-	policy     *engine.PolicyEngine
+	identities IdentityProjectionInterface
+	usage      UsageProjectionInterface
+	policy     PolicyEngineInterface
 	poller     *engine.Poller
 	cluster    *engine.ClusterTopology
-	graph      *graph.Projection
+	graph      GraphProjectionInterface
 	staticFS   fs.FS
 
 	// TLS Config
@@ -50,7 +92,7 @@ type Server struct {
 	tracker UsageTracker
 
 	// High Availability
-	election *engine.ElectionManager
+	election ElectionManagerInterface
 }
 
 // UsageTracker defines an interface for tracking local usage
@@ -59,12 +101,12 @@ type UsageTracker interface {
 }
 
 // NewServer creates a new API server instance
-func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, graphProj *graph.Projection, addr string) *Server {
+func NewServer(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy PolicyEngineInterface, cluster *engine.ClusterTopology, graphProj *graph.Projection, addr string) *Server {
 	return NewServerWithPoller(st, identities, usage, policy, cluster, graphProj, nil, addr)
 }
 
 // NewServerWithPoller creates a new API server instance with poller access (for debug endpoints)
-func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy *engine.PolicyEngine, cluster *engine.ClusterTopology, graphProj *graph.Projection, poller *engine.Poller, addr string) *Server {
+func NewServerWithPoller(st *store.Store, identities *engine.IdentityProjection, usage *engine.UsageProjection, policy PolicyEngineInterface, cluster *engine.ClusterTopology, graphProj *graph.Projection, poller *engine.Poller, addr string) *Server {
 	mux := http.NewServeMux()
 
 	// Register routes
@@ -138,7 +180,7 @@ func (s *Server) SetUsageTracker(t UsageTracker) {
 }
 
 // SetElectionManager sets the election manager for HA routing
-func (s *Server) SetElectionManager(em *engine.ElectionManager) {
+func (s *Server) SetElectionManager(em ElectionManagerInterface) {
 	s.election = em
 }
 
@@ -794,6 +836,11 @@ func (s *Server) handleDebugInject(w http.ResponseWriter, r *http.Request) {
 // handleStatic serves static web assets with SPA fallback
 func (s *Server) handleStatic() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if s.staticFS == nil {
+			http.NotFound(w, r)
+			return
+		}
+
 		path := r.URL.Path
 
 		// Skip API and debug routes

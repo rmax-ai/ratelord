@@ -15,11 +15,11 @@ import (
 
 // AccessLogReport generates CSV reports for access log events (intent decisions).
 type AccessLogReport struct {
-	store *store.Store
+	store ReportStore
 }
 
 // NewAccessLogReport creates a new AccessLogReport generator.
-func NewAccessLogReport(s *store.Store) *AccessLogReport {
+func NewAccessLogReport(s ReportStore) *AccessLogReport {
 	return &AccessLogReport{store: s}
 }
 

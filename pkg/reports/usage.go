@@ -12,11 +12,11 @@ import (
 
 // UsageReport generates CSV reports for usage statistics.
 type UsageReport struct {
-	store *store.Store
+	store ReportStore
 }
 
 // NewUsageReport creates a new UsageReport generator.
-func NewUsageReport(s *store.Store) *UsageReport {
+func NewUsageReport(s ReportStore) *UsageReport {
 	return &UsageReport{store: s}
 }
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rmax-ai/ratelord/pkg/store"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPruneWorker(t *testing.T) {
@@ -116,4 +117,63 @@ func TestPruneWorker(t *testing.T) {
 	if evt, _ := st.GetEvent(ctx, "evt_old_b"); evt == nil {
 		t.Errorf("expected evt_old_b to exist, but it was pruned")
 	}
+}
+
+func TestPruneWorker_UpdateConfig(t *testing.T) {
+	st := &store.Store{} // Mock or nil is fine since we won't call Prune
+	worker := NewPruneWorker(st, nil)
+
+	cfg := &RetentionConfig{Enabled: true}
+	worker.UpdateConfig(cfg)
+
+	worker.mu.RLock()
+	assert.Equal(t, cfg, worker.config)
+	worker.mu.RUnlock()
+}
+
+func TestPruneWorker_Run(t *testing.T) {
+	// Setup simple store
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "test_prune_run.db")
+	st, err := store.NewStore(dbPath)
+	if err != nil {
+		t.Fatalf("failed to create store: %v", err)
+	}
+	defer st.Close()
+
+	// Config with very short interval
+	cfg := &RetentionConfig{
+		Enabled:       true,
+		CheckInterval: "1ms", // Fast tick
+		DefaultTTL:    "1h",
+	}
+
+	worker := NewPruneWorker(st, cfg)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Run in goroutine
+	done := make(chan struct{})
+	go func() {
+		worker.Run(ctx)
+		close(done)
+	}()
+
+	// Let it run for a bit
+	time.Sleep(10 * time.Millisecond)
+	cancel()
+
+	select {
+	case <-done:
+		// Success
+	case <-time.After(1 * time.Second):
+		t.Fatal("worker did not stop")
+	}
+}
+
+func TestPruneWorker_Run_Disabled(t *testing.T) {
+	worker := NewPruneWorker(nil, &RetentionConfig{Enabled: false})
+	ctx := context.Background()
+	// Should return immediately
+	worker.Run(ctx)
 }
