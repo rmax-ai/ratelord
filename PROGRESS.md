@@ -76,3 +76,6 @@
 | M41.1: API Package Coverage | COMPLETED | Implement | 2026-02-07 |
 | M41.2: Store Package Coverage | COMPLETED | Implement | 2026-02-07 |
 | M41.3: Engine Package Coverage | COMPLETED | Implement | 2026-02-07 |
+| docs/index.md | DRAFTED | Docs | 2026-02-07 |
+| docs/installation.md | DRAFTED | Docs | 2026-02-07 |
+| docs/configuration.md | DRAFTED | Docs | 2026-02-07 |
