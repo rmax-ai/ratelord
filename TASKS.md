@@ -498,9 +498,8 @@ Focus: Visualize the entire cluster.
 - [ ] **M34.1: Cluster View**
     - [x] **M34.1.1: API**: Implement `GET /v1/cluster/nodes` and `ClusterTopology` projection.
     - [x] **M34.1.2: UI**: Add "Cluster" tab (Node Table) in Web UI.
-- [ ] **M34.2: Node Diagnostics**
-    - [ ] Visualize Replication Lag per node.
-    - [ ] Show Election Status (Leader/Follower).
+- [x] **M34.2: Node Diagnostics**
+    - [x] Visualize Replication Lag & Election Status (Implemented via Metadata & UI Update).
 
 ## Epic 35: Canonical Constraint Graph
 Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
@@ -522,9 +521,9 @@ Focus: Formalizing the constraint graph taxonomy as defined in ARCHITECTURE.md.
 
 ## Epic 36: Advanced Retention & Compaction
 Focus: Managing long-term storage and compliance.
-- [ ] **M36.1: Retention Policy Engine**
-    - [ ] Allow configuring TTL per Event Type.
-    - [ ] Implement `PruneWorker` (Refinement of M27.4).
+- [x] **M36.1: Retention Policy Engine**
+    - [x] Allow configuring TTL per Event Type.
+    - [x] Implement `PruneWorker` (Refinement of M27.4).
 - [ ] **M36.2: Cold Storage Offload**
     - [ ] Implement S3/GCS adapter for archiving old events/snapshots.
     - [ ] Implement "Hydrate from Archive" for historical analysis.
@@ -559,17 +558,20 @@ Focus: Unifying subsystems and paying down technical debt.
 ## Epic 39: Model Context Protocol (MCP) Integration
 Focus: Allow LLMs (Claude, Gemini, etc.) to natively discover and query Ratelord constraints.
 - [ ] **M39.1: MCP Server Core**
-    - [ ] Implement MCP Protocol (JSON-RPC 2.0 via Stdio/SSE).
-    - [ ] Map `ratelord` concepts to MCP Resources (`ratelord://limits`).
-- [ ] **M39.2: Tools & Prompts**
-    - [ ] Implement `check_budget` tool.
-    - [ ] Implement `get_forecast` tool.
-    - [ ] Add system prompts for budget awareness.
+    - [ ] Implement MCP Server using `github.com/mark3labs/mcp-go` (or similar standard lib).
+- [ ] **M39.2: Resource Exporter**
+    - [ ] Map `events` and `usage` to MCP Resources.
+- [ ] **M39.3: Tool Exporter**
+    - [ ] Expose `ask_intent` and `check_usage` as MCP Tools.
+- [ ] **M39.4: Prompts**
+    - [ ] Add `ratelord-aware` system prompt.
 
 ## Epic 40: Client Resilience Library
 Focus: Standardize retry/backoff logic across SDKs to prevent thundering herds.
-- [ ] **M40.1: Backoff Algorithms**
-    - [ ] Implement "Decorrelated Jitter" in Go/Python/TS SDKs.
-- [ ] **M40.2: Circuit Breaker**
-    - [ ] Implement client-side circuit breaking when Ratelord is unreachable or consistently denying.
+- [ ] **M40.1: Go SDK Resilience**
+    - [ ] Add Backoff & Jitter.
+- [ ] **M40.2: JS SDK Resilience**
+    - [ ] Add `bottleneck` or custom backoff.
+- [ ] **M40.3: Python SDK Resilience**
+    - [ ] Add `tenacity` integration.
 

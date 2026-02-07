@@ -53,3 +53,7 @@
 | M35.4: Graph Visualization | COMPLETED | Implement | 2026-02-07 |
 | Epic 38: Architecture Convergence (Scope Add) | COMPLETED | Orchestrator | 2026-02-07 |
 | M38.1: Constraint Graph Integration (Federation) | COMPLETED | Implement | 2026-02-07 |
+| M36.1: Retention Policy Engine | COMPLETED | Implement | 2026-02-07 |
+| Epic 36: Advanced Retention & Compaction | IN PROGRESS | Docs | 2026-02-07 |
+| Epic 34: Federation UI | IN PROGRESS | Docs | 2026-02-07 |
+| M34.2: Node Diagnostics | COMPLETED | Docs | 2026-02-07 |

@@ -141,7 +141,8 @@ Returns the current topology of the cluster (Leader and known Followers).
     {
       "node_id": "string",    // Follower ID
       "last_seen": "string",  // ISO8601 timestamp of last grant/heartbeat
-      "status": "string"      // "active" | "offline"
+      "status": "string",     // "active" | "offline"
+      "metadata": object      // Optional: { "version": "...", "uptime": "..." }
     }
   ]
 }
@@ -154,8 +155,10 @@ Follower daemons use this endpoint to request token grants from the leader.
 ```json
 {
   "follower_id": "string",   // ID of the requesting daemon
+  "provider_id": "string",
   "pool_id": "string",       // The constraint pool (e.g., "github:core")
-  "amount": number           // Tokens requested
+  "amount": number,          // Tokens requested
+  "metadata": object
 }
 ```
 

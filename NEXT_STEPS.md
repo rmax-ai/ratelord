@@ -9,16 +9,21 @@
 
 ## Immediate Actions
 
- 1. **Epic 38: Architecture Convergence** (`TASKS.md`):
+ 1. **Epic 34: Federation UI** (`TASKS.md`):
+       - [x] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
+
+ 2. **Epic 39: Model Context Protocol (MCP) Integration** (`TASKS.md`):
+       - [ ] **M39.1**: Implement MCP Server Core.
+       - [ ] **M39.2**: Resource Exporter.
+       - [ ] **M39.3**: Tool Exporter.
+
+ 3. **Epic 38: Architecture Convergence** (`TASKS.md`):
        - [x] **M38.1: Constraint Graph Integration**: Refactor Policy Engine to use Graph.
            - [x] Refactor Policy Engine (Done in M35.3).
            - [x] Ensure Federation respects Graph (Done).
        - [ ] **M38.2: Unified Store Audit**: Verify Redis/SQLite parity.
 
- 2. **Epic 34: Federation UI** (`TASKS.md`):
-       - [ ] **M34.2: Node Diagnostics**: Visualize Replication Lag & Election Status.
-
- 3. **Epic 36: Advanced Retention & Compaction** (`TASKS.md`):
+ 4. **Epic 36: Advanced Retention & Compaction** (`TASKS.md`):
        - [x] **M36.1: Retention Policy Engine**: Configure TTL per Event Type.
 
 ## Phase History
